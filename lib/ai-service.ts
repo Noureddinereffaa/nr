@@ -7,7 +7,7 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
  */
 class NeuroCore {
     private static async getGeminiResponse(prompt: string, config: AIConfig, isJSON: boolean = false): Promise<string> {
-        const key = config.apiKey || import.meta.env.VITE_GEMINI_API_KEY;
+        const key = (config.apiKey || import.meta.env.VITE_GEMINI_API_KEY || "").trim();
         if (!key) throw new Error("مفتاح Gemini API مفقود.");
 
         try {
@@ -25,7 +25,7 @@ class NeuroCore {
     }
 
     private static async getAnthropicResponse(prompt: string, config: AIConfig): Promise<string> {
-        const key = config.anthropicKey || import.meta.env.VITE_ANTHROPIC_API_KEY;
+        const key = (config.anthropicKey || import.meta.env.VITE_ANTHROPIC_API_KEY || "").trim();
         if (!key) throw new Error("Anthropic Key missing.");
         // Simplified fetch for browser usage
         const response = await fetch("https://api.anthropic.com/v1/messages", {
@@ -46,8 +46,29 @@ class NeuroCore {
         return data.content?.[0]?.text || "";
     }
 
+    private static async getOpenAIResponse(prompt: string, config: AIConfig): Promise<string> {
+        const key = (config.openaiKey || import.meta.env.VITE_OPENAI_API_KEY || "").trim();
+        if (!key) throw new Error("مفتاح OpenAI API مفقود.");
+
+        const response = await fetch("https://api.openai.com/v1/chat/completions", {
+            method: "POST",
+            headers: {
+                "Authorization": `Bearer ${key}`,
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                model: "gpt-4o", // or gpt-3.5-turbo
+                messages: [{ role: "user", content: prompt }]
+            })
+        });
+
+        if (!response.ok) throw new Error(`OpenAI Error: ${response.status}`);
+        const data = await response.json();
+        return data.choices?.[0]?.message?.content || "";
+    }
+
     private static async getHuggingFaceResponse(prompt: string, config: AIConfig, model: string = "mistralai/Mistral-7B-Instruct-v0.3"): Promise<string> {
-        const token = config.huggingFaceKey || import.meta.env.VITE_HUGGING_FACE_TOKEN;
+        const token = (config.huggingFaceKey || import.meta.env.VITE_HUGGING_FACE_TOKEN || "").trim();
         if (!token) throw new Error("مفتاح Hugging Face مفقود.");
 
         const response = await fetch(`https://api-inference.huggingface.co/models/${model}`, {
@@ -78,6 +99,7 @@ class NeuroCore {
                 case 'gemini': await this.getGeminiResponse(testPrompt, config); break;
                 case 'huggingface': await this.getHuggingFaceResponse(testPrompt, config); break;
                 case 'anthropic': await this.getAnthropicResponse(testPrompt, config); break;
+                case 'openai': await this.getOpenAIResponse(testPrompt, config); break;
                 default: throw new Error("Unknown provider");
             }
             return true;
@@ -107,6 +129,8 @@ class NeuroCore {
                 return await this.getHuggingFaceResponse(fullPrompt, config);
             } else if (provider === 'anthropic') {
                 return await this.getAnthropicResponse(fullPrompt, config);
+            } else if (provider === 'openai') {
+                return await this.getOpenAIResponse(fullPrompt, config);
             } else {
                 return await this.getGeminiResponse(fullPrompt, config, jsonMode);
             }
