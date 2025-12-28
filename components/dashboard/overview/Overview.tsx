@@ -1,7 +1,7 @@
 import React, { Suspense } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useData } from '../../context/DataContext';
-import { useUI } from '../../context/UIContext';
+import { useData } from '../../../context/DataContext';
+import { useUI } from '../../../context/UIContext';
 import {
     Zap,
     PlusCircle,
@@ -13,10 +13,10 @@ import {
     Briefcase,
     Layout
 } from 'lucide-react';
-import WidgetWrapper from './widgets/WidgetWrapper';
-import { WIDGET_REGISTRY } from './widgets/WidgetRegistry';
-import LoadingSpinner from '../ui/LoadingSpinner';
-import { transitions, variants } from '../../lib/motion-config';
+import WidgetWrapper from '../widgets/WidgetWrapper';
+import { WIDGET_REGISTRY } from '../widgets/WidgetRegistry';
+import LoadingSpinner from '../../ui/LoadingSpinner';
+import { transitions, variants } from '../../../lib/motion-config';
 
 const Overview: React.FC = () => {
     const { siteData, isLoading } = useData();

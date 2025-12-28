@@ -18,7 +18,7 @@ import CommandBar from '../components/ui/CommandBar';
 // import ServiceRequestForm from '../components/dashboard/forms/ServiceRequestForm'; // Checking if this exists
 
 // Lazy Load Content Components
-const Overview = React.lazy(() => import('../components/dashboard/Overview'));
+const Overview = React.lazy(() => import('../components/dashboard/overview/Overview'));
 const ContentManager = React.lazy(() => import('../components/dashboard/modules/strategic-content/ContentManager'));
 const AIArchitect = React.lazy(() => import('../components/dashboard/modules/ai-global-brain/AIArchitect'));
 const Projects = React.lazy(() => import('../components/dashboard/modules/project-studio/Projects'));
