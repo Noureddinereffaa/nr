@@ -124,10 +124,13 @@ const BlogManager: React.FC = () => {
                     article={editingArticle}
                     aiConfig={aiConfig}
                     onSave={(updatedArticle) => {
+                        // Auto-save: just update data, don't close
                         updateArticle(editingArticle.id!, updatedArticle);
+                    }}
+                    onClose={() => {
+                        // Manual close: save final state and close
                         setEditingArticle(null);
                     }}
-                    onClose={() => setEditingArticle(null)}
                 />
             )}
         </div>

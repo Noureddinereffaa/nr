@@ -79,8 +79,17 @@ const WritingWorkspace: React.FC<WritingWorkspaceProps> = ({ article: initialArt
         });
     }, [article.content, article.excerpt, article.keywords]);
 
-    // Auto-Save System
+    // Track if component has been mounted to prevent immediate auto-save
+    const isMounted = React.useRef(false);
+
+    // Auto-Save System (with mount protection)
     useEffect(() => {
+        // Skip auto-save on initial mount
+        if (!isMounted.current) {
+            isMounted.current = true;
+            return;
+        }
+
         setHasChanges(true);
         setSaveStatus('unsaved');
 
@@ -94,7 +103,7 @@ const WritingWorkspace: React.FC<WritingWorkspaceProps> = ({ article: initialArt
         }, 3000);
 
         return () => clearTimeout(timer);
-    }, [article.content, article.title, article.excerpt, article.slug, hasChanges, onSave]);
+    }, [article.content, article.title, article.excerpt, article.slug]);
 
     // Keyboard Shortcuts
     useEffect(() => {
