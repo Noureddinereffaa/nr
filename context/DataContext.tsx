@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { NOUREDDINE_DATA, SERVICES, PROJECTS, TESTIMONIALS, FAQS, WORK_PROCESS, DEFAULT_STATS, ARTICLES } from '../constants';
-import { SiteData, Client, Project, Invoice, Service, Article, ServiceRequest, Expense, SocialPost, SocialIntegration, ContentPlanItem } from '../types';
+import { SiteData, Client, Project, Invoice, Service, Article, ServiceRequest, Expense, SocialPost, SocialIntegration } from '../types';
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
 import Logger from '../lib/logger';
 
@@ -428,22 +428,51 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const addArticle = async (article: Omit<Article, 'id' | 'date' | 'slug'>): Promise<void> => {
     const newArticle: Article = {
       ...article,
-      id: 'art-' + Date.now(),
+      id: crypto.randomUUID(),
       date: new Date().toISOString(),
-      slug: article.title.toLowerCase().replace(/\s+/g, '-'),
-      status: article.status || 'draft'
+      slug: article.slug || article.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, ''),
+      status: article.status || 'draft',
+      // Ensure defaults
+      views: 0,
+      seoScore: article.seoScore || 0,
+      image: article.image || 'https://images.unsplash.com/photo-1542435503-956c469947f6?auto=format&fit=crop&q=80'
     } as Article;
+
+    // Optimistic Update
     setSiteData(prev => ({ ...prev, articles: [newArticle, ...(prev.articles || [])] }));
+
     if (isSupabaseConfigured() && supabase) {
-      await supabase.from('articles').insert([{ id: newArticle.id, data: newArticle }]);
+      const { error } = await supabase.from('articles').insert([{
+        id: newArticle.id,
+        title: newArticle.title,
+        slug: newArticle.slug,
+        content: newArticle.content,
+        excerpt: newArticle.excerpt,
+        image: newArticle.image,
+        category: newArticle.category,
+        date: newArticle.date,
+        views: newArticle.views,
+        seo_score: newArticle.seoScore,
+        status: newArticle.status,
+        keywords: newArticle.keywords || []
+      }]);
+
+      if (error) {
+        Logger.error('Supabase Add Article Failed', error);
+        // Optional: Revert optimistic update or show toast
+      }
     }
   };
 
   const updateArticle = async (id: string, data: Partial<Article>): Promise<void> => {
     setSiteData(prev => ({ ...prev, articles: (prev.articles || []).map(a => a.id === id ? { ...a, ...data } : a) }));
+
     if (isSupabaseConfigured() && supabase) {
-      const currentArticle = siteData.articles.find(a => a.id === id);
-      await supabase.from('articles').upsert({ id, data: { ...currentArticle, ...data } });
+      // Map frontend camelCase to backend snake_case if needed, or send specific fields
+      const payload: any = { ...data };
+      if (data.seoScore !== undefined) { payload.seo_score = data.seoScore; delete payload.seoScore; }
+
+      await supabase.from('articles').update(payload).eq('id', id);
     }
   };
 
