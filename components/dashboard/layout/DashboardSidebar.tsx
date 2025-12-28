@@ -46,9 +46,9 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
         <div
             className={`
                 fixed md:relative top-0 bottom-0 right-0
-                z-[1001] md:z-[40] w-72 h-full 
+                z-[var(--z-modal)] md:z-[var(--z-nav)] w-72 h-full 
                 glass-morph border-l border-white/5 shadow-2xl
-                transition-transform duration-700 ease-[cubic-bezier(0.25,1,0.5,1)] 
+                transition-transform duration-700 cubic-bezier(0.4, 0, 0.2, 1)
                 ${mobileMenuOpen ? 'translate-x-0' : 'translate-x-full md:translate-x-0'}
                 overflow-y-auto p-6 flex flex-col gap-8
             `}

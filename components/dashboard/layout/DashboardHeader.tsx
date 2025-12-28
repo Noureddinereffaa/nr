@@ -87,7 +87,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({ onMenuToggle, isMenuO
     };
 
     return (
-        <div className="p-6 border-b border-white/10 flex items-center justify-between glass-morph sticky top-0 z-[100] backdrop-blur-3xl shadow-xl">
+        <div className="p-6 border-b border-white/10 flex items-center justify-between glass-morph sticky top-0 z-[var(--z-nav)] backdrop-blur-3xl shadow-xl">
             <div className="flex items-center gap-4 md:gap-8">
                 {/* Mobile Menu Trigger */}
                 <button

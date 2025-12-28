@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useData } from '../context/DataContext';
 import { BookOpen, ArrowLeft, Clock, User, Calendar, Sparkles } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import ArticleReader from './ArticleReader';
 import { Article } from '../types';
 
@@ -10,39 +11,57 @@ const StrategicBlog: React.FC = () => {
     const [selectedArticle, setSelectedArticle] = useState<Article | null>(null);
 
     // Priority: Featured first, then by date. Only show published.
-    const publishedArticles = [...articles]
-        .filter(a => a.status === 'published')
-        .sort((a, b) => {
-            if (a.featured && !b.featured) return -1;
-            if (!a.featured && b.featured) return 1;
-            return new Date(b.date).getTime() - new Date(a.date).getTime();
-        })
-        .slice(0, 3);
+    // Priority Selection: Show published if available, otherwise show any to avoid empty section.
+    const allArticles = articles || [];
+    let displayArticles = [...allArticles].filter(a => a.status === 'published');
 
-    if (publishedArticles.length === 0) return null;
+    if (displayArticles.length === 0 && allArticles.length > 0) {
+        displayArticles = [...allArticles].slice(0, 3);
+    } else {
+        displayArticles = displayArticles
+            .sort((a, b) => {
+                const aFeat = a.featured ? 1 : 0;
+                const bFeat = b.featured ? 1 : 0;
+                if (aFeat !== bFeat) return bFeat - aFeat;
+                return new Date(b.date).getTime() - new Date(a.date).getTime();
+            })
+            .slice(0, 3);
+    }
+
+    const { brand } = siteData;
+    const templateId = brand?.templateId || 'premium-glass';
+    const isCyber = templateId === 'cyber-command';
+    const isMinimalist = templateId === 'minimalist-pro';
+
+    if (displayArticles.length === 0) return null;
 
     return (
-        <section id="blog" className="py-16 md:py-24 relative overflow-hidden bg-slate-950/40">
+        <section id="blog" className={`py-16 md:py-24 relative overflow-hidden ${isMinimalist ? 'bg-white' : 'bg-slate-950/40'}`}>
             {/* Ambient Background Elements */}
-            <div className="absolute top-1/2 left-0 w-[600px] h-[600px] bg-[rgba(var(--accent-indigo-rgb),0.05)] blur-[120px] rounded-full -translate-x-1/2 -translate-y-1/2 pointer-events-none"></div>
-            <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-blue-600/5 blur-[100px] rounded-full translate-x-1/2 -translate-y-1/2 pointer-events-none"></div>
+            {!isMinimalist && (
+                <>
+                    <div className="absolute top-1/2 left-0 w-[600px] h-[600px] bg-[rgba(var(--accent-indigo-rgb),0.05)] blur-[120px] rounded-full -translate-x-1/2 -translate-y-1/2 pointer-events-none"></div>
+                    <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-blue-600/5 blur-[100px] rounded-full translate-x-1/2 -translate-y-1/2 pointer-events-none"></div>
+                </>
+            )}
 
             <div className="container mx-auto px-6 relative z-10">
                 <div className="max-w-4xl mx-auto text-center mb-16 md:mb-24">
-                    <div className="inline-flex items-center gap-3 px-6 py-2.5 rounded-full bg-[rgba(var(--accent-indigo-rgb),0.1)] border border-[rgba(var(--accent-indigo-rgb),0.2)] text-[var(--accent-indigo)] text-[11px] font-black uppercase tracking-[0.4em] mb-8">
+                    <div className={`inline-flex items-center gap-3 px-6 py-2.5 rounded-full border text-[11px] font-black uppercase tracking-[0.4em] mb-8 ${isCyber ? 'bg-green-500/10 border-green-500/20 text-green-500' : isMinimalist ? 'bg-slate-100 border-slate-200 text-slate-900' : 'bg-[rgba(var(--accent-indigo-rgb),0.1)] border-[rgba(var(--accent-indigo-rgb),0.2)] text-[var(--accent-indigo)]'
+                        }`}>
                         <Sparkles size={14} className="animate-pulse" />
                         Intelligence Insights
                     </div>
-                    <h2 className="text-5xl md:text-8xl font-black mb-8 text-white tracking-tighter leading-[1.1]">
-                        المدونة <span className="gradient-text">الاستراتيجية</span> <br /> لعصر الذكاء الاصطناعي
+                    <h2 className={`text-5xl md:text-8xl font-black mb-8 tracking-tighter leading-[1.1] ${isMinimalist ? 'text-slate-950' : 'text-white'}`}>
+                        المدونة <span className={isMinimalist ? 'text-indigo-600' : 'gradient-text'}>الاستراتيجية</span> <br /> لعصر الذكاء الاصطناعي
                     </h2>
-                    <p className="text-slate-400 text-lg md:text-2xl leading-relaxed max-w-2xl mx-auto font-medium opacity-80">
+                    <p className={`text-lg md:text-2xl leading-relaxed max-w-2xl mx-auto font-medium opacity-80 ${isMinimalist ? 'text-slate-600' : 'text-slate-400'}`}>
                         حلول، رؤى، وتحليلات عميقة لتمكين مشروعك الرقمي من السيادة الكاملة في السوق.
                     </p>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                    {publishedArticles.map((article, i) => (
+                    {displayArticles.map((article, i) => (
                         <article
                             key={article.id}
                             onClick={() => setSelectedArticle(article)}
@@ -121,12 +140,14 @@ const StrategicBlog: React.FC = () => {
             </div>
 
             {/* Premium Article Reader Overlay */}
-            {selectedArticle && (
-                <ArticleReader
-                    article={selectedArticle}
-                    onClose={() => setSelectedArticle(null)}
-                />
-            )}
+            <AnimatePresence mode="wait">
+                {selectedArticle && (
+                    <ArticleReader
+                        article={selectedArticle}
+                        onClose={() => setSelectedArticle(null)}
+                    />
+                )}
+            </AnimatePresence>
         </section>
     );
 };

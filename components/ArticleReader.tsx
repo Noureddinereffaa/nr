@@ -34,7 +34,7 @@ const ArticleReader: React.FC<ArticleReaderProps> = ({ article, onClose }) => {
     }, []);
 
     return (
-        <div className="fixed inset-0 z-[9999] flex flex-col bg-slate-950">
+        <div className="fixed inset-0 z-[20000] flex flex-col bg-slate-950">
             {/* Ambient Background */}
             <div className="absolute inset-0 z-0 pointer-events-none opacity-40">
                 <div className="absolute top-[-10%] right-[-10%] w-[70%] h-[70%] bg-indigo-600/20 blur-[150px] rounded-full"></div>

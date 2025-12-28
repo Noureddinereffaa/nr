@@ -60,8 +60,8 @@ const DashboardPage: React.FC = () => {
 
 
   return (
-    <div className="min-h-screen bg-slate-950/40 p-6 mesh-gradient backdrop-blur-3xl">
-      <div className="relative w-full max-w-7xl mx-auto glass-morph border border-white/10 rounded-[3rem] shadow-[0_50px_100px_-20px_rgba(0,0,0,0.5)] flex flex-col overflow-hidden h-[calc(100vh-3rem)] transition-all duration-500">
+    <div className="min-h-screen bg-slate-950/40 p-3 sm:p-6 mesh-gradient backdrop-blur-3xl">
+      <div className="relative w-full max-w-7xl mx-auto glass-morph border border-white/10 rounded-[2rem] sm:rounded-[3rem] shadow-[0_50px_100px_-20px_rgba(0,0,0,0.5)] flex flex-col overflow-hidden h-[calc(100vh-1.5rem)] sm:h-[calc(100vh-3rem)] transition-all duration-500">
 
         <DashboardHeader
           onMenuToggle={() => setMobileMenuOpen(!mobileMenuOpen)}
@@ -70,15 +70,17 @@ const DashboardPage: React.FC = () => {
 
         <div className="flex flex-1 overflow-hidden relative">
           {/* Mobile Overlay/Backdrop */}
-          {mobileMenuOpen && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setMobileMenuOpen(false)}
-              className="absolute inset-0 z-[85] bg-slate-950/60 backdrop-blur-sm md:hidden"
-            />
-          )}
+          <AnimatePresence>
+            {mobileMenuOpen && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                onClick={() => setMobileMenuOpen(false)}
+                className="absolute inset-0 z-[var(--z-nav)] bg-slate-950/60 backdrop-blur-sm md:hidden"
+              />
+            )}
+          </AnimatePresence>
 
           {/* Sidebar */}
           <DashboardSidebar
@@ -91,7 +93,7 @@ const DashboardPage: React.FC = () => {
 
           {/* Main Content */}
           <div
-            className="flex-1 overflow-y-auto p-8 space-y-12 bg-slate-950/50 custom-scrollbar scroll-smooth pb-32"
+            className="flex-1 overflow-y-auto p-4 sm:p-8 space-y-8 sm:space-y-12 bg-slate-950/50 custom-scrollbar scroll-smooth pb-32"
             dir="rtl"
           >
             <AnimatePresence mode="wait">

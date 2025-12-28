@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { NOUREDDINE_DATA, SERVICES, PROJECTS, TESTIMONIALS, FAQS, WORK_PROCESS, DEFAULT_STATS, ARTICLES } from '../constants';
-import { SiteData, Client, Project, Invoice, Service, Article, ServiceRequest, Expense, SocialPost, SocialIntegration } from '../types';
+import { SiteData, Client, Project, Invoice, Service, Article, ServiceRequest, Expense, SocialPost, SocialIntegration, ContentPlanItem } from '../types';
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
 import Logger from '../lib/logger';
 
@@ -70,7 +70,8 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         slogan: 'Building Digital Empires',
         fontFamily: 'Inter',
         borderRadius: '1.5rem',
-        glassOpacity: '0.1'
+        glassOpacity: '0.1',
+        templateId: 'premium-glass'
       },
       contactInfo: {
         phone: '+213 555 000 000',
@@ -426,11 +427,12 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const addArticle = async (article: Omit<Article, 'id' | 'date' | 'slug'>): Promise<void> => {
+    const articleData = article as any;
     const newArticle: Article = {
       ...article,
       id: crypto.randomUUID(),
       date: new Date().toISOString(),
-      slug: article.slug || article.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, ''),
+      slug: articleData.slug || article.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, ''),
       status: article.status || 'draft',
       // Ensure defaults
       views: 0,

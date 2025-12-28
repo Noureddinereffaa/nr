@@ -5,14 +5,14 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 const ProjectDetail: React.FC<{ project: any; onClose: () => void }> = ({ project, onClose }) => {
   return (
-    <div className="fixed inset-0 z-[500] flex items-center justify-center p-4 md:p-10">
+    <div className="fixed inset-0 z-[10000] flex items-center justify-center p-4 md:p-10">
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        className="absolute inset-0 bg-slate-950/95 backdrop-blur-2xl"
+        className="absolute inset-0 bg-slate-950/98 backdrop-blur-3xl"
         onClick={onClose}
-      ></motion.div>
+      />
 
       <motion.div
         initial={{ opacity: 0, scale: 0.95, y: 30 }}
@@ -157,10 +157,16 @@ const Portfolio: React.FC = () => {
   const { siteData } = useData();
   const { projects } = siteData;
   const [selectedProject, setSelectedProject] = useState<any>(null);
+  const { brand } = siteData;
+  const templateId = brand?.templateId || 'premium-glass';
+  const isCyber = templateId === 'cyber-command';
+  const isMinimalist = templateId === 'minimalist-pro';
 
   return (
-    <section id="portfolio" className="py-24 md:py-32 relative overflow-hidden">
-      <div className="absolute top-0 right-1/4 w-[600px] h-[600px] bg-indigo-600/5 blur-[150px] rounded-full pointer-events-none"></div>
+    <section id="portfolio" className={`py-24 md:py-32 relative overflow-hidden ${isMinimalist ? 'bg-slate-50' : ''}`}>
+      {!isMinimalist && (
+        <div className="absolute top-0 right-1/4 w-[600px] h-[600px] bg-indigo-600/5 blur-[150px] rounded-full pointer-events-none"></div>
+      )}
 
       <div className="container mx-auto px-6 relative z-10">
         <div className="max-w-4xl mx-auto text-center mb-24">
@@ -168,9 +174,10 @@ const Portfolio: React.FC = () => {
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="inline-flex items-center gap-3 px-6 py-2 rounded-full bg-white/5 border border-white/10 text-indigo-400 text-[11px] font-black uppercase tracking-[0.4em] mb-8"
+            className={`inline-flex items-center gap-3 px-6 py-2 rounded-full border text-[11px] font-black uppercase tracking-[0.4em] mb-8 ${isCyber ? 'bg-green-500/10 border-green-500/20 text-green-500' : isMinimalist ? 'bg-white border-slate-200 text-slate-950 shadow-sm' : 'bg-white/5 border-white/10 text-indigo-400'
+              }`}
           >
-            <Sparkles size={16} className="text-indigo-500" />
+            <Sparkles size={16} className={isCyber ? 'text-green-500' : 'text-indigo-500'} />
             Elite Case Studies
           </motion.div>
           <motion.h2
@@ -178,16 +185,16 @@ const Portfolio: React.FC = () => {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ delay: 0.1 }}
-            className="text-5xl md:text-8xl font-black mb-10 text-white tracking-tighter leading-[0.95]"
+            className={`text-5xl md:text-8xl font-black mb-10 tracking-tighter leading-[0.95] ${isMinimalist ? 'text-slate-950' : 'text-white'}`}
           >
-            معرض <span className="gradient-text">الإنجازات</span> <br /> الاستراتيجي
+            معرض <span className={isMinimalist ? 'text-indigo-600' : 'gradient-text'}>الإنجازات</span> <br /> الاستراتيجي
           </motion.h2>
           <motion.p
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ delay: 0.2 }}
-            className="text-xl md:text-2xl text-slate-400 leading-relaxed max-w-2xl mx-auto font-medium"
+            className={`text-xl md:text-2xl leading-relaxed max-w-2xl mx-auto font-medium ${isMinimalist ? 'text-slate-600' : 'text-slate-400'}`}
           >
             شاهد كيف تحولت الرؤى الطموحة إلى واقع رقمي ملموس من خلال حلولنا الهندسية المبتكرة.
           </motion.p>

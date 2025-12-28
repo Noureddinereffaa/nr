@@ -19,7 +19,7 @@ const RequestModal: React.FC<{ service: any; onClose: () => void }> = ({ service
       clientEmail: formData.email,
       projectDetails: formData.details,
       priority: 'medium',
-      status: 'pending'
+      status: 'new'
     });
     setSubmitted(true);
     setTimeout(() => {
@@ -137,12 +137,20 @@ const Services: React.FC = () => {
   const { siteData } = useData();
   const { services } = siteData;
   const [selectedService, setSelectedService] = useState<any>(null);
+  const { brand } = siteData;
+  const templateId = brand?.templateId || 'premium-glass';
+  const isCyber = templateId === 'cyber-command';
+  const isMinimalist = templateId === 'minimalist-pro';
 
   return (
     <section id="services" className="py-24 md:py-32 relative overflow-hidden">
       {/* Immersive Section Background */}
-      <div className="absolute top-0 left-1/4 w-[600px] h-[600px] bg-indigo-600/5 blur-[120px] rounded-full pointer-events-none"></div>
-      <div className="absolute bottom-0 right-1/4 w-[500px] h-[500px] bg-purple-600/5 blur-[150px] rounded-full pointer-events-none"></div>
+      {!isMinimalist && (
+        <>
+          <div className="absolute top-0 left-1/4 w-[600px] h-[600px] bg-indigo-600/5 blur-[120px] rounded-full pointer-events-none"></div>
+          <div className="absolute bottom-0 right-1/4 w-[500px] h-[500px] bg-purple-600/5 blur-[150px] rounded-full pointer-events-none"></div>
+        </>
+      )}
 
       <div className="container mx-auto px-6 relative z-10">
         <div className="max-w-4xl mx-auto text-center mb-24">
@@ -150,26 +158,27 @@ const Services: React.FC = () => {
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="inline-flex items-center gap-3 px-6 py-2 rounded-full bg-white/5 border border-white/10 text-indigo-400 text-[11px] font-black uppercase tracking-[0.4em] mb-8"
+            className={`inline-flex items-center gap-3 px-6 py-2 rounded-full border text-[11px] font-black uppercase tracking-[0.4em] mb-8 ${isCyber ? 'bg-green-500/10 border-green-500/20 text-green-500' : isMinimalist ? 'bg-slate-100 border-slate-200 text-slate-900' : 'bg-white/5 border-white/10 text-indigo-400'
+              }`}
           >
-            <Shield size={16} className="text-indigo-500" />
-            Strategic Command Center
+            <Shield size={16} className={isCyber ? 'text-green-500' : 'text-indigo-500'} />
+            {isCyber ? 'STRATEGIC NODE NETWORK' : 'Strategic Command Center'}
           </motion.div>
           <motion.h2
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ delay: 0.1 }}
-            className="text-5xl md:text-8xl font-black mb-10 text-white tracking-tighter leading-[0.95]"
+            className={`text-5xl md:text-8xl font-black mb-10 tracking-tighter leading-[0.95] ${isMinimalist ? 'text-slate-950' : 'text-white'}`}
           >
-            حلول <span className="gradient-text">استراتيجية</span> <br /> لا تقبل المنافسة
+            حلول <span className={isMinimalist ? 'text-indigo-600' : 'gradient-text'}>استراتيجية</span> <br /> لا تقبل المنافسة
           </motion.h2>
           <motion.p
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ delay: 0.2 }}
-            className="text-xl md:text-2xl text-slate-400 leading-relaxed max-w-2xl mx-auto font-medium"
+            className={`text-xl md:text-2xl leading-relaxed max-w-2xl mx-auto font-medium ${isMinimalist ? 'text-slate-600' : 'text-slate-400'}`}
           >
             نحن لا نبيع مجرد خدمات، نحن نصمم أنظمة ذكية تضمن لك السيطرة الكاملة على السوق الرقمي.
           </motion.p>

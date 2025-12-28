@@ -26,6 +26,12 @@ const FONT_FAMILIES = [
     { name: 'Roboto (Tech)', value: 'Roboto, sans-serif', label: 'تقني (Roboto)' },
 ];
 
+const TEMPLATES = [
+    { id: 'premium-glass', name: 'Premium Glass', label: 'الزجاج الفاخر', description: 'تجربة بصرية غامرة مع شفافية عالية', color: '#6366f1' },
+    { id: 'minimalist-pro', name: 'Minimalist Pro', label: 'الأناقة البسيطة', description: 'تركيز كامل على المحتوى بخطوط حادة', color: '#ffffff' },
+    { id: 'cyber-command', name: 'Cyber Command', label: 'القيادة التقنية', description: 'هوية مستقبلية قوية للمشاريع التقنية', color: '#10b981' },
+];
+
 const BrandSettings: React.FC = () => {
     const { siteData, updateSiteData } = useData();
     const { themeConfig, updateTheme } = useUI();
@@ -206,6 +212,43 @@ const BrandSettings: React.FC = () => {
                                     />
                                 </div>
                             </div>
+                        </div>
+                    </div>
+
+                    {/* Template Selector */}
+                    <div className="bg-slate-900 border border-white/5 p-4 rounded-xl space-y-4">
+                        <h4 className="text-sm font-bold text-white flex items-center gap-2">
+                            <Layout className="text-indigo-400" size={16} />
+                            القوالب الاحترافية (Design Templates)
+                        </h4>
+                        <p className="text-[10px] text-slate-500 font-medium">تغيير الهيكل البصري بالكامل مع الحفاظ على المحتوى</p>
+
+                        <div className="grid grid-cols-1 gap-3">
+                            {TEMPLATES.map((tmpl) => {
+                                const isActive = (brand.templateId || 'premium-glass') === tmpl.id;
+                                return (
+                                    <button
+                                        key={tmpl.id}
+                                        onClick={() => handleChange('templateId', tmpl.id)}
+                                        className={`flex items-start gap-4 p-4 rounded-2xl border text-right transition-all ${isActive
+                                                ? 'bg-indigo-600/10 border-indigo-500 shadow-xl'
+                                                : 'bg-slate-950 border-white/5 hover:border-white/10'
+                                            }`}
+                                        dir="rtl"
+                                    >
+                                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${isActive ? 'bg-indigo-600 text-white' : 'bg-slate-900 text-slate-500'}`}>
+                                            <Layout size={20} />
+                                        </div>
+                                        <div className="flex-1">
+                                            <div className="flex justify-between items-center mb-1">
+                                                <h5 className={`text-sm font-black ${isActive ? 'text-white' : 'text-slate-300'}`}>{tmpl.label}</h5>
+                                                {isActive && <div className="w-2 h-2 rounded-full bg-indigo-400 animate-pulse"></div>}
+                                            </div>
+                                            <p className="text-[10px] text-slate-500 font-medium">{tmpl.description}</p>
+                                        </div>
+                                    </button>
+                                );
+                            })}
                         </div>
                     </div>
 

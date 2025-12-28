@@ -96,8 +96,10 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     { name: 'تواصل معنا', href: '#contact' },
   ];
 
+  const templateClass = brand?.templateId ? `tmpl-${brand.templateId.split('-')[0]}` : '';
+
   return (
-    <div className="min-h-screen bg-slate-950 selection:bg-indigo-500/30 overflow-x-hidden animated-bg relative">
+    <div className={`min-h-screen bg-slate-950 selection:bg-indigo-500/30 overflow-x-hidden animated-bg relative ${templateClass}`}>
       {/* Mesh Gradient Overlays */}
       <div className="fixed inset-0 pointer-events-none mesh-gradient opacity-60 z-0"></div>
 
@@ -109,13 +111,13 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
         initial={{ x: -100 }}
         animate={{ x: 0 }}
         onClick={() => scrollToSection(null, '#assistant')}
-        className="fixed top-1/2 -left-2 z-[300] -rotate-90 origin-left flex items-center gap-3 bg-indigo-600 text-white px-8 py-4 rounded-t-3xl shadow-[0_-10px_40px_rgba(79,70,229,0.3)] border-x border-t border-white/20 hover:px-10 transition-all group"
+        className="fixed top-1/2 -left-2 z-[var(--z-nav)] -rotate-90 origin-left flex items-center gap-3 bg-indigo-600 text-white px-8 py-4 rounded-t-3xl shadow-[0_-10px_40px_rgba(79,70,229,0.3)] border-x border-t border-white/20 hover:px-10 transition-all group"
       >
         <Sparkles size={16} className="animate-pulse text-indigo-200" />
         <span className="text-xs font-black uppercase tracking-[0.15em] whitespace-nowrap">استشارة ذكية مجانية</span>
       </motion.button>
 
-      <nav className={`fixed top-0 left-0 right-0 z-[400] transition-all duration-700 ${scrolled ? 'py-4' : 'py-8'}`}>
+      <nav className={`fixed top-0 left-0 right-0 z-[var(--z-nav)] transition-all duration-700 ${scrolled ? 'py-4' : 'py-8'}`}>
         <div className="container mx-auto px-6">
           <div className={`flex justify-between items-center p-3 rounded-[2rem] transition-all duration-700 ${scrolled ? 'glass-panel border-white/10 shadow-3xl px-6' : 'bg-transparent'}`}>
             <div onClick={(e) => scrollToSection(e, '#hero')} className="flex items-center gap-3 group cursor-pointer">
@@ -214,7 +216,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
         </AnimatePresence>
       </nav>
 
-      <main className="relative z-10">{children}</main>
+      <main className="relative">{children}</main>
 
       <footer className="bg-slate-950 border-t border-white/5 py-24 relative overflow-hidden">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-px bg-gradient-to-r from-transparent via-indigo-500/20 to-transparent"></div>

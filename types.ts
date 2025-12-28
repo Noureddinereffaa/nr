@@ -239,6 +239,7 @@ export interface BrandIdentity {
   fontFamily: string;
   borderRadius: string;
   glassOpacity: string;
+  templateId?: 'premium-glass' | 'minimalist-pro' | 'cyber-command';
 }
 
 export interface ContactInfo {

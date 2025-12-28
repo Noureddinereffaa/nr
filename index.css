@@ -4,6 +4,28 @@
 /* Vanilla CSS for Global Styles & Scrollbars */
 
 :root {
+    /* Z-Index Registry - Global Stacking Order */
+    --z-negative: -1;
+    --z-base: 1;
+    --z-grid: 10;
+    --z-nav: 50;
+    --z-overlay: 100;
+    --z-modal: 500;
+    --z-article-reader: 1000;
+    --z-toast: 2000;
+
+    /* Fluid Typography (clamp based) */
+    --text-xs: clamp(0.7rem, 0.6rem + 0.5vw, 0.75rem);
+    --text-sm: clamp(0.8rem, 0.75rem + 0.5vw, 0.875rem);
+    --text-base: clamp(0.9rem, 0.85rem + 0.5vw, 1rem);
+    --text-lg: clamp(1.1rem, 1rem + 1vw, 1.25rem);
+    --text-xl: clamp(1.25rem, 1.1rem + 1.2vw, 1.5rem);
+    --text-2xl: clamp(1.5rem, 1.3rem + 1.5vw, 2rem);
+    --text-4xl: clamp(2.2rem, 2rem + 2.5vw, 3.5rem);
+    --text-6xl: clamp(3.5rem, 3rem + 5vw, 6rem);
+    --text-8xl: clamp(5rem, 4rem + 8vw, 9rem);
+
+    /* Original Design System Tokens */
     --bg-main: #020617;
     --bg-main-rgb: 2, 6, 23;
     --bg-panel: rgba(15, 23, 42, 0.4);
@@ -17,6 +39,9 @@
     --border-radius-elite: 1.5rem;
     --glass-opacity: 0.4;
     --font-main: 'Outfit', 'Cairo', sans-serif;
+    --font-serif: 'Cairo', serif;
+    /* Use Cairo as serif fallback or add another */
+    --font-mono: 'Roboto Mono', monospace;
     --silk-gradient: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(168, 85, 247, 0.1) 100%);
     --premium-gradient: linear-gradient(135deg, #6366f1 0%, #a855f7 50%, #ec4899 100%);
 }
@@ -37,6 +62,12 @@ body {
     transition: background-color 0.5s cubic-bezier(0.4, 0, 0.2, 1), color 0.5s ease;
     overflow-x: hidden;
     -webkit-font-smoothing: antialiased;
+    line-height: 1.5;
+}
+
+:focus-visible {
+    outline: 2px solid var(--accent-indigo);
+    outline-offset: 4px;
 }
 
 /* Utilities */

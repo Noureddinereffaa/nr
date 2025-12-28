@@ -19,10 +19,10 @@ const WidgetWrapper: React.FC<WidgetWrapperProps> = ({ children, title, size = '
     return (
         <div className={`${sizeClasses[size]} bg-slate-900/40 border border-white/5 rounded-[2.5rem] backdrop-blur-3xl relative group overflow-hidden transition-all hover:border-[rgba(var(--accent-indigo-rgb),0.3)] shadow-2xl`}>
             {/* Header */}
-            <div className="p-6 border-b border-white/5 flex items-center justify-between relative z-10 bg-slate-900/20">
+            <div className="p-4 sm:p-6 border-b border-white/5 flex items-center justify-between relative z-10 bg-slate-900/20">
                 <div className="flex items-center gap-3">
                     <GripVertical size={16} className="text-slate-600 cursor-grab active:cursor-grabbing opacity-0 group-hover:opacity-100 transition-opacity" />
-                    <h3 className="text-xs font-black text-white uppercase tracking-widest">{title}</h3>
+                    <h3 className="text-[10px] sm:text-xs font-black text-white uppercase tracking-widest">{title}</h3>
                 </div>
                 <div className="flex items-center gap-2">
                     <button className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-slate-400 hover:bg-white/10 transition-colors">
@@ -35,7 +35,7 @@ const WidgetWrapper: React.FC<WidgetWrapperProps> = ({ children, title, size = '
             </div>
 
             {/* Content */}
-            <div className="p-6 h-[calc(100%-72px)] overflow-hidden">
+            <div className="p-4 sm:p-6 h-[calc(100%-72px)] overflow-hidden">
                 {children}
             </div>
 
