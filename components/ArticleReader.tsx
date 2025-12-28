@@ -48,8 +48,8 @@ const ArticleReader: React.FC<ArticleReaderProps> = ({ article, onClose }) => {
                 exit={{ opacity: 0 }}
                 className="relative flex-1 flex flex-col overflow-hidden z-10"
             >
-                {/* Progress System */}
-                <div className="absolute top-0 left-0 w-full h-1.5 bg-white/5 z-[100]">
+                {/* Progress System - Fixed to Top */}
+                <div className="fixed top-0 left-0 w-full h-1 bg-white/5 z-[110]">
                     <motion.div
                         className="h-full bg-gradient-to-r from-indigo-600 via-purple-600 to-indigo-600 relative overflow-hidden"
                         style={{ width: `${scrollProgress}%` }}
@@ -59,29 +59,29 @@ const ArticleReader: React.FC<ArticleReaderProps> = ({ article, onClose }) => {
                 </div>
 
                 {/* Dynamic Header - Sovereign Control */}
-                <div className="sticky top-0 left-0 right-0 p-6 md:px-16 md:py-10 border-b border-white/10 bg-slate-900/40 backdrop-blur-2xl z-[90] flex items-center justify-between">
-                    <div className="flex items-center gap-6 md:gap-10">
+                <div className="sticky top-0 left-0 right-0 p-4 md:px-16 md:py-8 border-b border-white/5 bg-slate-950/80 backdrop-blur-3xl z-[100] flex items-center justify-between">
+                    <div className="flex items-center gap-4 md:gap-10 overflow-hidden">
                         <button
                             onClick={onClose}
-                            className="group w-14 h-14 md:w-16 md:h-16 flex items-center justify-center rounded-2xl bg-white/5 border border-white/10 text-white hover:bg-indigo-600 hover:border-indigo-500 transition-all active:scale-95"
+                            className="shrink-0 w-12 h-12 md:w-16 md:h-16 flex items-center justify-center rounded-2xl bg-white/5 border border-white/10 text-white hover:bg-indigo-600 hover:border-indigo-500 transition-all active:scale-95"
                         >
-                            <X size={28} className="group-hover:rotate-90 transition-transform duration-500" />
+                            <X size={24} className="group-hover:rotate-90 transition-transform duration-500" />
                         </button>
-                        <div className="hidden sm:block text-right" dir="rtl">
-                            <h4 className="text-white font-black text-sm md:text-lg truncate max-w-[300px] md:max-w-xl group-hover:text-indigo-400 transition-colors">{article.title}</h4>
-                            <p className="text-indigo-500 text-[10px] font-black uppercase tracking-[0.3em] mt-1 flex items-center gap-2">
-                                <Target size={12} /> {article.category}
+                        <div className="text-right overflow-hidden" dir="rtl">
+                            <h4 className="text-white font-black text-sm md:text-lg truncate max-w-[180px] sm:max-w-xs md:max-w-xl">{article.title}</h4>
+                            <p className="text-indigo-500 text-[9px] font-black uppercase tracking-[0.2em] mt-0.5 flex items-center gap-2 justify-end">
+                                <Target size={10} /> {article.category}
                             </p>
                         </div>
                     </div>
 
-                    <div className="flex items-center gap-6">
-                        <div className="hidden md:flex flex-col items-end border-r border-white/10 pr-6 mr-2" dir="rtl">
+                    <div className="flex items-center gap-4">
+                        <div className="hidden lg:flex flex-col items-end border-r border-white/10 pr-6 mr-2" dir="rtl">
                             <span className="text-white font-black text-xs uppercase tracking-widest">Noureddine Reffaa</span>
                             <span className="text-slate-500 text-[10px] font-black tracking-widest mt-1">Sovereign Expert</span>
                         </div>
-                        <button className="hidden sm:flex p-4 rounded-xl bg-white/5 hover:bg-indigo-600 text-white transition-all shadow-xl">
-                            <Share2 size={24} />
+                        <button className="p-3 md:p-4 rounded-xl bg-white/5 hover:bg-indigo-600 text-white transition-all shadow-xl">
+                            <Share2 size={20} />
                         </button>
                     </div>
                 </div>
@@ -100,21 +100,21 @@ const ArticleReader: React.FC<ArticleReaderProps> = ({ article, onClose }) => {
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/40 to-transparent"></div>
 
-                        <div className="absolute inset-0 flex flex-col items-center justify-end pb-24 px-10 max-w-5xl mx-auto text-center">
+                        <div className="absolute inset-0 flex flex-col items-center justify-end pb-12 md:pb-24 px-6 md:px-10 max-w-5xl mx-auto text-center">
                             <motion.div
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ delay: 0.3 }}
-                                className="inline-flex items-center gap-3 px-6 py-2.5 rounded-full bg-indigo-600 text-white text-[11px] font-black uppercase tracking-[0.4em] mb-10 shadow-3xl"
+                                className="inline-flex items-center gap-3 px-4 py-2 rounded-full bg-indigo-600 text-white text-[9px] md:text-[11px] font-black uppercase tracking-[0.3em] mb-6 md:mb-10 shadow-3xl"
                             >
-                                <Shield size={16} />
+                                <Shield size={14} />
                                 Strategic Insight Lab
                             </motion.div>
                             <motion.h1
                                 initial={{ opacity: 0, y: 30 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ delay: 0.4 }}
-                                className="text-5xl md:text-8xl font-black text-white leading-[1] mb-12 tracking-tighter drop-shadow-3xl"
+                                className="text-3xl sm:text-4xl md:text-7xl lg:text-8xl font-black text-white leading-tight md:leading-[1] mb-8 md:mb-12 tracking-tighter drop-shadow-3xl"
                             >
                                 {article.title}
                             </motion.h1>
@@ -123,18 +123,18 @@ const ArticleReader: React.FC<ArticleReaderProps> = ({ article, onClose }) => {
                                 initial={{ opacity: 0 }}
                                 animate={{ opacity: 1 }}
                                 transition={{ delay: 0.5 }}
-                                className="flex flex-wrap items-center justify-center gap-10 text-white font-black text-sm border-t border-white/10 pt-10"
+                                className="flex flex-wrap items-center justify-center gap-6 md:gap-10 text-white font-black text-xs md:text-sm border-t border-white/10 pt-8 md:pt-10"
                             >
-                                <div className="flex items-center gap-3 text-indigo-400">
-                                    <Calendar size={20} />
+                                <div className="flex items-center gap-2 md:gap-3 text-indigo-400">
+                                    <Calendar size={16} />
                                     {new Date(article.date).toLocaleDateString('ar-EG')}
                                 </div>
-                                <div className="flex items-center gap-3 text-indigo-400">
-                                    <Clock size={20} />
+                                <div className="flex items-center gap-2 md:gap-3 text-indigo-400">
+                                    <Clock size={16} />
                                     {article.readTime}
                                 </div>
-                                <div className="flex items-center gap-3 text-indigo-400">
-                                    <Zap size={20} />
+                                <div className="hidden sm:flex items-center gap-2 md:gap-3 text-indigo-400">
+                                    <Zap size={16} />
                                     بواسطة الذكاء الاصطناعي
                                 </div>
                             </motion.div>
@@ -172,25 +172,25 @@ const ArticleReader: React.FC<ArticleReaderProps> = ({ article, onClose }) => {
                             initial={{ opacity: 0, scale: 0.95 }}
                             whileInView={{ opacity: 1, scale: 1 }}
                             viewport={{ once: true }}
-                            className="mt-40 p-12 md:p-24 rounded-[4rem] bg-indigo-600 text-white text-center relative group overflow-hidden shadow-3xl"
+                            className="mt-24 md:mt-40 p-8 md:p-24 rounded-[2.5rem] md:rounded-[4rem] bg-indigo-600 text-white text-center relative group overflow-hidden shadow-3xl"
                         >
                             <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                            <div className="absolute top-0 right-0 w-full h-3 bg-white/20"></div>
+                            <div className="absolute top-0 right-0 w-full h-2 md:h-3 bg-white/20"></div>
 
-                            <h3 className="text-4xl md:text-7xl font-black mb-8 tracking-tighter leading-none relative z-10">نحول الرؤية إلى سلطة رقمية</h3>
-                            <p className="text-indigo-100 text-xl md:text-2xl mb-16 max-w-4xl mx-auto leading-relaxed font-medium relative z-10">
+                            <h3 className="text-3xl md:text-7xl font-black mb-6 md:mb-8 tracking-tighter leading-tight relative z-10">نحول الرؤية إلى سلطة رقمية</h3>
+                            <p className="text-indigo-100 text-lg md:text-2xl mb-10 md:mb-16 max-w-4xl mx-auto leading-relaxed font-medium relative z-10">
                                 لا نكتفي بالتنظير، بل نمنحك الأنظمة التي تدير أعمالك وتضاعف نموك بأتمتة ذكية ومسارات استراتيجية لا تُقهر.
                             </p>
 
-                            <div className="flex flex-col md:flex-row items-center justify-center gap-8 relative z-10">
+                            <div className="flex flex-col md:flex-row items-center justify-center gap-4 md:gap-8 relative z-10">
                                 <a
                                     href={article.ctaWhatsApp || '#'}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="w-full md:w-auto bg-white text-slate-950 px-16 py-6 rounded-3xl font-black text-xl hover:scale-105 active:scale-95 transition-all shadow-4xl flex items-center justify-center gap-4 group/btn"
+                                    className="w-full md:w-auto bg-white text-slate-950 px-8 md:px-16 py-4 md:py-6 rounded-2xl md:rounded-3xl font-black text-lg md:text-xl hover:scale-105 active:scale-95 transition-all shadow-4xl flex items-center justify-center gap-4 group/btn"
                                 >
-                                    حجز استشارة هاتفية فورية
-                                    <Sparkles size={24} className="text-indigo-600 group-hover/btn:animate-pulse" />
+                                    حجز استشارة هاتفية
+                                    <Sparkles size={20} className="text-indigo-600 group-hover/btn:animate-pulse" />
                                 </a>
 
                                 {article.ctaDownloadUrl && (
@@ -198,16 +198,42 @@ const ArticleReader: React.FC<ArticleReaderProps> = ({ article, onClose }) => {
                                         href={article.ctaDownloadUrl}
                                         target="_blank"
                                         rel="noopener noreferrer"
-                                        className="w-full md:w-auto bg-indigo-500/30 backdrop-blur-md text-white border border-white/20 px-12 py-6 rounded-3xl font-black text-lg hover:bg-white hover:text-slate-950 transition-all flex items-center justify-center gap-4 group/dl"
+                                        className="w-full md:w-auto bg-indigo-500/30 backdrop-blur-md text-white border border-white/20 px-8 md:px-12 py-4 md:py-6 rounded-2xl md:rounded-3xl font-black text-base md:text-lg hover:bg-white hover:text-slate-950 transition-all flex items-center justify-center gap-4 group/dl"
                                     >
                                         تحميل دليل التنفيذ
-                                        <ArrowRight size={24} className="rotate-180 group-hover/dl:translate-x-[-8px] transition-transform" />
+                                        <ArrowRight size={20} className="rotate-180 group-hover/dl:translate-x-[-8px] transition-transform" />
                                     </a>
                                 )}
                             </div>
                         </motion.div>
+
+                        {/* Navigation Footer */}
+                        <div className="mt-24 md:mt-32 border-t border-white/5 pt-12 text-center">
+                            <button
+                                onClick={onClose}
+                                className="text-slate-500 hover:text-white font-black text-sm uppercase tracking-widest flex items-center gap-3 mx-auto transition-colors"
+                            >
+                                <ArrowRight size={18} />
+                                العودة إلى مركز المعرفة
+                            </button>
+                        </div>
                     </div>
                 </div>
+
+                {/* Fixed Action: Scroll to Top */}
+                <AnimatePresence>
+                    {scrollProgress > 20 && (
+                        <motion.button
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: 20 }}
+                            onClick={() => document.getElementById('reader-content')?.scrollTo({ top: 0, behavior: 'smooth' })}
+                            className="fixed bottom-10 right-10 z-[120] w-14 h-14 rounded-2xl bg-indigo-600 text-white flex items-center justify-center shadow-4xl hover:scale-110 active:scale-95 transition-all"
+                        >
+                            <ArrowRight size={24} className="-rotate-90" />
+                        </motion.button>
+                    )}
+                </AnimatePresence>
             </motion.div>
 
             <style>{`
