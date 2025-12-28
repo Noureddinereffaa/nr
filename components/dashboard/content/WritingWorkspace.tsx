@@ -394,7 +394,6 @@ const WritingWorkspace: React.FC<WritingWorkspaceProps> = ({ article: initialArt
                 </div>
             </div>
         </div>
-        </div >
     );
 };
 
