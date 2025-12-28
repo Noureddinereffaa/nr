@@ -3,10 +3,12 @@ import { MessageCircle, X, Send, User, ChevronDown, CheckCircle, Sparkles } from
 import { ChatMessage, ChatSession, INITIAL_SESSION, generateId, simulateTyping } from '../lib/chat-service';
 import { useData } from '../context/DataContext';
 import { useUI } from '../context/UIContext';
+import { useAI } from '../context/AIContext';
 
 const SmartChatbot: React.FC = () => {
-    const { addServiceRequest } = useData();
+    const { addServiceRequest, siteData } = useData();
     const { isChatOpen, toggleChat, openChat } = useUI();
+    const { generateText } = useAI();
 
     // Load session from localStorage for persistence across pages
     const [session, setSession] = useState<ChatSession>(() => {
@@ -50,7 +52,10 @@ const SmartChatbot: React.FC = () => {
         localStorage.setItem('nr_chat_session', JSON.stringify(session));
     }, [session]);
 
-    // ... (rest of useEffects)
+    // Scroll to bottom
+    useEffect(() => {
+        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }, [session.messages, isTyping]);
 
     // Auto-Greeting (only if not already greeted in this browser)
     useEffect(() => {
@@ -80,19 +85,34 @@ const SmartChatbot: React.FC = () => {
 
     const handleBotResponse = async (state: string, userResponse?: string) => {
         setIsTyping(true);
-        await simulateTyping(1000); // Fake AI thinking time
+        // await simulateTyping(1000); // Removed fixed delay, let API time determine it naturally or keep small delay
 
-        let newMessages: Partial<ChatMessage>[] = [];
         let nextState = session.currentState;
+
+        // RAG Context Builder
+        const buildContext = () => {
+            const services = (siteData.services || []).map(s => `- ${s.title}: ${s.description}`).join('\n');
+            const projects = (siteData.projects || []).slice(0, 3).map(p => `- ${p.title} (${p.category})`).join('\n');
+            return `
+            You are "Nova", the AI assistant for Noureddine Reffaa (Digital Architect).
+            My Bio: ${siteData.profile?.bio || 'Expert Dev'}.
+            My Services:
+            ${services}
+            Recent Projects:
+            ${projects}
+            
+            Mission: ${siteData.aiConfig.mission}
+            Tone: ${siteData.aiConfig.tone}
+            
+            Rules:
+            - Keep answers short (under 50 words) and friendly.
+            - If user asks for pricing, ask for email/phone.
+            - Speak Arabic naturally.
+            `;
+        };
 
         switch (state) {
             case 'GREETING':
-                newMessages = [
-                    { text: "مرحباً بك في موقع نورالدين رفعة 👋", sender: 'bot' },
-                ];
-                await simulateTyping(1500); // Second bubble delay
-                // We don't use 'addMessage' directly inside async flow to avoid closure staleness, 
-                // effectively we batch or chain them. For simplicity in react state:
                 setIsTyping(false);
                 setSession(prev => ({
                     ...prev,
@@ -110,7 +130,6 @@ const SmartChatbot: React.FC = () => {
                     setIsTyping(false);
                     setSession(prev => {
                         const updated: ChatSession = { ...prev, userData: { ...prev.userData, name: userResponse }, currentState: 'MENU_SELECTION' as const };
-                        // Trigger menu immediately
                         setTimeout(() => handleBotTrigger(updated, 'SHOW_MENU'), 100);
                         return updated;
                     });
@@ -133,7 +152,8 @@ const SmartChatbot: React.FC = () => {
                                 { label: '🚀 تطوير مشروع رقمي', value: 'project' },
                                 { label: '💼 استشارة إدارية', value: 'consultation' },
                                 { label: '💰 استفسار عن الأسعار', value: 'pricing' },
-                                { label: '📞 تواصل مع نورالدين', value: 'contact' }
+                                { label: '📞 تواصل مع نورالدين', value: 'contact' },
+                                { label: '🧠 سؤال عام (AI)', value: 'ai_chat' }
                             ]
                         }
                     ]
@@ -145,9 +165,21 @@ const SmartChatbot: React.FC = () => {
                     'project': 'تطوير مشروع رقمي',
                     'consultation': 'استشارة إدارية',
                     'pricing': 'استفسار أسعار',
-                    'contact': 'طلب تواصل عام'
+                    'contact': 'طلب تواصل عام',
+                    'ai_chat': 'سؤال عام'
                 };
+
                 const userIntent = intentMap[userResponse || ''] || 'عام';
+
+                if (userResponse === 'ai_chat') {
+                    setIsTyping(false);
+                    setSession(prev => ({
+                        ...prev,
+                        currentState: 'AI_CHAT_MODE',
+                        messages: [...prev.messages, { id: generateId(), text: "أنا جاهز للإجابة على أي استفسار يخص خدماتنا أو التقنية عموماً! تفضل بالسؤال.", sender: 'bot', timestamp: new Date() }]
+                    }));
+                    return;
+                }
 
                 setIsTyping(false);
                 setSession(prev => ({
@@ -165,14 +197,12 @@ const SmartChatbot: React.FC = () => {
             case 'HANDLE_PHONE':
                 // Save to CRM
                 const finalUserData = { ...session.userData, phone: userResponse };
-
-                // Add to Context (CRM)
                 addServiceRequest({
                     serviceTitle: finalUserData.intent || 'طلب من الشات بوت',
                     clientName: finalUserData.name || 'زائر من الشات',
                     clientPhone: userResponse || '',
                     clientEmail: '',
-                    projectDetails: `طلب تم إنشاؤه تلقائياً عبر الشات بوت الذكي`,
+                    projectDetails: `طلب تم إنشاؤه تلقائياً عبر الشات بوت الذكي - ${finalUserData.intent}`,
                     priority: 'medium'
                 });
 
@@ -187,14 +217,44 @@ const SmartChatbot: React.FC = () => {
                     ]
                 }));
                 return;
-        }
 
-        setIsTyping(false);
+            case 'AI_CHAT_REPLY':
+                // This is the new Dynamic RAG Logic
+                try {
+                    const context = buildContext();
+                    const refinedPrompt = `CONTEXT: ${context}\n\nUSER QUESTION: ${userResponse}`;
+
+                    // We use standard generateText from context which handles provider switching
+                    const reply = await generateText(refinedPrompt);
+
+                    setIsTyping(false);
+                    setSession(prev => ({
+                        ...prev,
+                        messages: [...prev.messages, { id: generateId(), text: reply, sender: 'bot', timestamp: new Date() }]
+                    }));
+                } catch (e) {
+                    setIsTyping(false);
+                    setSession(prev => ({
+                        ...prev,
+                        messages: [...prev.messages, { id: generateId(), text: "عذراً، حدث خطأ تقني. يرجى المحاولة لاحقاً.", sender: 'bot', timestamp: new Date() }]
+                    }));
+                }
+                return;
+
+            default:
+                // Fallback for AI Chat Mode
+                if (session.currentState === 'AI_CHAT_MODE') {
+                    handleBotResponse('AI_CHAT_REPLY', userResponse);
+                    return;
+                }
+
+                handleBotResponse('DEFAULT_REPLY'); // Or just ignore
+                return;
+        }
     };
 
     // Helper wrapper to trigger bot with latest state
     const handleBotTrigger = (currentSession: ChatSession, action: string) => {
-        // This is a simplified logic handler, in real app utilize proper state machine
         handleBotResponse(action);
     };
 
@@ -210,9 +270,11 @@ const SmartChatbot: React.FC = () => {
             handleBotResponse('HANDLE_NAME', userText);
         } else if (session.currentState === 'COLLECTING_PHONE') {
             handleBotResponse('HANDLE_PHONE', userText);
+        } else if (session.currentState === 'AI_CHAT_MODE') {
+            handleBotResponse('AI_CHAT_REPLY', userText);
         } else {
-            // Fallback default
-            handleBotResponse('DEFAULT_REPLY');
+            // Default
+            handleBotResponse('DEFAULT_REPLY', userText);
         }
     };
 
@@ -223,9 +285,6 @@ const SmartChatbot: React.FC = () => {
         }
     };
 
-    // const toggleChat = () => { ... } // Replaced by UIContext toggleChat
-
-    // Reset conversation to start fresh
     const resetChat = () => {
         localStorage.removeItem('nr_chat_session');
         setSession({ ...INITIAL_SESSION, isOpen: true, hasGreeted: true });
@@ -247,7 +306,7 @@ const SmartChatbot: React.FC = () => {
                                 <span className="absolute bottom-0 right-0 w-2.5 h-2.5 sm:w-3 sm:h-3 bg-emerald-500 border-2 border-slate-900 rounded-full"></span>
                             </div>
                             <div>
-                                <h3 className="font-bold text-white text-xs sm:text-sm">المساعد الذكي</h3>
+                                <h3 className="font-bold text-white text-xs sm:text-sm">المساعد الذكي (Nova)</h3>
                                 <p className="text-[9px] sm:text-[10px] text-indigo-200 flex items-center gap-1">
                                     <span className="w-1 h-1 bg-emerald-500 rounded-full animate-pulse"></span>
                                     متصل الآن

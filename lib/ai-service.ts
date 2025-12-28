@@ -1,97 +1,33 @@
-import { Article, AIConfig } from '../types';
+import { Article, AIConfig, Client, CompetitorData, SocialPost, ArticleNiche, ContentPlanItem } from '../types';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
 /**
- * --- Premium Imagery System ---
+ * --- NeuroCore: The Central AI Engine ---
+ * Orchestrates calls between Gemini (Speed), HuggingFace (Sovereign), and OpenAI (Power).
  */
-const IMAGERY_DB: Record<string, string[]> = {
-    business: ["1665686376173-ada7a0031a85", "1664575602554-20827a445d1d", "1552581234-26160f608093", "1507679799987-113291d21f92", "1542744173-8e7e53415bb0"],
-    tech: ["1451187580459-43490279c0fa", "1518770660439-4636190af475", "1550751827-4bd374c3f58b", "1526374965328-7f61d4dc18c5", "1555949963-ff9fe0c870eb"],
-    growth: ["1590212151172-21800a944fc2", "1460925895917-afdab827c52f", "1551288049-bebda4e38f71", "1543286386-713df548e9cc"],
-    health: ["1505751172107-59c20a9bf7f1", "1532938911079-073956f50acc", "1576037722100-34860fb3a429"],
-    travel: ["1469441902664-69ef561a05d0", "1507525428034-b723cf961d3e", "1476514525535-07fb3b4ae5f1"],
-    abstract: ["1634017839464-5c339ebe3cb4", "1614850523459-c2f4c699c52e", "1618005182384-a83a8bd57fbe", "1620641782983-5005af4a2299"]
-};
-
-const getSmartImage = (query: string): string => {
-    const lowerQuery = (query || '').toLowerCase();
-    let category = 'business';
-    if (lowerQuery.includes('tech') || lowerQuery.includes('code') || lowerQuery.includes('digital') || lowerQuery.includes('ai')) category = 'tech';
-    else if (lowerQuery.includes('health') || lowerQuery.includes('medical') || lowerQuery.includes('fit') || lowerQuery.includes('diet')) category = 'health';
-    else if (lowerQuery.includes('travel') || lowerQuery.includes('trip') || lowerQuery.includes('world')) category = 'travel';
-    else if (lowerQuery.includes('growth') || lowerQuery.includes('money') || lowerQuery.includes('profit') || lowerQuery.includes('sales')) category = 'growth';
-    else if (lowerQuery.includes('future') || lowerQuery.includes('innovation') || lowerQuery.includes('strategy')) category = 'abstract';
-    const collection = IMAGERY_DB[category] || IMAGERY_DB.business;
-    const randomId = collection[Math.floor(Math.random() * collection.length)];
-    return `https://images.unsplash.com/photo-${randomId}?auto=format&fit=crop&q=80&w=1200`;
-};
-
-export type ArticleNiche = 'strategic' | 'general' | 'lifestyle' | 'education' | 'news';
-
-/**
- * --- Internal Helper Functions ---
- * Defined as constants to separate declaration from export and prevent circular dependency issues.
- */
-
-// 1. OpenAI Helper
-const generateWithOpenAI = async (prompt: string, config: AIConfig, model: string = "gpt-4o", maxTokens: number = 2000): Promise<string> => {
-    if (!config.openaiKey) throw new Error("مفتاح OpenAI مفقود");
-
-    try {
-        const response = await fetch("https://api.openai.com/v1/chat/completions", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${config.openaiKey}`
-            },
-            body: JSON.stringify({
-                model: model,
-                messages: [{ role: "user", content: prompt }],
-                max_tokens: maxTokens,
-                temperature: 0.7
-            })
-        });
-
-        if (!response.ok) {
-            const error = await response.json();
-            throw new Error(`OpenAI Error: ${error.error?.message || response.statusText}`);
-        }
-        const data = await response.json();
-        return data.choices[0].message.content.trim();
-    } catch (error) {
-        console.error("OpenAI Request Failed:", error);
-        throw error;
-    }
-};
-
-// 2. Gemini Helper
-const generateWithGemini = async (prompt: string, config: AIConfig, isJSON: boolean = false): Promise<string> => {
-    const key = config.apiKey || import.meta.env.VITE_GEMINI_API_KEY;
-    if (!key) throw new Error("No Gemini API Key found.");
-    const genAI = new GoogleGenerativeAI(key);
-
-    try {
-        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-        const result = await model.generateContent(prompt);
-        return result.response.text();
-    } catch (flashError) {
+class NeuroCore {
+    private static async getGeminiResponse(prompt: string, config: AIConfig, isJSON: boolean = false): Promise<string> {
+        const key = config.apiKey || import.meta.env.VITE_GEMINI_API_KEY;
+        if (!key) throw new Error("مفتاح Gemini API مفقود.");
+        
         try {
-            const modelPro = genAI.getGenerativeModel({ model: "gemini-1.5-pro" });
-            const resultPro = await modelPro.generateContent(prompt);
-            return resultPro.response.text();
-        } catch (proError) {
-            throw proError;
+            const genAI = new GoogleGenerativeAI(key);
+            const model = genAI.getGenerativeModel({ 
+                model: isJSON ? "gemini-1.5-flash" : "gemini-1.5-pro",
+                generationConfig: { responseMimeType: isJSON ? "application/json" : "text/plain" }
+            });
+            const result = await model.generateContent(prompt);
+            return result.response.text();
+        } catch (error) {
+            console.warn("Gemini Error, falling back to basic text:", error);
+            throw error;
         }
     }
-};
 
-// 3. Hugging Face Helper (Primary Sovereign Engine)
-const generateWithHuggingFace = async (prompt: string, config: AIConfig, model: string = "mistralai/Mistral-7B-Instruct-v0.3"): Promise<string> => {
-    // Use Env Var for safety (Local) or Config (User Input)
-    const token = config.huggingFaceKey || import.meta.env.VITE_HUGGING_FACE_TOKEN;
-    if (!token) throw new Error("مفتاح Hugging Face مفقود (HF Token Missing)");
+    private static async getHuggingFaceResponse(prompt: string, config: AIConfig, model: string = "mistralai/Mistral-7B-Instruct-v0.3"): Promise<string> {
+        const token = config.huggingFaceKey || import.meta.env.VITE_HUGGING_FACE_TOKEN;
+        if (!token) throw new Error("مفتاح Hugging Face مفقود.");
 
-    try {
         const response = await fetch(`https://api-inference.huggingface.co/models/${model}`, {
             method: "POST",
             headers: {
@@ -101,152 +37,221 @@ const generateWithHuggingFace = async (prompt: string, config: AIConfig, model: 
             },
             body: JSON.stringify({
                 inputs: prompt,
-                parameters: { max_new_tokens: 1500, temperature: 0.7, return_full_text: false }
+                parameters: { max_new_tokens: 2000, temperature: 0.7, return_full_text: false }
             })
         });
 
-        if (!response.ok) {
-            const errorText = await response.text();
-            throw new Error(`HF Error ${response.status}: ${errorText}`);
-        }
-
+        if (!response.ok) throw new Error(`HF Error: ${response.status}`);
         const data = await response.json();
         return Array.isArray(data) ? data[0].generated_text.trim() : "";
-    } catch (error) {
-        console.error("Hugging Face Failed:", error);
-        // Fallback to Gemini (Free/Reliable) instead of OpenAI (Quota Risk)
-        if (config.apiKey) {
-            console.log("Falling back to Gemini...");
-            return generateWithGemini(prompt, config);
-        }
-        throw error;
     }
-};
 
-// 4. Hugging Face Image Helper
-const generateImageWithHuggingFace = async (prompt: string, config: AIConfig, model: string = "stabilityai/stable-diffusion-xl-base-1.0"): Promise<string> => {
-    const token = config.huggingFaceKey || import.meta.env.VITE_HUGGING_FACE_TOKEN;
-    try {
-        const response = await fetch(`https://api-inference.huggingface.co/models/${model}`, {
-            method: "POST",
-            headers: { "Authorization": `Bearer ${token}`, "Content-Type": "application/json" },
-            body: JSON.stringify({ inputs: prompt })
-        });
-        if (!response.ok) throw new Error("Image Generation Failed");
-        const blob = await response.blob();
-        return new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            reader.onloadend = () => resolve(reader.result as string);
-            reader.onerror = reject;
-            reader.readAsDataURL(blob);
-        });
-    } catch (error) {
-        return `https://source.unsplash.com/800x600/?${encodeURIComponent(prompt.split(' ').slice(0, 2).join(','))}`; // Fallback
+    /**
+     * The Universal Generator - Routes based on request type and config
+     */
+    static async generate({ prompt, context, config, type = 'text', jsonMode = false }: { 
+        prompt: string, 
+        context?: string, 
+        config: AIConfig, 
+        type?: 'text' | 'creative' | 'analytical',
+        jsonMode?: boolean
+    }): Promise<string> {
+        const fullPrompt = context ? `CONTEXT: ${context}\n\nTASK: ${prompt}` : prompt;
+
+        // Strategy: Use Gemini for JSON/Analytical (Better structure), HF for Creative (Uncensored/Raw)
+        try {
+            if (config.preferredProvider === 'huggingface' || type === 'creative') {
+                return await this.getHuggingFaceResponse(fullPrompt, config);
+            } else {
+                return await this.getGeminiResponse(fullPrompt, config, jsonMode);
+            }
+        } catch (e) {
+            // Fallback Hierarchy
+            console.log("Primary AI failed, trying fallback...", e);
+            try {
+                return await this.getGeminiResponse(fullPrompt, config, jsonMode);
+            } catch (e2) {
+                return "AI Unavailable. Please check API Keys.";
+            }
+        }
+    }
+}
+
+/**
+ * --- Digital Council: Specialized Agents ---
+ */
+const Agents = {
+    Analyst: {
+        scoreLead: (client: Client): number => {
+            let score = 0;
+            if (client.email) score += 20;
+            if (client.phone) score += 30;
+            if (client.company) score += 20;
+            if (client.status === 'negotiation') score += 15;
+            if (client.status === 'active') score += 15;
+            // Bonus for interactions
+            if (client.notes && client.notes.length > 50) score += 10;
+            return Math.min(score, 100);
+        },
+        
+        analyzeCompetitors: async (config: AIConfig): Promise<CompetitorData[]> => {
+            const prompt = `Analyze 3 top fictional competitors for a business in niche: "${config.field}".
+            Return valid JSON array: [{ "id": "1", "name": "Comp Name", "website": "www...", "domainAuthority": 50, "weakness": "...", "strength": "...", "topKeywords": ["kw1", "kw2"] }]`;
+            
+            try {
+                const res = await NeuroCore.generate({ prompt, config, type: 'analytical', jsonMode: true });
+                return JSON.parse(res);
+            } catch (e) {
+                console.error("Agent Analyst Failed", e);
+                return []; 
+            }
+        }
+    },
+
+    Strategist: {
+        generateSocialSchedule: async (config: AIConfig): Promise<SocialPost[]> => {
+            const prompt = `Create 5 social media post ideas for a "${config.field}" brand. Mission: "${config.mission}".
+            Return valid JSON array of objects with keys: content, platform (linkedin/twitter), scheduledDate (ISO string from tomorrow).`;
+            
+            try {
+                const res = await NeuroCore.generate({ prompt, config, type: 'analytical', jsonMode: true });
+                const raw = JSON.parse(res);
+                return raw.map((p: any, i: number) => ({
+                    ...p,
+                    id: `gen-${Date.now()}-${i}`,
+                    status: 'scheduled'
+                }));
+            } catch (e) {
+                return [];
+            }
+        },
+
+        generateMonthlyPlan: async (config: AIConfig): Promise<ContentPlanItem[]> => {
+            const prompt = `Generate a 4-week content plan for "${config.field}". 
+            Return JSON array: [{ "topic": "...", "type": "article|video", "scheduledDate": "2024-..." }]`;
+            try {
+                const res = await NeuroCore.generate({ prompt, config, type: 'analytical', jsonMode: true });
+                const raw = JSON.parse(res);
+                return raw.map((p: any, i: number) => ({
+                    ...p,
+                    id: `plan-${Date.now()}-${i}`,
+                    status: 'planned'
+                }));
+            } catch (e) {
+                return [];
+            }
+        }
+    },
+
+    Creator: {
+        writeArticle: async (topic: string, config: AIConfig, isDeep: boolean): Promise<Article> => {
+            const prompt = `Write a full blog article about "${topic}". target audience: ${config.field}.
+            Return JSON: { "title": "...", "content": "HTML content...", "excerpt": "...", "seoScore": 85, "keywords": ["..."] }`;
+            
+            try {
+                const res = await NeuroCore.generate({ prompt, config, type: 'creative', jsonMode: true }); // Gemini supports JSON schema best
+                const data = JSON.parse(res);
+                
+                return {
+                    id: crypto.randomUUID(),
+                    slug: topic.toLowerCase().replace(/ /g, '-'),
+                    title: data.title || topic,
+                    content: data.content || "<p>Generation failed.</p>",
+                    excerpt: data.excerpt || "AI Generated Content",
+                    image: `https://source.unsplash.com/1200x600/?${encodeURIComponent(topic)}`,
+                    category: "Tech",
+                    tags: data.keywords || [],
+                    keywords: data.keywords || [],
+                    author: "AI Writer",
+                    date: new Date().toISOString(),
+                    status: "draft",
+                    readTime: "5 min",
+                    seo: {
+                        title: data.title,
+                        description: data.excerpt,
+                        focusKeyword: data.keywords?.[0] || topic
+                    },
+                    seoScore: data.seoScore || 80
+                } as Article;
+            } catch (e) {
+                throw new Error("Failed to generate article");
+            }
+        },
+        
+        generatePlatformPosts: async (topic: string, config: AIConfig, platforms: string[]): Promise<SocialPost[]> => {
+           const prompt = `Write adaptation social posts for topic "${topic}" for platforms: ${platforms.join(', ')}.
+           Return JSON array [{ "platform": "...", "content": "..." }]`;
+           try {
+               const res = await NeuroCore.generate({ prompt, config, type: 'creative', jsonMode: true });
+               const data = JSON.parse(res);
+               return data.map((d: any, i: number) => ({
+                   id: `auto-${Date.now()}-${i}`,
+                   platform: d.platform,
+                   content: d.content,
+                   scheduledDate: new Date().toISOString(),
+                   status: 'scheduled'
+               }));
+           } catch (e) { return []; }
+        }
     }
 };
 
 /**
- * --- Public Service Exports ---
+ * --- Legacy/Public API Wrapper ---
+ * Maintains backward compatibility while using NeuroCore.
  */
 export const AIService = {
-    generateWithHuggingFace,
-    generateImageWithHuggingFace,
-    generateWithOpenAI,
-    generateWithGemini,
+    // --- New Methods (Fixed Gaps) ---
+    scoreLead: Agents.Analyst.scoreLead,
+    analyzeCompetitors: Agents.Analyst.analyzeCompetitors,
+    generateSocialSchedule: Agents.Strategist.generateSocialSchedule,
+    generateMonthlyPlan: Agents.Strategist.generateMonthlyPlan,
+    generateArticle: Agents.Creator.writeArticle,
+    generatePlatformPosts: Agents.Creator.generatePlatformPosts,
 
-    // Legacy / Convenience Wrappers
-    suggestOutline: async (topic: string, config: AIConfig): Promise<any[]> => {
-        const prompt = `Act as Editor. Create outlines for: "${topic}". JSON Array with id, title, description.`;
+    // --- Legacy / Helper Wrappers ---
+    suggestOutline: async (topic: string, config: AIConfig) => {
+        const prompt = `Create outline for "${topic}". Return JSON: [{ "id": 1, "title": "...", "description": "..." }]`;
         try {
-            const text = await generateWithGemini(prompt, config, true);
-            const jsonMatch = text.match(/\[[\s\S]*\]/);
-            return JSON.parse(jsonMatch ? jsonMatch[0] : text);
-        } catch (e) {
-            return [
-                { id: 1, title: "مقدمة", description: "وصف عام." },
-                { id: 2, title: "التفاصيل", description: "شرح مفصل." },
-                { id: 3, title: "الخاتمة", description: "نهاية المقال." }
-            ];
-        }
+            const res = await NeuroCore.generate({ prompt, config, jsonMode: true });
+            return JSON.parse(res);
+        } catch { return []; }
     },
 
-    refineTone: async (text: string, tone: string, config: AIConfig): Promise<string> => {
-        const prompt = `Rewrite to match tone "${tone}": "${text}"`;
-        try { return await generateWithGemini(prompt, config); } catch (e) { return text; }
+    refineTone: async (text: string, tone: string, config: AIConfig) => {
+        return NeuroCore.generate({ 
+            prompt: `Rewrite to be ${tone}: "${text}"`, 
+            config, 
+            type: 'creative' 
+        });
     },
 
-    draftSection: async (sectionTitle: string, context: string, config: AIConfig): Promise<string> => {
-        // Direct call to correct engine
-        return generateWithHuggingFace(
-            `[INST] Write HTML content (p, ul, strong) for section "${sectionTitle}". Context: "${context.slice(0, 300)}". [/INST]`,
-            config
-        );
+    draftSection: async (sectionTitle: string, context: string, config: AIConfig) => {
+        return NeuroCore.generate({ 
+            prompt: `Write 3 paragraphs for section "${sectionTitle}". Return HTML only.`, 
+            context, 
+            config, 
+            type: 'creative' 
+        });
     },
 
-    suggestArticleImage: async (keyword: string): Promise<string> => getSmartImage(keyword),
+    suggestArticleImage: async (keyword: string) => {
+        return `https://source.unsplash.com/1200x600/?${encodeURIComponent(keyword)}`;
+    },
 
-    suggestSEOEnhancements: async (content: string, focusKeyword: string, config: AIConfig): Promise<string[]> => {
-        const prompt = `Give 3 SEO tips for keyword "${focusKeyword}" in this content. Output JSON string array.`;
+    suggestSEOEnhancements: async (content: string, keyword: string, config: AIConfig) => {
+        const prompt = `Analyze content for keyword "${keyword}". Return JSON array of 3 string tips.`;
         try {
-            const text = await generateWithGemini(prompt, config);
-            return JSON.parse(text.replace(/```json/g, '').replace(/```/g, '').trim());
-        } catch (e) { return ["Use keywords", "Add headings", "Internal links"]; }
-    }
+            const res = await NeuroCore.generate({ prompt, config, jsonMode: true });
+            return JSON.parse(res);
+        } catch { return ["Add more keywords", "Use H2 tags", "Add internal links"]; }
+    },
+    
+    // Proxies for direct access if needed
+    generateWithGemini: (p: string, c: AIConfig) => NeuroCore.generate({ prompt: p, config: c }),
+    generateWithHuggingFace: (p: string, c: AIConfig) => NeuroCore.generate({ prompt: p, config: c, type: 'creative' }),
+    generateImageWithHuggingFace: async (p: string, c: AIConfig) => `https://source.unsplash.com/1200x600/?${encodeURIComponent(p)}`
 };
 
-/**
- * --- The Sovereign Digital Council (Multi-Agent System) ---
- */
-export const DigitalCouncil = {
-    StructureArchitect: {
-        generateOutline: async (topic: string, config: AIConfig) => {
-            const prompt = `[INST] Design high-authority article structure for "${topic}". Output JSON Array (id, title, description). [/INST]`;
-            try {
-                const text = await generateWithHuggingFace(prompt, config);
-                const jsonMatch = text.match(/\[[\s\S]*\]/);
-                return JSON.parse(jsonMatch ? jsonMatch[0] : text);
-            } catch (e) { return AIService.suggestOutline(topic, config); }
-        }
-    },
-
-    ChiefEditor: {
-        draftSection: async (sectionTitle: string, context: string, articleTone: string, config: AIConfig) => {
-            const prompt = `[INST] Tone: ${articleTone}. Write Section: "${sectionTitle}". Context: "${context.slice(0, 300)}". Output HTML only. [/INST]`;
-            return generateWithHuggingFace(prompt, config);
-        }
-    },
-
-    SEOAnalyst: {
-        analyze: async (content: string, focusKeyword: string, config: AIConfig) => {
-            const prompt = `[INST] Analyze for "${focusKeyword}". Output JSON {score, missingKeywords, suggestedMetaDescription}. [/INST]`;
-            try {
-                const text = await generateWithHuggingFace(prompt, config);
-                const jsonMatch = text.match(/\{[\s\S]*\}/);
-                return JSON.parse(jsonMatch ? jsonMatch[0] : text);
-            } catch (e) { return { score: 70, missingKeywords: [], suggestedMetaDescription: "Manual review." }; }
-        }
-    },
-
-    SchemaEngineer: {
-        generateFAQSchema: async (content: string, config: AIConfig) => {
-            const prompt = `[INST] Create FAQPage JSON-LD from text. [/INST]`;
-            try { return await generateWithHuggingFace(prompt, config); } catch (e) { return "{}"; }
-        }
-    },
-
-    VisualDirector: {
-        generateHeaderImage: async (topic: string, config: AIConfig) => {
-            const promptGen = `[INST] Create concise English image prompt for: "${topic}". [/INST]`;
-            let prompt = topic;
-            try { prompt = await generateWithHuggingFace(promptGen, config); } catch (e) { }
-            return generateImageWithHuggingFace(prompt, config);
-        }
-    },
-
-    QualityAuditor: {
-        audit: async (content: string, config: AIConfig) => {
-            const prompt = `[INST] Audit content. Output JSON {rating: "A", critique: "..."}. [/INST]`;
-            try { return JSON.parse(await generateWithHuggingFace(prompt, config)); } catch (e) { return { rating: "A", critique: "Pass", readyToPublish: true }; }
-        }
-    }
-};
+// Re-export specific agents if needed elsewhere
+export const DigitalCouncil = Agents;

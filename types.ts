@@ -1,4 +1,6 @@
 
+export type ArticleNiche = 'strategic' | 'general' | 'lifestyle' | 'education' | 'news';
+
 export interface NavigationItem {
   id: string;
   label: string;
