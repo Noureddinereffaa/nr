@@ -19,12 +19,177 @@ interface WritingWorkspaceProps {
 
 const WritingWorkspace: React.FC<WritingWorkspaceProps> = ({ article: initialArticle, aiConfig, onSave, onClose }) => {
     const [article, setArticle] = useState<Article>(initialArticle);
-    const [view, setView] = useState<'editor' | 'preview'>('editor');
+    const [view, setView] = useState<'split' | 'editor' | 'preview'>('split');
     const [aiStatus, setAiStatus] = useState<'idle' | 'working'>('idle');
     const [aiTools, setAiTools] = useState(false);
     const [activeSection, setActiveSection] = useState<string>('');
     const [selectedTone, setSelectedTone] = useState<'Sovereign' | 'Analytical' | 'Storyteller'>('Sovereign');
     const [generatedOutline, setGeneratedOutline] = useState<any[]>([]);
+    const [saveStatus, setSaveStatus] = useState<'saved' | 'saving' | 'unsaved'>('saved');
+    const [hasChanges, setHasChanges] = useState(false);
+    const [showLinkModal, setShowLinkModal] = useState(false);
+    const [showImageModal, setShowImageModal] = useState(false);
+    const [linkUrl, setLinkUrl] = useState('');
+    const [linkText, setLinkText] = useState('');
+    const [imageUrl, setImageUrl] = useState('');
+
+    // SEO Analysis State
+    const [seoMetrics, setSeoMetrics] = useState({
+        wordCount: 0,
+        readingTime: 0,
+        keywordDensity: 0,
+        readabilityScore: 0,
+        metaLength: 0,
+        hasH1: false,
+        h2Count: 0
+    });
+
+    // Calculate SEO Metrics in Real-Time
+    useEffect(() => {
+        const words = article.content.split(/\s+/).filter(w => w.length > 0);
+        const wordCount = words.length;
+        const readingTime = Math.ceil(wordCount / 200);
+
+        // Simple keyword density (if first keyword exists)
+        const keyword = article.keywords?.[0] || '';
+        const keywordCount = keyword ? (article.content.toLowerCase().match(new RegExp(keyword.toLowerCase(), 'g')) || []).length : 0;
+        const keywordDensity = wordCount > 0 ? (keywordCount / wordCount) * 100 : 0;
+
+        // Simple readability (based on avg sentence length)
+        const sentences = article.content.split(/[.!?]+/).filter(s => s.trim().length > 0);
+        const avgWordsPerSentence = sentences.length > 0 ? wordCount / sentences.length : 0;
+        const readabilityScore = Math.max(0, 100 - (avgWordsPerSentence * 2)); // Simple heuristic
+
+        // Meta description length
+        const metaLength = article.excerpt?.length || 0;
+
+        // Check for H1 and H2
+        const hasH1 = /<h1/i.test(article.content);
+        const h2Count = (article.content.match(/<h2/gi) || []).length;
+
+        setSeoMetrics({
+            wordCount,
+            readingTime,
+            keywordDensity: Math.round(keywordDensity * 10) / 10,
+            readabilityScore: Math.round(readabilityScore),
+            metaLength,
+            hasH1,
+            h2Count
+        });
+    }, [article.content, article.excerpt, article.keywords]);
+
+    // Auto-Save System
+    useEffect(() => {
+        setHasChanges(true);
+        setSaveStatus('unsaved');
+
+        const timer = setTimeout(() => {
+            if (hasChanges) {
+                setSaveStatus('saving');
+                onSave(article);
+                setTimeout(() => setSaveStatus('saved'), 500);
+                setHasChanges(false);
+            }
+        }, 3000);
+
+        return () => clearTimeout(timer);
+    }, [article.content, article.title, article.excerpt, article.slug]);
+
+    // Keyboard Shortcuts
+    useEffect(() => {
+        const handleKeyboard = (e: KeyboardEvent) => {
+            // Ctrl+S: Save
+            if (e.ctrlKey && e.key === 's') {
+                e.preventDefault();
+                setSaveStatus('saving');
+                onSave(article);
+                setTimeout(() => setSaveStatus('saved'), 500);
+                return;
+            }
+
+            // Ctrl+B: Bold
+            if (e.ctrlKey && e.key === 'b') {
+                e.preventDefault();
+                insertTag('<strong>', '</strong>');
+                return;
+            }
+
+            // Ctrl+I: Italic
+            if (e.ctrlKey && e.key === 'i') {
+                e.preventDefault();
+                insertTag('<em>', '</em>');
+                return;
+            }
+
+            // Ctrl+Shift+P: Toggle Preview
+            if (e.ctrlKey && e.shiftKey && e.key === 'P') {
+                e.preventDefault();
+                setView(v => v === 'split' ? 'editor' : 'split');
+                return;
+            }
+        };
+
+        window.addEventListener('keydown', handleKeyboard);
+        return () => window.removeEventListener('keydown', handleKeyboard);
+    }, [article]);
+
+    // Insert Link
+    const handleInsertLink = () => {
+        if (!linkUrl || !linkText) {
+            alert('الرجاء إدخال الرابط والنص');
+            return;
+        }
+        const linkHtml = `<a href="${linkUrl}" target="_blank" rel="noopener">${linkText}</a>`;
+        const textarea = document.getElementById('main-editor') as HTMLTextAreaElement;
+        if (!textarea) return;
+
+        const start = textarea.selectionStart;
+        const text = textarea.value;
+        const newContent = text.substring(0, start) + linkHtml + text.substring(start);
+        setArticle(prev => ({ ...prev, content: newContent }));
+
+        setShowLinkModal(false);
+        setLinkUrl('');
+        setLinkText('');
+    };
+
+    // Insert Image
+    const handleInsertImage = () => {
+        if (!imageUrl) {
+            alert('الرجاء إدخال رابط الصورة');
+            return;
+        }
+        const imgHtml = `<img src="${imageUrl}" alt="Article Image" class="w-full rounded-2xl my-6" />`;
+        const textarea = document.getElementById('main-editor') as HTMLTextAreaElement;
+        if (!textarea) return;
+
+        const start = textarea.selectionStart;
+        const text = textarea.value;
+        const newContent = text.substring(0, start) + imgHtml + text.substring(start);
+        setArticle(prev => ({ ...prev, content: newContent }));
+
+        setShowImageModal(false);
+        setImageUrl('');
+    };
+
+    // Helper: Insert HTML Tag
+    const insertTag = (openTag: string, closeTag: string) => {
+        const textarea = document.getElementById('main-editor') as HTMLTextAreaElement;
+        if (!textarea) return;
+
+        const start = textarea.selectionStart;
+        const end = textarea.selectionEnd;
+        const text = textarea.value;
+        const selection = text.substring(start, end);
+
+        const newContent = text.substring(0, start) + openTag + selection + closeTag + text.substring(end);
+        setArticle(prev => ({ ...prev, content: newContent }));
+
+        setTimeout(() => {
+            textarea.focus();
+            textarea.setSelectionRange(start + openTag.length, start + openTag.length + selection.length);
+        }, 0);
+    };
 
     // AI Actions
     const handleRefineTone = async () => {
@@ -146,7 +311,31 @@ const WritingWorkspace: React.FC<WritingWorkspaceProps> = ({ article: initialArt
                     </div>
                 </div>
 
+
+
                 <div className="flex items-center gap-4">
+                    {/* Save Status Indicator */}
+                    <div className="flex items-center gap-2 px-4 py-2 bg-slate-950/50 border border-white/5 rounded-xl">
+                        {saveStatus === 'saving' && (
+                            <>
+                                <div className="w-2 h-2 rounded-full bg-yellow-500 animate-pulse" />
+                                <span className="text-xs text-yellow-400 font-black">Saving...</span>
+                            </>
+                        )}
+                        {saveStatus === 'saved' && (
+                            <>
+                                <CheckCircle size={14} className="text-green-500" />
+                                <span className="text-xs text-green-400 font-black">Saved</span>
+                            </>
+                        )}
+                        {saveStatus === 'unsaved' && (
+                            <>
+                                <div className="w-2 h-2 rounded-full bg-slate-500" />
+                                <span className="text-xs text-slate-500 font-black">Unsaved</span>
+                            </>
+                        )}
+                    </div>
+
                     <div className="flex bg-slate-950/50 p-1 rounded-2xl border border-white/5">
                         <button
                             onClick={() => setView('editor')}
@@ -163,7 +352,11 @@ const WritingWorkspace: React.FC<WritingWorkspaceProps> = ({ article: initialArt
                     </div>
 
                     <button
-                        onClick={() => onSave(article)}
+                        onClick={() => {
+                            setSaveStatus('saving');
+                            onSave(article);
+                            setTimeout(() => setSaveStatus('saved'), 500);
+                        }}
                         className="bg-indigo-600 hover:bg-indigo-500 text-white px-8 py-3 rounded-2xl font-black text-xs flex items-center gap-2 shadow-2xl shadow-indigo-600/20 active:scale-95 transition-all"
                     >
                         <Save size={16} /> حفظ التغييرات
@@ -239,26 +432,17 @@ const WritingWorkspace: React.FC<WritingWorkspaceProps> = ({ article: initialArt
                                                 const after = text.substring(end, text.length);
                                                 const selection = text.substring(start, end);
 
-                                                // Intelligent wrapping
                                                 const openTag = tool.tag.split('><')[0] + '>';
                                                 const closeTag = '<' + tool.tag.split('><')[1];
 
-                                                // Special handle for self-closing or complex logic could go here
-                                                // Simple wrap for now
                                                 let insertion = tool.tag;
                                                 if (selection) {
-                                                    // This is a naive split, for V1 it works for simple tags
-                                                    // Better logic:
-                                                    const parts = tool.tag.match(/^<[^>]+>|<\/[^>]+>$/g);
-                                                    // If prompt is just strings like <h2></h2> we can split by >
-                                                    // Actually let's just insert at cursor if empty, or wrap if selected
                                                     insertion = selection ? tool.tag.replace('><', `>${selection}<`) : tool.tag;
                                                 }
 
                                                 const newText = before + insertion + after;
                                                 setArticle({ ...article, content: newText });
 
-                                                // Defer cursor move
                                                 setTimeout(() => {
                                                     textarea.focus();
                                                     textarea.setSelectionRange(start + openTag.length, start + openTag.length + (selection ? selection.length : 0));
@@ -269,6 +453,23 @@ const WritingWorkspace: React.FC<WritingWorkspaceProps> = ({ article: initialArt
                                             {tool.label}
                                         </button>
                                     ))}
+                                    <div className="h-4 w-[1px] bg-white/10 mx-2" />
+                                    {/* Link Button */}
+                                    <button
+                                        onClick={() => setShowLinkModal(true)}
+                                        className="px-3 py-1.5 rounded-lg bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 hover:text-blue-300 text-xs font-bold transition-all border border-blue-500/20"
+                                        title="Insert Link (Ctrl+K)"
+                                    >
+                                        🔗 Link
+                                    </button>
+                                    {/* Image Button */}
+                                    <button
+                                        onClick={() => setShowImageModal(true)}
+                                        className="px-3 py-1.5 rounded-lg bg-purple-500/10 hover:bg-purple-500/20 text-purple-400 hover:text-purple-300 text-xs font-bold transition-all border border-purple-500/20"
+                                        title="Insert Image"
+                                    >
+                                        🖼️ Image
+                                    </button>
                                     <div className="h-4 w-[1px] bg-white/10 mx-2" />
                                     <span className="text-[10px] text-slate-600 font-mono">HTML MODE</span>
                                 </div>
@@ -360,26 +561,69 @@ const WritingWorkspace: React.FC<WritingWorkspaceProps> = ({ article: initialArt
                     </div>
                 </div>
 
-                {/* SEO Realtime Score */}
-                <div className="bg-slate-900/80 border border-white/10 rounded-[2.5rem] p-8 space-y-6">
-                    <div className="flex items-center justify-between">
-                        <div className="text-right">
-                            <h5 className="text-white font-black text-lg">99</h5>
-                            <p className="text-[10px] text-indigo-400 font-black uppercase tracking-widest">Authority Score</p>
+                {/* Real-Time SEO Analyzer */}
+                <div className="bg-slate-900/80 border border-white/10 rounded-[2.5rem] p-6 space-y-4">
+                    <div className="flex items-center justify-between mb-4">
+                        <h5 className="text-white font-black text-sm">محلل SEO المباشر</h5>
+                        <Activity size={16} className="text-indigo-500" />
+                    </div>
+
+                    {/* Metrics Grid */}
+                    <div className="grid grid-cols-2 gap-3">
+                        {/* Word Count */}
+                        <div className="bg-slate-950/50 rounded-xl p-3 border border-white/5">
+                            <p className="text-[9px] text-slate-500 font-black uppercase mb-1">Words</p>
+                            <p className="text-lg font-black text-white">{seoMetrics.wordCount}</p>
+                            <p className="text-[8px] text-slate-600">{seoMetrics.readingTime} min read</p>
                         </div>
-                        <div className="w-16 h-16 rounded-3xl bg-indigo-600/20 flex items-center justify-center border border-indigo-500/20">
-                            <div className="w-10 h-10 rounded-2xl bg-indigo-600 flex items-center justify-center text-white shadow-2xl shadow-indigo-600">
-                                <CheckCircle size={20} />
-                            </div>
+
+                        {/* Readability Score */}
+                        <div className="bg-slate-950/50 rounded-xl p-3 border border-white/5">
+                            <p className="text-[9px] text-slate-500 font-black uppercase mb-1">Readability</p>
+                            <p className={`text-lg font-black ${seoMetrics.readabilityScore > 60 ? 'text-green-400' : 'text-yellow-400'}`}>
+                                {seoMetrics.readabilityScore}%
+                            </p>
+                            <p className="text-[8px] text-slate-600">
+                                {seoMetrics.readabilityScore > 80 ? 'Excellent' : seoMetrics.readabilityScore > 60 ? 'Good' : 'Complex'}
+                            </p>
+                        </div>
+
+                        {/* Keyword Density */}
+                        <div className="bg-slate-950/50 rounded-xl p-3 border border-white/5">
+                            <p className="text-[9px] text-slate-500 font-black uppercase mb-1">Keyword Density</p>
+                            <p className={`text-lg font-black ${seoMetrics.keywordDensity > 1 && seoMetrics.keywordDensity < 3 ? 'text-green-400' : 'text-orange-400'}`}>
+                                {seoMetrics.keywordDensity}%
+                            </p>
+                            <p className="text-[8px] text-slate-600">
+                                {seoMetrics.keywordDensity < 1 ? 'Low' : seoMetrics.keywordDensity > 3 ? 'High' : 'Optimal'}
+                            </p>
+                        </div>
+
+                        {/* Meta Length */}
+                        <div className="bg-slate-950/50 rounded-xl p-3 border border-white/5">
+                            <p className="text-[9px] text-slate-500 font-black uppercase mb-1">Meta Desc</p>
+                            <p className={`text-lg font-black ${seoMetrics.metaLength >= 50 && seoMetrics.metaLength <= 160 ? 'text-green-400' : 'text-yellow-400'}`}>
+                                {seoMetrics.metaLength}
+                            </p>
+                            <p className="text-[8px] text-slate-600">
+                                {seoMetrics.metaLength < 50 ? 'Too short' : seoMetrics.metaLength > 160 ? 'Too long' : 'Perfect'}
+                            </p>
                         </div>
                     </div>
-                    <div className="space-y-3">
-                        <div className="flex items-center justify-between text-[10px] font-black text-slate-500">
-                            <span>Industrial Grade</span>
-                            <span className="text-emerald-500">Ready</span>
+
+                    {/* Structure Check */}
+                    <div className="space-y-2 pt-2 border-t border-white/5">
+                        <div className="flex items-center justify-between text-xs">
+                            <span className="text-slate-500 font-bold">H1 Tag:</span>
+                            <span className={seoMetrics.hasH1 ? 'text-green-400' : 'text-red-400'}>
+                                {seoMetrics.hasH1 ? '✓ Found' : '✗ Missing'}
+                            </span>
                         </div>
-                        <div className="w-full h-1 bg-slate-950 rounded-full overflow-hidden">
-                            <div className="w-full h-full bg-indigo-600" />
+                        <div className="flex items-center justify-between text-xs">
+                            <span className="text-slate-500 font-bold">H2 Tags:</span>
+                            <span className={seoMetrics.h2Count > 0 ? 'text-green-400' : 'text-yellow-400'}>
+                                {seoMetrics.h2Count} found
+                            </span>
                         </div>
                     </div>
                 </div>
@@ -393,6 +637,102 @@ const WritingWorkspace: React.FC<WritingWorkspaceProps> = ({ article: initialArt
                     <div className="w-1.5 h-1.5 rounded-full bg-indigo-500 opacity-20" />
                 </div>
             </div>
+
+            {/* Link Insertion Modal */}
+            {showLinkModal && (
+                <div className="fixed inset-0 z-[2000] bg-black/80 backdrop-blur-sm flex items-center justify-center p-8" onClick={() => setShowLinkModal(false)}>
+                    <motion.div
+                        initial={{ opacity: 0, scale: 0.9 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        className="bg-slate-900 rounded-3xl p-8 max-w-md w-full border border-white/10"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <h3 className="text-white font-black text-xl mb-6 text-right">إدراج رابط</h3>
+                        <div className="space-y-4">
+                            <div>
+                                <label className="text-slate-400 text-sm font-bold block mb-2 text-right">نص الرابط</label>
+                                <input
+                                    type="text"
+                                    value={linkText}
+                                    onChange={(e) => setLinkText(e.target.value)}
+                                    className="w-full bg-slate-950 border border-white/10 rounded-xl p-3 text-white outline-none focus:border-blue-500 transition-all text-right"
+                                    placeholder="اضغط هنا"
+                                    dir="rtl"
+                                />
+                            </div>
+                            <div>
+                                <label className="text-slate-400 text-sm font-bold block mb-2 text-right">عنوان URL</label>
+                                <input
+                                    type="url"
+                                    value={linkUrl}
+                                    onChange={(e) => setLinkUrl(e.target.value)}
+                                    className="w-full bg-slate-950 border border-white/10 rounded-xl p-3 text-white outline-none focus:border-blue-500 transition-all"
+                                    placeholder="https://example.com"
+                                />
+                            </div>
+                            <div className="flex gap-3 pt-4">
+                                <button
+                                    onClick={() => setShowLinkModal(false)}
+                                    className="flex-1 bg-white/5 hover:bg-white/10 text-white rounded-xl py-3 font-bold transition-all"
+                                >
+                                    إلغاء
+                                </button>
+                                <button
+                                    onClick={handleInsertLink}
+                                    className="flex-1 bg-blue-600 hover:bg-blue-500 text-white rounded-xl py-3 font-bold transition-all"
+                                >
+                                    إدراج
+                                </button>
+                            </div>
+                        </div>
+                    </motion.div>
+                </div>
+            )}
+
+            {/* Image Insertion Modal */}
+            {showImageModal && (
+                <div className="fixed inset-0 z-[2000] bg-black/80 backdrop-blur-sm flex items-center justify-center p-8" onClick={() => setShowImageModal(false)}>
+                    <motion.div
+                        initial={{ opacity: 0, scale: 0.9 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        className="bg-slate-900 rounded-3xl p-8 max-w-md w-full border border-white/10"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <h3 className="text-white font-black text-xl mb-6 text-right">إدراج صورة</h3>
+                        <div className="space-y-4">
+                            <div>
+                                <label className="text-slate-400 text-sm font-bold block mb-2 text-right">رابط الصورة (URL)</label>
+                                <input
+                                    type="url"
+                                    value={imageUrl}
+                                    onChange={(e) => setImageUrl(e.target.value)}
+                                    className="w-full bg-slate-950 border border-white/10 rounded-xl p-3 text-white outline-none focus:border-purple-500 transition-all"
+                                    placeholder="https://images.unsplash.com/..."
+                                />
+                            </div>
+                            {imageUrl && (
+                                <div className="aspect-video rounded-xl overflow-hidden border border-white/10">
+                                    <img src={imageUrl} alt="Preview" className="w-full h-full object-cover" onError={(e) => e.currentTarget.src = 'https://via.placeholder.com/400x300?text=Invalid+URL'} />
+                                </div>
+                            )}
+                            <div className="flex gap-3 pt-4">
+                                <button
+                                    onClick={() => setShowImageModal(false)}
+                                    className="flex-1 bg-white/5 hover:bg-white/10 text-white rounded-xl py-3 font-bold transition-all"
+                                >
+                                    إلغاء
+                                </button>
+                                <button
+                                    onClick={handleInsertImage}
+                                    className="flex-1 bg-purple-600 hover:bg-purple-500 text-white rounded-xl py-3 font-bold transition-all"
+                                >
+                                    إدراج
+                                </button>
+                            </div>
+                        </div>
+                    </motion.div>
+                </div>
+            )}
         </div>
     );
 };
