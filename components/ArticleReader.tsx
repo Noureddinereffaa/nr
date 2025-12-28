@@ -34,22 +34,19 @@ const ArticleReader: React.FC<ArticleReaderProps> = ({ article, onClose }) => {
     }, []);
 
     return (
-        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-0 md:p-6 lg:p-12">
-            {/* Backdrop with focal blur */}
+        <div className="fixed inset-0 z-[9999] flex flex-col bg-slate-950">
+            {/* Ambient Background */}
+            <div className="absolute inset-0 z-0 pointer-events-none opacity-40">
+                <div className="absolute top-[-10%] right-[-10%] w-[70%] h-[70%] bg-indigo-600/20 blur-[150px] rounded-full"></div>
+                <div className="absolute bottom-[-10%] left-[-10%] w-[60%] h-[60%] bg-purple-600/20 blur-[180px] rounded-full"></div>
+            </div>
+
+            {/* Reader Container - Full Page Architecture */}
             <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className="absolute inset-0 bg-slate-950/98 backdrop-blur-2xl transition-all"
-                onClick={onClose}
-            />
-
-            {/* Reader Container - Elite Architecture */}
-            <motion.div
-                initial={{ opacity: 0, scale: 0.95, y: 30 }}
-                animate={{ opacity: 1, scale: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 0.95, y: 30 }}
-                className="relative w-full h-full max-w-6xl bg-slate-900 border border-white/10 rounded-none md:rounded-[4rem] overflow-hidden flex flex-col shadow-[0_50px_150px_rgba(0,0,0,0.9)]"
+                className="relative flex-1 flex flex-col overflow-hidden z-10"
             >
                 {/* Progress System */}
                 <div className="absolute top-0 left-0 w-full h-1.5 bg-white/5 z-[100]">

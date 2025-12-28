@@ -33,9 +33,10 @@ const BlogPage: React.FC = () => {
 
     return (
         <Layout>
-            <div className="pt-32 pb-24 min-h-screen relative overflow-hidden bg-slate-950">
+            <div className="pt-32 pb-24 min-h-screen relative overflow-hidden bg-slate-950 animated-bg">
 
                 {/* Cinematic Background Architecture */}
+                <div className="absolute inset-0 z-0 mesh-gradient opacity-30"></div>
                 <div className="absolute inset-0 z-0">
                     <div className="absolute top-[-10%] right-[-10%] w-[70%] h-[70%] bg-indigo-600/10 blur-[150px] rounded-full"></div>
                     <div className="absolute bottom-[-10%] left-[-10%] w-[60%] h-[60%] bg-purple-600/10 blur-[180px] rounded-full"></div>
@@ -209,7 +210,7 @@ const BlogPage: React.FC = () => {
                                             exit={{ opacity: 0, scale: 0.95 }}
                                             transition={{ delay: i * 0.05 }}
                                             onClick={() => setSelectedArticle(article)}
-                                            className="group flex flex-col glass-card rounded-[3.5rem] overflow-hidden hover:border-indigo-500 transition-all duration-700 cursor-pointer shadow-2xl"
+                                            className="group flex flex-col glass-morph rounded-[3.5rem] overflow-hidden hover:border-indigo-500/50 transition-all duration-700 cursor-pointer shadow-2xl premium-border"
                                         >
                                             <div className="aspect-[16/10] overflow-hidden relative">
                                                 <img

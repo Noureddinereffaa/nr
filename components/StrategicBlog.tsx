@@ -9,8 +9,15 @@ const StrategicBlog: React.FC = () => {
     const { articles } = siteData;
     const [selectedArticle, setSelectedArticle] = useState<Article | null>(null);
 
-    // Only show published articles
-    const publishedArticles = articles.filter(a => a.status === 'published').slice(0, 3);
+    // Priority: Featured first, then by date. Only show published.
+    const publishedArticles = [...articles]
+        .filter(a => a.status === 'published')
+        .sort((a, b) => {
+            if (a.featured && !b.featured) return -1;
+            if (!a.featured && b.featured) return 1;
+            return new Date(b.date).getTime() - new Date(a.date).getTime();
+        })
+        .slice(0, 3);
 
     if (publishedArticles.length === 0) return null;
 
@@ -39,8 +46,15 @@ const StrategicBlog: React.FC = () => {
                         <article
                             key={article.id}
                             onClick={() => setSelectedArticle(article)}
-                            className="group relative bg-slate-900/40 border border-white/5 rounded-[var(--border-radius-elite)] overflow-hidden hover:border-[rgba(var(--accent-indigo-rgb),0.3)] transition-all duration-700 hover:-translate-y-2 flex flex-col h-full cursor-pointer"
+                            className="group relative bg-slate-900/40 border border-white/5 rounded-[var(--border-radius-elite)] overflow-hidden hover:border-indigo-500/50 transition-all duration-700 hover:-translate-y-2 flex flex-col h-full cursor-pointer glass-morph"
                         >
+                            {article.featured && (
+                                <div className="absolute top-0 right-0 z-20">
+                                    <div className="bg-indigo-600 text-white px-4 py-1 text-[9px] font-black uppercase tracking-widest rounded-bl-xl shadow-xl">
+                                        Featured
+                                    </div>
+                                </div>
+                            )}
                             {/* Card Image */}
                             <div className="aspect-[16/10] relative overflow-hidden">
                                 <img
