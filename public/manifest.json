@@ -1,0 +1,21 @@
+{
+    "name": "NR-OS Elite Dashboard",
+    "short_name": "NR-OS",
+    "description": "Operating System for Noureddine Reffaa Digital Ecosystem",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#020617",
+    "theme_color": "#6366f1",
+    "icons": [
+        {
+            "src": "/logo192.png",
+            "type": "image/png",
+            "sizes": "192x192"
+        },
+        {
+            "src": "/logo512.png",
+            "type": "image/png",
+            "sizes": "512x512"
+        }
+    ]
+}

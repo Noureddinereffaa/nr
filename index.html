@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <link rel="manifest" href="/manifest.json" />
+    <title>NR-OS | Noureddine Reffaa Operating System</title>
+    <meta name="description"
+        content="NR-OS is an intelligent growth and marketing strategic system that automates content generation and competitive analysis.">
+    <meta name="keywords" content="AI, Marketing, Automation, CRM, Growth Hack, SEO, Content Generation">
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="NR-OS | Noureddine Reffaa Operating System">
+    <meta property="og:description"
+        content="Automate your growth with AI-powered content strategy and competitor intelligence.">
+    <meta property="og:image" content="/og-image.jpg">
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:title" content="NR-OS | Noureddine Reffaa Operating System">
+    <meta property="twitter:description"
+        content="Automate your growth with AI-powered content strategy and competitor intelligence.">
+    <meta property="twitter:image" content="/og-image.jpg">
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/service-worker.js');
+            });
+        }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+</head>
+
+<body class="text-slate-100 bg-grid-pattern">
+    <div id="root"></div>
+    <script type="module" src="./index.tsx"></script>
+</body>
+
+</html>
