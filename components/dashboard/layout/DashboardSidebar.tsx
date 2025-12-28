@@ -1,5 +1,5 @@
 import React from 'react';
-import TabButton from '../TabButton';
+import TabButton from '../shared/TabButton';
 import { useData } from '../../../context/DataContext';
 import { motion } from 'framer-motion';
 import { haptic } from '../../../lib/motion-config';

@@ -9,10 +9,10 @@ class NeuroCore {
     private static async getGeminiResponse(prompt: string, config: AIConfig, isJSON: boolean = false): Promise<string> {
         const key = config.apiKey || import.meta.env.VITE_GEMINI_API_KEY;
         if (!key) throw new Error("مفتاح Gemini API مفقود.");
-        
+
         try {
             const genAI = new GoogleGenerativeAI(key);
-            const model = genAI.getGenerativeModel({ 
+            const model = genAI.getGenerativeModel({
                 model: isJSON ? "gemini-1.5-flash" : "gemini-1.5-pro",
                 generationConfig: { responseMimeType: isJSON ? "application/json" : "text/plain" }
             });
@@ -49,10 +49,10 @@ class NeuroCore {
     /**
      * The Universal Generator - Routes based on request type and config
      */
-    static async generate({ prompt, context, config, type = 'text', jsonMode = false }: { 
-        prompt: string, 
-        context?: string, 
-        config: AIConfig, 
+    static async generate({ prompt, context, config, type = 'text', jsonMode = false }: {
+        prompt: string,
+        context?: string,
+        config: AIConfig,
         type?: 'text' | 'creative' | 'analytical',
         jsonMode?: boolean
     }): Promise<string> {
@@ -93,17 +93,17 @@ const Agents = {
             if (client.notes && client.notes.length > 50) score += 10;
             return Math.min(score, 100);
         },
-        
+
         analyzeCompetitors: async (config: AIConfig): Promise<CompetitorData[]> => {
             const prompt = `Analyze 3 top fictional competitors for a business in niche: "${config.field}".
             Return valid JSON array: [{ "id": "1", "name": "Comp Name", "website": "www...", "domainAuthority": 50, "weakness": "...", "strength": "...", "topKeywords": ["kw1", "kw2"] }]`;
-            
+
             try {
                 const res = await NeuroCore.generate({ prompt, config, type: 'analytical', jsonMode: true });
                 return JSON.parse(res);
             } catch (e) {
                 console.error("Agent Analyst Failed", e);
-                return []; 
+                return [];
             }
         }
     },
@@ -112,7 +112,7 @@ const Agents = {
         generateSocialSchedule: async (config: AIConfig): Promise<SocialPost[]> => {
             const prompt = `Create 5 social media post ideas for a "${config.field}" brand. Mission: "${config.mission}".
             Return valid JSON array of objects with keys: content, platform (linkedin/twitter), scheduledDate (ISO string from tomorrow).`;
-            
+
             try {
                 const res = await NeuroCore.generate({ prompt, config, type: 'analytical', jsonMode: true });
                 const raw = JSON.parse(res);
@@ -147,11 +147,11 @@ const Agents = {
         writeArticle: async (topic: string, config: AIConfig, isDeep: boolean): Promise<Article> => {
             const prompt = `Write a full blog article about "${topic}". target audience: ${config.field}.
             Return JSON: { "title": "...", "content": "HTML content...", "excerpt": "...", "seoScore": 85, "keywords": ["..."] }`;
-            
+
             try {
                 const res = await NeuroCore.generate({ prompt, config, type: 'creative', jsonMode: true }); // Gemini supports JSON schema best
                 const data = JSON.parse(res);
-                
+
                 return {
                     id: crypto.randomUUID(),
                     slug: topic.toLowerCase().replace(/ /g, '-'),
@@ -177,21 +177,53 @@ const Agents = {
                 throw new Error("Failed to generate article");
             }
         },
-        
+
         generatePlatformPosts: async (topic: string, config: AIConfig, platforms: string[]): Promise<SocialPost[]> => {
-           const prompt = `Write adaptation social posts for topic "${topic}" for platforms: ${platforms.join(', ')}.
+            const prompt = `Write adaptation social posts for topic "${topic}" for platforms: ${platforms.join(', ')}.
            Return JSON array [{ "platform": "...", "content": "..." }]`;
-           try {
-               const res = await NeuroCore.generate({ prompt, config, type: 'creative', jsonMode: true });
-               const data = JSON.parse(res);
-               return data.map((d: any, i: number) => ({
-                   id: `auto-${Date.now()}-${i}`,
-                   platform: d.platform,
-                   content: d.content,
-                   scheduledDate: new Date().toISOString(),
-                   status: 'scheduled'
-               }));
-           } catch (e) { return []; }
+            try {
+                const res = await NeuroCore.generate({ prompt, config, type: 'creative', jsonMode: true });
+                const data = JSON.parse(res);
+                return data.map((d: any, i: number) => ({
+                    id: `auto-${Date.now()}-${i}`,
+                    platform: d.platform,
+                    content: d.content,
+                    scheduledDate: new Date().toISOString(),
+                    status: 'scheduled'
+                }));
+            } catch (e) { return []; }
+        }
+    },
+
+    // Legacy agents for backward compatibility
+    ChiefEditor: {
+        draftSection: async (sectionTitle: string, context: string, tone: string, config: AIConfig) => {
+            const prompt = `Tone: ${tone}. Write Section: "${sectionTitle}". Context: "${context.slice(0, 300)}". Output HTML only.`;
+            return NeuroCore.generate({ prompt, config, type: 'creative' });
+        }
+    },
+
+    VisualDirector: {
+        generateHeaderImage: async (topic: string, config: AIConfig) => {
+            // Return Unsplash URL as fallback (original used HuggingFace)
+            return `https://source.unsplash.com/1200x600/?${encodeURIComponent(topic)}`;
+        }
+    },
+
+    SEOAnalyst: {
+        analyze: async (content: string, focusKeyword: string, config: AIConfig) => {
+            const prompt = `Analyze for "${focusKeyword}". Output JSON {score, missingKeywords, suggestedMetaDescription}.`;
+            try {
+                const res = await NeuroCore.generate({ prompt, config, jsonMode: true });
+                return JSON.parse(res);
+            } catch (e) { return { score: 70, missingKeywords: [], suggestedMetaDescription: "Manual review." }; }
+        }
+    },
+
+    SchemaEngineer: {
+        generateFAQSchema: async (content: string, config: AIConfig) => {
+            const prompt = `Create FAQPage JSON-LD from this content: "${content.slice(0, 500)}".`;
+            try { return await NeuroCore.generate({ prompt, config, jsonMode: true }); } catch (e) { return "{}"; }
         }
     }
 };
@@ -219,19 +251,19 @@ export const AIService = {
     },
 
     refineTone: async (text: string, tone: string, config: AIConfig) => {
-        return NeuroCore.generate({ 
-            prompt: `Rewrite to be ${tone}: "${text}"`, 
-            config, 
-            type: 'creative' 
+        return NeuroCore.generate({
+            prompt: `Rewrite to be ${tone}: "${text}"`,
+            config,
+            type: 'creative'
         });
     },
 
     draftSection: async (sectionTitle: string, context: string, config: AIConfig) => {
-        return NeuroCore.generate({ 
-            prompt: `Write 3 paragraphs for section "${sectionTitle}". Return HTML only.`, 
-            context, 
-            config, 
-            type: 'creative' 
+        return NeuroCore.generate({
+            prompt: `Write 3 paragraphs for section "${sectionTitle}". Return HTML only.`,
+            context,
+            config,
+            type: 'creative'
         });
     },
 
@@ -246,7 +278,7 @@ export const AIService = {
             return JSON.parse(res);
         } catch { return ["Add more keywords", "Use H2 tags", "Add internal links"]; }
     },
-    
+
     // Proxies for direct access if needed
     generateWithGemini: (p: string, c: AIConfig) => NeuroCore.generate({ prompt: p, config: c }),
     generateWithHuggingFace: (p: string, c: AIConfig) => NeuroCore.generate({ prompt: p, config: c, type: 'creative' }),

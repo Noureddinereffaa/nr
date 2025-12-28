@@ -688,120 +688,115 @@ const WritingWorkspace: React.FC<WritingWorkspaceProps> = ({ article: initialArt
                         </div>
                     </div>
                 </div>
+            )}
+
+            <div className="p-8 border-t border-white/5 text-center">
+                <p className="text-[9px] text-slate-600 font-black uppercase tracking-[0.4em] mb-4">Masterpiece in Progress</p>
+                <div className="flex gap-2 justify-center">
+                    <div className="w-1.5 h-1.5 rounded-full bg-indigo-500" />
+                    <div className="w-1.5 h-1.5 rounded-full bg-indigo-500 opacity-50" />
+                    <div className="w-1.5 h-1.5 rounded-full bg-indigo-500 opacity-20" />
+                </div>
             </div>
-    )
-}
 
-<div className="p-8 border-t border-white/5 text-center">
-    <p className="text-[9px] text-slate-600 font-black uppercase tracking-[0.4em] mb-4">Masterpiece in Progress</p>
-    <div className="flex gap-2 justify-center">
-        <div className="w-1.5 h-1.5 rounded-full bg-indigo-500" />
-        <div className="w-1.5 h-1.5 rounded-full bg-indigo-500 opacity-50" />
-        <div className="w-1.5 h-1.5 rounded-full bg-indigo-500 opacity-20" />
-    </div>
-</div>
-
-{/* Link Insertion Modal */ }
-{
-    showLinkModal && (
-        <div className="fixed inset-0 z-[2000] bg-black/80 backdrop-blur-sm flex items-center justify-center p-8" onClick={() => setShowLinkModal(false)}>
-            <motion.div
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                className="bg-slate-900 rounded-3xl p-8 max-w-md w-full border border-white/10"
-                onClick={(e) => e.stopPropagation()}
-            >
-                <h3 className="text-white font-black text-xl mb-6 text-right">إدراج رابط</h3>
-                <div className="space-y-4">
-                    <div>
-                        <label className="text-slate-400 text-sm font-bold block mb-2 text-right">نص الرابط</label>
-                        <input
-                            type="text"
-                            value={linkText}
-                            onChange={(e) => setLinkText(e.target.value)}
-                            className="w-full bg-slate-950 border border-white/10 rounded-xl p-3 text-white outline-none focus:border-blue-500 transition-all text-right"
-                            placeholder="اضغط هنا"
-                            dir="rtl"
-                        />
-                    </div>
-                    <div>
-                        <label className="text-slate-400 text-sm font-bold block mb-2 text-right">عنوان URL</label>
-                        <input
-                            type="url"
-                            value={linkUrl}
-                            onChange={(e) => setLinkUrl(e.target.value)}
-                            className="w-full bg-slate-950 border border-white/10 rounded-xl p-3 text-white outline-none focus:border-blue-500 transition-all"
-                            placeholder="https://example.com"
-                        />
-                    </div>
-                    <div className="flex gap-3 pt-4">
-                        <button
-                            onClick={() => setShowLinkModal(false)}
-                            className="flex-1 bg-white/5 hover:bg-white/10 text-white rounded-xl py-3 font-bold transition-all"
-                        >
-                            إلغاء
-                        </button>
-                        <button
-                            onClick={handleInsertLink}
-                            className="flex-1 bg-blue-600 hover:bg-blue-500 text-white rounded-xl py-3 font-bold transition-all"
-                        >
-                            إدراج
-                        </button>
-                    </div>
-                </div>
-            </motion.div>
-        </div>
-    )
-}
-
-{/* Image Insertion Modal */ }
-{
-    showImageModal && (
-        <div className="fixed inset-0 z-[2000] bg-black/80 backdrop-blur-sm flex items-center justify-center p-8" onClick={() => setShowImageModal(false)}>
-            <motion.div
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                className="bg-slate-900 rounded-3xl p-8 max-w-md w-full border border-white/10"
-                onClick={(e) => e.stopPropagation()}
-            >
-                <h3 className="text-white font-black text-xl mb-6 text-right">إدراج صورة</h3>
-                <div className="space-y-4">
-                    <div>
-                        <label className="text-slate-400 text-sm font-bold block mb-2 text-right">رابط الصورة (URL)</label>
-                        <input
-                            type="url"
-                            value={imageUrl}
-                            onChange={(e) => setImageUrl(e.target.value)}
-                            className="w-full bg-slate-950 border border-white/10 rounded-xl p-3 text-white outline-none focus:border-purple-500 transition-all"
-                            placeholder="https://images.unsplash.com/..."
-                        />
-                    </div>
-                    {imageUrl && (
-                        <div className="aspect-video rounded-xl overflow-hidden border border-white/10">
-                            <img src={imageUrl} alt="Preview" className="w-full h-full object-cover" onError={(e) => e.currentTarget.src = 'https://via.placeholder.com/400x300?text=Invalid+URL'} />
+            {/* Link Insertion Modal */}
+            {showLinkModal && (
+                <div className="fixed inset-0 z-[2000] bg-black/80 backdrop-blur-sm flex items-center justify-center p-8" onClick={() => setShowLinkModal(false)}>
+                    <motion.div
+                        initial={{ opacity: 0, scale: 0.9 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        className="bg-slate-900 rounded-3xl p-8 max-w-md w-full border border-white/10"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <h3 className="text-white font-black text-xl mb-6 text-right">إدراج رابط</h3>
+                        <div className="space-y-4">
+                            <div>
+                                <label className="text-slate-400 text-sm font-bold block mb-2 text-right">نص الرابط</label>
+                                <input
+                                    type="text"
+                                    value={linkText}
+                                    onChange={(e) => setLinkText(e.target.value)}
+                                    className="w-full bg-slate-950 border border-white/10 rounded-xl p-3 text-white outline-none focus:border-blue-500 transition-all text-right"
+                                    placeholder="اضغط هنا"
+                                    dir="rtl"
+                                />
+                            </div>
+                            <div>
+                                <label className="text-slate-400 text-sm font-bold block mb-2 text-right">عنوان URL</label>
+                                <input
+                                    type="url"
+                                    value={linkUrl}
+                                    onChange={(e) => setLinkUrl(e.target.value)}
+                                    className="w-full bg-slate-950 border border-white/10 rounded-xl p-3 text-white outline-none focus:border-blue-500 transition-all"
+                                    placeholder="https://example.com"
+                                />
+                            </div>
+                            <div className="flex gap-3 pt-4">
+                                <button
+                                    onClick={() => setShowLinkModal(false)}
+                                    className="flex-1 bg-white/5 hover:bg-white/10 text-white rounded-xl py-3 font-bold transition-all"
+                                >
+                                    إلغاء
+                                </button>
+                                <button
+                                    onClick={handleInsertLink}
+                                    className="flex-1 bg-blue-600 hover:bg-blue-500 text-white rounded-xl py-3 font-bold transition-all"
+                                >
+                                    إدراج
+                                </button>
+                            </div>
                         </div>
-                    )}
-                    <div className="flex gap-3 pt-4">
-                        <button
-                            onClick={() => setShowImageModal(false)}
-                            className="flex-1 bg-white/5 hover:bg-white/10 text-white rounded-xl py-3 font-bold transition-all"
-                        >
-                            إلغاء
-                        </button>
-                        <button
-                            onClick={handleInsertImage}
-                            className="flex-1 bg-purple-600 hover:bg-purple-500 text-white rounded-xl py-3 font-bold transition-all"
-                        >
-                            إدراج
-                        </button>
-                    </div>
+                    </motion.div>
                 </div>
-            </motion.div>
+            )}
+
+            {/* Image Insertion Modal */}
+            {showImageModal && (
+                <div className="fixed inset-0 z-[2000] bg-black/80 backdrop-blur-sm flex items-center justify-center p-8" onClick={() => setShowImageModal(false)}>
+                    <motion.div
+                        initial={{ opacity: 0, scale: 0.9 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        className="bg-slate-900 rounded-3xl p-8 max-w-md w-full border border-white/10"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <h3 className="text-white font-black text-xl mb-6 text-right">إدراج صورة</h3>
+                        <div className="space-y-4">
+                            <div>
+                                <label className="text-slate-400 text-sm font-bold block mb-2 text-right">رابط الصورة (URL)</label>
+                                <input
+                                    type="url"
+                                    value={imageUrl}
+                                    onChange={(e) => setImageUrl(e.target.value)}
+                                    className="w-full bg-slate-950 border border-white/10 rounded-xl p-3 text-white outline-none focus:border-purple-500 transition-all"
+                                    placeholder="https://images.unsplash.com/..."
+                                />
+                            </div>
+                            {imageUrl && (
+                                <div className="aspect-video rounded-xl overflow-hidden border border-white/10">
+                                    <img src={imageUrl} alt="Preview" className="w-full h-full object-cover" onError={(e) => e.currentTarget.src = 'https://via.placeholder.com/400x300?text=Invalid+URL'} />
+                                </div>
+                            )}
+                            <div className="flex gap-3 pt-4">
+                                <button
+                                    onClick={() => setShowImageModal(false)}
+                                    className="flex-1 bg-white/5 hover:bg-white/10 text-white rounded-xl py-3 font-bold transition-all"
+                                >
+                                    إلغاء
+                                </button>
+                                <button
+                                    onClick={handleInsertImage}
+                                    className="flex-1 bg-purple-600 hover:bg-purple-500 text-white rounded-xl py-3 font-bold transition-all"
+                                >
+                                    إدراج
+                                </button>
+                            </div>
+                        </div>
+                    </motion.div>
+                </div>
+            )}
         </div>
-    )
-}
-        </div >
     );
 };
 
 export default WritingWorkspace;
+
