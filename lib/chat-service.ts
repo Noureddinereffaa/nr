@@ -1,6 +1,6 @@
 // Chat Service Types and Utilities
 
-export type ChatState = 'HIDDEN' | 'IDLE' | 'GREETING' | 'COLLECTING_NAME' | 'COLLECTING_PHONE' | 'MENU_SELECTION' | 'LIVE_SUPPORT_QUEUE' | 'ENDED';
+export type ChatState = 'HIDDEN' | 'IDLE' | 'GREETING' | 'COLLECTING_NAME' | 'COLLECTING_PHONE' | 'MENU_SELECTION' | 'LIVE_SUPPORT_QUEUE' | 'ENDED' | 'AI_CHAT_MODE' | 'AI_CHAT_REPLY';
 
 export interface ChatMessage {
     id: string;

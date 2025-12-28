@@ -1,12 +1,13 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { MessageCircle, X, Send, User, ChevronDown, CheckCircle, Sparkles } from 'lucide-react';
+import { MessageCircle, X, Send, User, ChevronDown, CheckCircle, Sparkles, RefreshCw } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { ChatMessage, ChatSession, INITIAL_SESSION, generateId, simulateTyping } from '../lib/chat-service';
 import { useData } from '../context/DataContext';
 import { useUI } from '../context/UIContext';
 import { useAI } from '../context/AIContext';
 
 const SmartChatbot: React.FC = () => {
-    const { addServiceRequest, siteData } = useData();
+    const { addRequest, siteData } = useData();
     const { isChatOpen, toggleChat, openChat } = useUI();
     const { generateText } = useAI();
 
@@ -92,22 +93,25 @@ const SmartChatbot: React.FC = () => {
         // RAG Context Builder
         const buildContext = () => {
             const services = (siteData.services || []).map(s => `- ${s.title}: ${s.description}`).join('\n');
-            const projects = (siteData.projects || []).slice(0, 3).map(p => `- ${p.title} (${p.category})`).join('\n');
+            const projects = (siteData.projects || []).slice(0, 5).map(p => `- ${p.title} (${p.category}): ${p.fullDescription || ''}`).join('\n');
             return `
-            You are "Nova", the AI assistant for Noureddine Reffaa (Digital Architect).
-            My Bio: ${siteData.profile?.bio || 'Expert Dev'}.
-            My Services:
+            أنت "Nova"، المساعد الذكي الفائق لنورالدين رفعة (Arquitecto Digital).
+            شخصيتك: استراتيجي، طموح، محترف جداً، وموجه نحو النتائج.
+            
+            نبذة عن نورالدين: ${siteData.profile?.bio || 'خبير في بناء الأنظمة الرقمية والأتمتة'}.
+            الخدمات المتاحة:
             ${services}
-            Recent Projects:
+            أبرز المشاريع:
             ${projects}
             
-            Mission: ${siteData.aiConfig.mission}
-            Tone: ${siteData.aiConfig.tone}
+            المهمة الحالية: ${siteData.aiConfig.mission}
+            نبرة الصوت: ${siteData.aiConfig.tone} (احترافية عالية، ثقة، سلطة معرفية).
             
-            Rules:
-            - Keep answers short (under 50 words) and friendly.
-            - If user asks for pricing, ask for email/phone.
-            - Speak Arabic naturally.
+            القواعد الذهبية:
+            1. تحدث بالعربية الفصحى المعاصرة الممزوجة بلمسة "ميزان" (احترافية هادئة).
+            2. اجعل الإجابات قصيرة ومركزة ومبنية على القيمة (القيمة فوق الكلام).
+            3. إذا سأل المستخدم عن السعر، اطلب رقم الهاتف أو الواتساب لتقديم عرض مخصص ومدروس.
+            4. لا تقل أبداً "أنا مجرد نموذج لغوي"، تصرف كعضو في فريق نورالدين.
             `;
         };
 
@@ -197,13 +201,14 @@ const SmartChatbot: React.FC = () => {
             case 'HANDLE_PHONE':
                 // Save to CRM
                 const finalUserData = { ...session.userData, phone: userResponse };
-                addServiceRequest({
+                addRequest({
                     serviceTitle: finalUserData.intent || 'طلب من الشات بوت',
                     clientName: finalUserData.name || 'زائر من الشات',
                     clientPhone: userResponse || '',
                     clientEmail: '',
                     projectDetails: `طلب تم إنشاؤه تلقائياً عبر الشات بوت الذكي - ${finalUserData.intent}`,
-                    priority: 'medium'
+                    priority: 'medium',
+                    status: 'new'
                 });
 
                 setIsTyping(false);
@@ -295,32 +300,35 @@ const SmartChatbot: React.FC = () => {
         <div className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-[60] font-sans" style={{ direction: 'rtl' }}>
             {/* Main Chat Window */}
             {session.isOpen && (
-                <div className="mb-4 w-[calc(100vw-32px)] sm:w-[350px] md:w-[380px] h-[450px] sm:h-[500px] bg-slate-900/95 backdrop-blur-xl border border-white/10 rounded-3xl shadow-2xl flex flex-col overflow-hidden animate-fade-up">
+                <motion.div
+                    initial={{ opacity: 0, y: 20, scale: 0.95 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: 20, scale: 0.95 }}
+                    className="mb-4 w-[calc(100vw-32px)] sm:w-[380px] md:w-[420px] h-[550px] sm:h-[600px] glass-morph rounded-[2.5rem] shadow-3xl flex flex-col overflow-hidden"
+                >
                     {/* Header */}
-                    <div className="bg-gradient-to-r from-indigo-900/80 to-purple-900/80 p-3 sm:p-4 flex items-center justify-between border-b border-white/5">
-                        <div className="flex items-center gap-3">
+                    <div className="bg-gradient-to-r from-indigo-600/20 to-purple-600/20 p-5 flex items-center justify-between border-b border-white/10 backdrop-blur-3xl">
+                        <div className="flex items-center gap-4">
                             <div className="relative">
-                                <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-white/10 flex items-center justify-center border border-white/20">
-                                    <Sparkles size={16} className="text-amber-400" />
+                                <div className="w-12 h-12 rounded-2xl bg-indigo-600 flex items-center justify-center shadow-lg shadow-indigo-600/20 border border-white/20">
+                                    <Sparkles size={20} className="text-white animate-pulse" />
                                 </div>
-                                <span className="absolute bottom-0 right-0 w-2.5 h-2.5 sm:w-3 sm:h-3 bg-emerald-500 border-2 border-slate-900 rounded-full"></span>
+                                <span className="absolute -bottom-1 -right-1 w-4 h-4 bg-emerald-500 border-2 border-slate-900 rounded-full"></span>
                             </div>
                             <div>
-                                <h3 className="font-bold text-white text-xs sm:text-sm">المساعد الذكي (Nova)</h3>
-                                <p className="text-[9px] sm:text-[10px] text-indigo-200 flex items-center gap-1">
-                                    <span className="w-1 h-1 bg-emerald-500 rounded-full animate-pulse"></span>
-                                    متصل الآن
+                                <h3 className="font-black text-white text-sm tracking-tight">المساعد الاستراتيجي (Nova)</h3>
+                                <p className="text-[10px] text-indigo-300 font-bold flex items-center gap-1.5">
+                                    <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse"></span>
+                                    AI ACTIVE
                                 </p>
                             </div>
                         </div>
-                        <div className="flex items-center gap-2">
-                            {session.currentState === 'ENDED' && (
-                                <button onClick={resetChat} className="text-indigo-300 hover:text-white text-[10px] font-bold bg-white/5 px-2 py-1 rounded-lg transition-colors">
-                                    محادثة جديدة
-                                </button>
-                            )}
-                            <button onClick={toggleChat} className="text-white/50 hover:text-white transition-colors p-1">
-                                <ChevronDown size={18} />
+                        <div className="flex items-center gap-3">
+                            <button onClick={resetChat} className="p-2 hover:bg-white/5 rounded-xl text-slate-400 hover:text-white transition-all" title="محادثة جديدة">
+                                <RefreshCw size={16} />
+                            </button>
+                            <button onClick={toggleChat} className="p-2 hover:bg-white/5 rounded-xl text-slate-400 hover:text-white transition-all">
+                                <X size={20} />
                             </button>
                         </div>
                     </div>
@@ -391,7 +399,7 @@ const SmartChatbot: React.FC = () => {
                             <Send size={18} className={inputValue.trim() ? '' : 'opacity-50'} />
                         </button>
                     </div>
-                </div>
+                </motion.div>
             )}
 
             {/* FAB Toggle Button */}

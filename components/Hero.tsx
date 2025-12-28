@@ -23,10 +23,11 @@ const Hero: React.FC = () => {
     <section id="hero" className="relative min-h-screen flex items-center pt-32 pb-20 md:py-0 overflow-hidden">
 
       {/* Cinematic Background Architecture */}
-      <div className="absolute inset-0 z-0">
-        <div className="absolute top-[-10%] right-[-10%] w-[70%] h-[70%] bg-indigo-600/10 blur-[150px] rounded-full animate-pulse"></div>
-        <div className="absolute bottom-[-10%] left-[-10%] w-[60%] h-[60%] bg-purple-600/10 blur-[180px] rounded-full"></div>
-        <div className="absolute inset-0 bg-grid-pattern opacity-[0.2]"></div>
+      <div className="absolute inset-0 z-0 overflow-hidden">
+        <div className="absolute top-[-10%] right-[-10%] w-[70%] h-[70%] bg-indigo-600/20 blur-[150px] rounded-full animate-pulse opacity-40"></div>
+        <div className="absolute bottom-[-10%] left-[-10%] w-[60%] h-[60%] bg-purple-600/20 blur-[180px] rounded-full opacity-40"></div>
+        <div className="absolute inset-0 bg-grid-pattern opacity-[0.1]"></div>
+        <div className="absolute inset-0 mesh-gradient opacity-30"></div>
       </div>
 
       <div className="container mx-auto px-6 relative z-10">

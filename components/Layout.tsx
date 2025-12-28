@@ -97,7 +97,9 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   ];
 
   return (
-    <div className="min-h-screen bg-slate-950 selection:bg-indigo-500/30 overflow-x-hidden">
+    <div className="min-h-screen bg-slate-950 selection:bg-indigo-500/30 overflow-x-hidden animated-bg relative">
+      {/* Mesh Gradient Overlays */}
+      <div className="fixed inset-0 pointer-events-none mesh-gradient opacity-60 z-0"></div>
 
       {/* Dynamic Background Noise/Texture */}
       <div className="fixed inset-0 pointer-events-none opacity-[0.03] bg-[url('https://grainy-gradients.vercel.app/noise.svg')] z-0"></div>

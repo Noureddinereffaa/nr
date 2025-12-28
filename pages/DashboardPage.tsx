@@ -60,8 +60,8 @@ const DashboardPage: React.FC = () => {
 
 
   return (
-    <div className="min-h-screen bg-slate-950/60 p-6">
-      <div className="relative w-full max-w-7xl mx-auto bg-slate-950 border border-white/10 rounded-[2rem] shadow-2xl flex flex-col overflow-hidden h-[calc(100vh-3rem)]">
+    <div className="min-h-screen bg-slate-950/40 p-6 mesh-gradient backdrop-blur-3xl">
+      <div className="relative w-full max-w-7xl mx-auto glass-morph border border-white/10 rounded-[3rem] shadow-[0_50px_100px_-20px_rgba(0,0,0,0.5)] flex flex-col overflow-hidden h-[calc(100vh-3rem)] transition-all duration-500">
 
         <DashboardHeader
           onMenuToggle={() => setMobileMenuOpen(!mobileMenuOpen)}

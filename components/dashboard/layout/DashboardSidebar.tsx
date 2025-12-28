@@ -47,9 +47,8 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
             className={`
                 fixed md:relative top-0 bottom-0 right-0
                 z-[1001] md:z-[40] w-72 h-full 
-                bg-slate-900/60 backdrop-blur-3xl 
-                border-l border-white/5 shadow-2xl
-                transition-transform duration-500 ease-[cubic-bezier(0.25,1,0.5,1)] 
+                glass-morph border-l border-white/5 shadow-2xl
+                transition-transform duration-700 ease-[cubic-bezier(0.25,1,0.5,1)] 
                 ${mobileMenuOpen ? 'translate-x-0' : 'translate-x-full md:translate-x-0'}
                 overflow-y-auto p-6 flex flex-col gap-8
             `}
@@ -114,7 +113,7 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
                 </div>
 
                 {/* Section: الذكاء */}
-                <div>
+                <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.3 }}>
                     <h3 className="px-3 mb-3 text-[10px] font-black uppercase tracking-[0.2em] text-slate-500/60 text-right">الذكاء والإنتاج</h3>
                     <div className="space-y-1">
                         {features.aiBrain && (
@@ -143,7 +142,7 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
                             onClick={onTabClick}
                         />
                     </div>
-                </div>
+                </motion.div>
 
                 {/* Section: المالية */}
                 {features.financials && (

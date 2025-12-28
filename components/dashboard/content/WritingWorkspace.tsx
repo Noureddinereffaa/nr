@@ -1,5 +1,4 @@
-
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
     X, Save, Eye, Sparkles, Layout, Type, Target,
     ChevronRight, Zap, RefreshCw, CheckCircle,
@@ -9,6 +8,7 @@ import {
 import { motion, AnimatePresence } from 'framer-motion';
 import { Article, AIConfig } from '../../../types';
 import { AIService, DigitalCouncil } from '../../../lib/ai-service';
+import AIMagicToolbar from './AIMagicToolbar';
 
 interface WritingWorkspaceProps {
     article: Article;
@@ -33,6 +33,10 @@ const WritingWorkspace: React.FC<WritingWorkspaceProps> = ({ article: initialArt
     const [linkText, setLinkText] = useState('');
     const [imageUrl, setImageUrl] = useState('');
     const [focusMode, setFocusMode] = useState(false);
+
+    // AI Magic States
+    const [selection, setSelection] = useState({ text: '', x: 0, y: 0, visible: false });
+    const editorRef = useRef<HTMLTextAreaElement>(null);
 
     // SEO Analysis State
     const [seoMetrics, setSeoMetrics] = useState({
@@ -149,6 +153,70 @@ const WritingWorkspace: React.FC<WritingWorkspaceProps> = ({ article: initialArt
         window.addEventListener('keydown', handleKeyboard);
         return () => window.removeEventListener('keydown', handleKeyboard);
     }, [article, focusMode]);
+
+    // Selection Handling for AI Magic
+    const handleSelection = () => {
+        const textarea = editorRef.current;
+        if (!textarea) return;
+
+        const start = textarea.selectionStart;
+        const end = textarea.selectionEnd;
+        const text = textarea.value.substring(start, end);
+
+        if (text && text.trim().length > 5) {
+            // Estimate position (Simplified for textareas)
+            const rect = textarea.getBoundingClientRect();
+            // This is a rough estimate. For perfect positioning in textareas we'd need a ghost div.
+            // But for now, we'll place it near the cursor/top.
+            setSelection({
+                text: text.trim(),
+                x: rect.left + 50,
+                y: rect.top - 60,
+                visible: true
+            });
+        } else {
+            setSelection(prev => ({ ...prev, visible: false }));
+        }
+    };
+
+    const handleMagicAction = async (action: string) => {
+        if (!selection.text) return;
+        setAiStatus('working');
+        setSelection(prev => ({ ...prev, visible: false }));
+
+        try {
+            let result = '';
+            switch (action) {
+                case 'rewrite':
+                    result = await AIService.refineTone(selection.text, selectedTone, aiConfig);
+                    break;
+                case 'expand':
+                    result = await AIService.draftSection(selection.text, article.content, aiConfig);
+                    break;
+                case 'summarize':
+                    result = await AIService.generateWithGemini(`Summarize this text in 2-3 bullet points: "${selection.text}"`, aiConfig);
+                    break;
+                case 'magic':
+                    result = await AIService.generateWithGemini(`Improve this content for a high-end strategy blog, adding authority and impact: "${selection.text}"`, aiConfig);
+                    break;
+            }
+
+            if (result) {
+                const textarea = editorRef.current;
+                if (textarea) {
+                    const start = textarea.selectionStart;
+                    const end = textarea.selectionEnd;
+                    const text = textarea.value;
+                    const newContent = text.substring(0, start) + result + text.substring(end);
+                    setArticle(prev => ({ ...prev, content: newContent }));
+                }
+            }
+        } catch (e) {
+            console.error("Magic action failed", e);
+        } finally {
+            setAiStatus('idle');
+        }
+    };
 
     // Insert Link
     const handleInsertLink = () => {
@@ -309,6 +377,12 @@ const WritingWorkspace: React.FC<WritingWorkspaceProps> = ({ article: initialArt
 
     return (
         <div className="fixed inset-0 z-[1500] bg-slate-950 flex flex-col overflow-hidden animate-in fade-in duration-500">
+            <AIMagicToolbar
+                x={selection.x}
+                y={selection.y}
+                isVisible={selection.visible}
+                onAction={handleMagicAction}
+            />
             {/* Elite Header */}
             <div className="h-24 border-b border-white/5 bg-slate-900/50 backdrop-blur-3xl px-8 flex items-center justify-between">
                 <div className="flex items-center gap-6">
@@ -422,8 +496,11 @@ const WritingWorkspace: React.FC<WritingWorkspaceProps> = ({ article: initialArt
 
                         {/* Fullscreen Editor */}
                         <textarea
-                            id="main-editor"
+                            ref={editorRef}
+                            id="main-editor-focus"
                             value={article.content}
+                            onMouseUp={handleSelection}
+                            onKeyUp={handleSelection}
                             onChange={(e) => setArticle({ ...article, content: e.target.value })}
                             className="w-full bg-transparent border-none text-2xl text-slate-300 outline-none placeholder:text-slate-900 text-right leading-relaxed resize-none min-h-screen font-serif"
                             placeholder="ابدأ الكتابة..."
@@ -545,8 +622,11 @@ const WritingWorkspace: React.FC<WritingWorkspaceProps> = ({ article: initialArt
 
                                     <div className="space-y-4 min-h-[60vh] relative">
                                         <textarea
+                                            ref={editorRef}
                                             id="main-editor"
                                             value={article.content}
+                                            onMouseUp={handleSelection}
+                                            onKeyUp={handleSelection}
                                             onChange={(e) => setArticle({ ...article, content: e.target.value })}
                                             className="w-full bg-transparent border-none text-xl text-slate-300 outline-none placeholder:text-slate-800 text-right leading-relaxed resize-none min-h-[800px] font-serif"
                                             placeholder="ابدأ الكتابة..."
