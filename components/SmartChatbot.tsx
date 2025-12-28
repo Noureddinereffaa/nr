@@ -90,28 +90,29 @@ const SmartChatbot: React.FC = () => {
 
         let nextState = session.currentState;
 
-        // RAG Context Builder
+        // RAG Context Builder - Enhanced Strategic Authority
         const buildContext = () => {
             const services = (siteData.services || []).map(s => `- ${s.title}: ${s.description}`).join('\n');
             const projects = (siteData.projects || []).slice(0, 5).map(p => `- ${p.title} (${p.category}): ${p.fullDescription || ''}`).join('\n');
             return `
-            أنت "Nova"، المساعد الذكي الفائق لنورالدين رفعة (Arquitecto Digital).
-            شخصيتك: استراتيجي، طموح، محترف جداً، وموجه نحو النتائج.
+            أنت "Nova"، المساعد الذكي الاستراتيجي لنورالدين رفعة (Arquitecto Digital).
+            هويتك: لست مجرد بوت دردشة، بل أنت مبعوث ذكاء اصطناعي سيادي.
             
-            نبذة عن نورالدين: ${siteData.profile?.bio || 'خبير في بناء الأنظمة الرقمية والأتمتة'}.
-            الخدمات المتاحة:
+            سياق العمل:
+            نورالدين رفعة: ${siteData.profile?.bio || 'خبير في بناء الأنظمة الرقمية السيادية والأتمتة الاستراتيجية'}.
+            المنظومة الخدمية:
             ${services}
-            أبرز المشاريع:
+            السجل المهني (مشاريع مختارة):
             ${projects}
             
-            المهمة الحالية: ${siteData.aiConfig.mission}
-            نبرة الصوت: ${siteData.aiConfig.tone} (احترافية عالية، ثقة، سلطة معرفية).
+            المهمة الاستراتيجية: ${siteData.aiConfig.mission}
+            نبرة الصوت المعتمدة: ${siteData.aiConfig.tone} (هيبة معرفية، ثقة مطلقة، لغة عربية فصحى معاصرة بليغة).
             
-            القواعد الذهبية:
-            1. تحدث بالعربية الفصحى المعاصرة الممزوجة بلمسة "ميزان" (احترافية هادئة).
-            2. اجعل الإجابات قصيرة ومركزة ومبنية على القيمة (القيمة فوق الكلام).
-            3. إذا سأل المستخدم عن السعر، اطلب رقم الهاتف أو الواتساب لتقديم عرض مخصص ومدروس.
-            4. لا تقل أبداً "أنا مجرد نموذج لغوي"، تصرف كعضو في فريق نورالدين.
+            التوجيهات العملياتية:
+            1. السلطة المعرفية: أجب على الأسئلة التقنية والاستراتيجية بدقة عالية تظهر الخبرة.
+            2. محرك التحويل: إذا سأل المستخدم سؤالاً يدل على اهتمام جدي أو احتياج عملي، اقترح عليه الانتقال للتواصل المباشر مع نورالدين عبر الواتساب أو حجز استشارة، لأن "الحلول السيادية تتطلب تفصيلاً دقيقاً لا يغطيه النص فقط".
+            3. التسعير: لا تعطِ أرقاماً نهائية. أخبرهم أن "المشاريع الاستراتيجية لها ميزانيات مخصصة تعتمد على النطاق والأثر"، واطلب بياناتهم لتقديم عرض مالي يليق بطموحاتهم.
+            4. الموقف: لست "نموذج لغوي"، أنت ممثل نورالدين رفعة.
             `;
         };
 
@@ -304,22 +305,23 @@ const SmartChatbot: React.FC = () => {
                     initial={{ opacity: 0, y: 20, scale: 0.95 }}
                     animate={{ opacity: 1, y: 0, scale: 1 }}
                     exit={{ opacity: 0, y: 20, scale: 0.95 }}
-                    className="mb-4 w-[calc(100vw-32px)] sm:w-[380px] md:w-[420px] h-[550px] sm:h-[600px] glass-morph rounded-[2.5rem] shadow-3xl flex flex-col overflow-hidden"
+                    className="mb-4 w-[calc(100vw-32px)] sm:w-[380px] md:w-[420px] h-[550px] sm:h-[650px] glass-morph rounded-[3rem] shadow-[0_40px_100px_rgba(0,0,0,0.6)] flex flex-col overflow-hidden border border-white/10"
                 >
-                    {/* Header */}
-                    <div className="bg-gradient-to-r from-indigo-600/20 to-purple-600/20 p-5 flex items-center justify-between border-b border-white/10 backdrop-blur-3xl">
-                        <div className="flex items-center gap-4">
+                    {/* Header - Deep Intelligence Style */}
+                    <div className="bg-slate-950 p-6 flex items-center justify-between border-b border-white/10 relative overflow-hidden">
+                        <div className="absolute inset-0 mesh-gradient opacity-20 pointer-events-none"></div>
+                        <div className="flex items-center gap-5 relative z-10">
                             <div className="relative">
-                                <div className="w-12 h-12 rounded-2xl bg-indigo-600 flex items-center justify-center shadow-lg shadow-indigo-600/20 border border-white/20">
-                                    <Sparkles size={20} className="text-white animate-pulse" />
+                                <div className="w-14 h-14 rounded-2xl bg-indigo-600 flex items-center justify-center shadow-[0_0_20px_rgba(79,70,229,0.4)] border border-white/20">
+                                    <Sparkles size={24} className="text-white animate-pulse" />
                                 </div>
-                                <span className="absolute -bottom-1 -right-1 w-4 h-4 bg-emerald-500 border-2 border-slate-900 rounded-full"></span>
+                                <span className="absolute -bottom-1 -right-1 w-4 h-4 bg-emerald-500 border-2 border-slate-950 rounded-full shadow-glow-emerald"></span>
                             </div>
                             <div>
-                                <h3 className="font-black text-white text-sm tracking-tight">المساعد الاستراتيجي (Nova)</h3>
-                                <p className="text-[10px] text-indigo-300 font-bold flex items-center gap-1.5">
+                                <h3 className="font-black text-white text-base tracking-tight">Nova Intelligence</h3>
+                                <p className="text-[10px] text-indigo-400 font-black flex items-center gap-2 mt-0.5">
                                     <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse"></span>
-                                    AI ACTIVE
+                                    Sovereign AI Active
                                 </p>
                             </div>
                         </div>
@@ -337,13 +339,13 @@ const SmartChatbot: React.FC = () => {
                     <div className="flex-1 overflow-y-auto p-4 space-y-4 custom-scrollbar bg-slate-950/30">
                         {session.messages.map((msg) => (
                             <div key={msg.id} className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
-                                <div className={`max-w-[80%] rounded-2xl p-3 text-sm leading-relaxed ${msg.sender === 'user'
-                                    ? 'bg-indigo-600 text-white rounded-br-none'
-                                    : 'bg-slate-800/80 border border-white/5 text-slate-200 rounded-bl-none shadow-lg'
+                                <div className={`max-w-[85%] rounded-[1.5rem] p-4 text-sm leading-relaxed font-medium ${msg.sender === 'user'
+                                    ? 'bg-indigo-600 text-white rounded-br-none shadow-xl'
+                                    : 'bg-slate-900 border border-white/10 text-slate-200 rounded-bl-none shadow-2xl backdrop-blur-xl'
                                     }`}>
                                     {msg.text}
                                     {msg.timestamp && (
-                                        <p className={`text-[9px] mt-1 ${msg.sender === 'user' ? 'text-indigo-200' : 'text-slate-500'}`}>
+                                        <p className={`text-[9px] mt-2 font-black ${msg.sender === 'user' ? 'text-indigo-200' : 'text-slate-500'}`}>
                                             {msg.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                         </p>
                                     )}

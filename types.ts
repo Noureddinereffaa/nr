@@ -189,6 +189,8 @@ export interface AIConfig {
   huggingFaceKey?: string; // Primary Sovereign Key
   anthropicKey?: string;
   preferredProvider?: 'gemini' | 'openai' | 'anthropic' | 'huggingface';
+  huggingFaceModel?: string;
+  enabledAgents?: string[]; // IDs of active Council members
 }
 
 export interface Article {

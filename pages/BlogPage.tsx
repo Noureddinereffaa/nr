@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import Layout from '../components/Layout';
 import { useData } from '../context/DataContext';
-import { Calendar, Clock, ArrowRight, Search, Sparkles, TrendingUp, Filter, Share2, Newspaper, Zap } from 'lucide-react';
+import { Calendar, Clock, ArrowRight, Search, Sparkles, TrendingUp, Filter, Share2, Newspaper, Zap, Bookmark } from 'lucide-react';
 import ArticleReader from '../components/ArticleReader';
 import { Article } from '../types';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -35,12 +35,13 @@ const BlogPage: React.FC = () => {
         <Layout>
             <div className="pt-32 pb-24 min-h-screen relative overflow-hidden bg-slate-950 animated-bg">
 
-                {/* Cinematic Background Architecture */}
-                <div className="absolute inset-0 z-0 mesh-gradient opacity-30"></div>
+                {/* Cinematic Background Architecture - Enhanced Depth */}
+                <div className="absolute inset-0 z-0 mesh-gradient opacity-40"></div>
                 <div className="absolute inset-0 z-0">
-                    <div className="absolute top-[-10%] right-[-10%] w-[70%] h-[70%] bg-indigo-600/10 blur-[150px] rounded-full"></div>
-                    <div className="absolute bottom-[-10%] left-[-10%] w-[60%] h-[60%] bg-purple-600/10 blur-[180px] rounded-full"></div>
-                    <div className="absolute inset-0 bg-grid-pattern opacity-[0.1]"></div>
+                    <div className="absolute top-[-20%] right-[-10%] w-[100%] h-[100%] bg-indigo-600/20 blur-[180px] rounded-full animate-pulse-slow"></div>
+                    <div className="absolute bottom-[-20%] left-[-10%] w-[100%] h-[100%] bg-purple-900/20 blur-[200px] rounded-full animate-pulse-slow" style={{ animationDelay: '2s' }}></div>
+                    <div className="absolute inset-0 bg-grid-pattern opacity-[0.05]"></div>
+                    <div className="absolute inset-0 bg-gradient-to-b from-transparent via-slate-950/80 to-slate-950"></div>
                 </div>
 
                 <div className="container mx-auto px-6 relative z-10">
@@ -60,15 +61,15 @@ const BlogPage: React.FC = () => {
                                 initial={{ opacity: 0, y: 30 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ delay: 0.1 }}
-                                className="text-6xl md:text-9xl font-black text-white mb-8 tracking-tighter leading-none"
+                                className="text-7xl md:text-[12rem] font-black text-white mb-8 tracking-tighter leading-[0.85] uppercase"
                             >
-                                مركز <span className="gradient-text">المعرفة</span>
+                                مركز <span className="gradient-text drop-shadow-[0_10px_40px_rgba(79,70,229,0.4)]">المعرفة</span>
                             </motion.h1>
                             <motion.p
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ delay: 0.2 }}
-                                className="text-xl md:text-3xl text-slate-400 font-medium leading-relaxed max-w-3xl"
+                                className="text-2xl md:text-4xl text-slate-300 font-medium leading-relaxed max-w-4xl border-r-8 border-indigo-600 pr-8"
                             >
                                 تحليلات استراتيجية ورؤى هندسية لصناعة الفارق في الاقتصاد الرقمي الحديث.
                             </motion.p>
@@ -138,7 +139,7 @@ const BlogPage: React.FC = () => {
                                 initial={{ opacity: 0, x: -20 }}
                                 whileInView={{ opacity: 1, x: 0 }}
                                 viewport={{ once: true }}
-                                className="glass-card p-10 rounded-[3rem] sticky top-32"
+                                className="glass-card p-10 rounded-[3.5rem] sticky top-32 border border-white/5 bg-slate-900/40 backdrop-blur-2xl"
                             >
                                 <h3 className="text-2xl font-black text-white mb-10 flex items-center justify-end gap-4" dir="rtl">
                                     الأكثر تأثيراً
@@ -230,8 +231,8 @@ const BlogPage: React.FC = () => {
                                                 )}
                                             </div>
 
-                                            <div className="p-10 text-right flex-1 flex flex-col" dir="rtl">
-                                                <div className="flex items-center gap-6 text-slate-500 text-[10px] font-black uppercase tracking-widest mb-6">
+                                            <div className="p-10 text-right flex-1 flex flex-col bg-slate-900/60" dir="rtl">
+                                                <div className="flex items-center gap-6 text-indigo-400/80 text-[10px] font-black uppercase tracking-widest mb-6">
                                                     <span className="flex items-center gap-2"><Calendar size={14} className="text-indigo-500" /> {new Date(article.date).toLocaleDateString('ar-EG')}</span>
                                                     <span className="flex items-center gap-2"><Clock size={14} className="text-indigo-500" /> {article.readTime}</span>
                                                 </div>
@@ -240,13 +241,16 @@ const BlogPage: React.FC = () => {
                                                     {article.title}
                                                 </h3>
 
-                                                <p className="text-slate-400 text-lg line-clamp-3 mb-10 flex-1 leading-relaxed font-medium">
+                                                <p className="text-slate-300 text-lg line-clamp-3 mb-10 flex-1 leading-relaxed font-medium opacity-80">
                                                     {article.excerpt}
                                                 </p>
 
                                                 <div className="flex items-center justify-between mt-auto pt-8 border-t border-white/5">
-                                                    <Share2 size={20} className="text-slate-500 hover:text-white transition-colors cursor-pointer" />
-                                                    <span className="flex items-center gap-4 text-white font-black text-sm group-hover:text-indigo-400 transition-all">
+                                                    <div className="flex gap-4">
+                                                        <Share2 size={20} className="text-slate-500 hover:text-indigo-400 transition-colors cursor-pointer" />
+                                                        <Bookmark size={20} className="text-slate-500 hover:text-indigo-400 transition-colors cursor-pointer" />
+                                                    </div>
+                                                    <span className="flex items-center gap-4 text-indigo-500 font-black text-sm group-hover:text-white transition-all">
                                                         استكشاف التحليل
                                                         <ArrowRight size={20} className="rotate-180 group-hover:translate-x-[-6px] transition-transform" />
                                                     </span>

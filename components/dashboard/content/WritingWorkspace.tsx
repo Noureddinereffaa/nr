@@ -9,6 +9,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Article, AIConfig } from '../../../types';
 import { AIService, DigitalCouncil } from '../../../lib/ai-service';
 import AIMagicToolbar from './AIMagicToolbar';
+import { SOVEREIGN_TEMPLATES, ArticleTemplate } from '../../../lib/article-templates';
 
 interface WritingWorkspaceProps {
     article: Article;
@@ -33,6 +34,7 @@ const WritingWorkspace: React.FC<WritingWorkspaceProps> = ({ article: initialArt
     const [linkText, setLinkText] = useState('');
     const [imageUrl, setImageUrl] = useState('');
     const [focusMode, setFocusMode] = useState(false);
+    const [showTemplateModal, setShowTemplateModal] = useState(false);
 
     // AI Magic States
     const [selection, setSelection] = useState({ text: '', x: 0, y: 0, visible: false });
@@ -257,6 +259,19 @@ const WritingWorkspace: React.FC<WritingWorkspaceProps> = ({ article: initialArt
         setImageUrl('');
     };
 
+    const handleApplyTemplate = (template: ArticleTemplate) => {
+        // Confirm if content exists
+        if (article.content.trim().length > 50) {
+            if (!confirm('سيؤدي تطبيق القالب إلى حذف المحتوى الحالي. هل أنت متأكد؟')) return;
+        }
+
+        setArticle(prev => ({
+            ...prev,
+            content: template.structure.trim()
+        }));
+        setShowTemplateModal(false);
+    };
+
     // Helper: Insert HTML Tag
     const insertTag = (openTag: string, closeTag: string) => {
         const textarea = document.getElementById('main-editor') as HTMLTextAreaElement;
@@ -441,6 +456,13 @@ const WritingWorkspace: React.FC<WritingWorkspaceProps> = ({ article: initialArt
                             <Eye size={14} /> المعاينة
                         </button>
                     </div>
+
+                    <button
+                        onClick={() => setShowTemplateModal(true)}
+                        className="bg-indigo-600/10 hover:bg-indigo-600/20 text-indigo-400 px-6 py-3 rounded-2xl font-black text-xs flex items-center gap-2 border border-indigo-500/20 transition-all"
+                    >
+                        <Layout size={16} /> القوالب السيادية
+                    </button>
 
                     {/* Focus Mode Button */}
                     <button
@@ -879,6 +901,55 @@ const WritingWorkspace: React.FC<WritingWorkspaceProps> = ({ article: initialArt
                                     إدراج
                                 </button>
                             </div>
+                        </div>
+                    </motion.div>
+                </div>
+            )}
+
+            {/* Template Selection Modal */}
+            {showTemplateModal && (
+                <div className="fixed inset-0 z-[2000] bg-black/85 backdrop-blur-xl flex items-center justify-center p-8" onClick={() => setShowTemplateModal(false)}>
+                    <motion.div
+                        initial={{ opacity: 0, y: 30 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="bg-slate-900 rounded-[3rem] p-10 max-w-5xl w-full border border-white/10 shadow-[0_50px_100px_rgba(0,0,0,0.8)] relative overflow-hidden"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <div className="absolute inset-0 mesh-gradient opacity-10 pointer-events-none"></div>
+
+                        <div className="flex items-center justify-between mb-12 relative z-10">
+                            <button onClick={() => setShowTemplateModal(false)} className="w-12 h-12 rounded-xl bg-white/5 hover:bg-white/10 text-slate-400 flex items-center justify-center transition-all">
+                                <X size={24} />
+                            </button>
+                            <div className="text-right">
+                                <h3 className="text-white font-black text-3xl mb-2">القوالب السيادية</h3>
+                                <p className="text-slate-400 text-sm font-medium">اختر هيكلية استراتيجية لبناء مقالك القادم بأعلى معايير النخبة.</p>
+                            </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 relative z-10">
+                            {SOVEREIGN_TEMPLATES.map((template) => (
+                                <div
+                                    key={template.id}
+                                    onClick={() => handleApplyTemplate(template)}
+                                    className="group cursor-pointer bg-slate-950/50 border border-white/5 rounded-[2.5rem] p-8 hover:border-indigo-500/50 hover:bg-indigo-600/5 transition-all duration-500 flex flex-col items-end text-right"
+                                >
+                                    <div className="w-16 h-16 rounded-2xl bg-indigo-600/10 flex items-center justify-center text-indigo-500 mb-8 group-hover:scale-110 group-hover:bg-indigo-600 group-hover:text-white transition-all shadow-xl">
+                                        {template.id === 'case-study' && <Target size={32} />}
+                                        {template.id === 'technical-breakdown' && <Code2 size={32} />}
+                                        {template.id === 'strategic-insight' && <Sparkles size={32} />}
+                                    </div>
+                                    <h4 className="text-xl font-black text-white mb-4 group-hover:text-indigo-400 transition-colors">{template.title}</h4>
+                                    <p className="text-slate-400 text-sm leading-relaxed mb-8 flex-1">{template.description}</p>
+                                    <button className="w-full py-4 bg-white/5 group-hover:bg-indigo-600 text-slate-400 group-hover:text-white rounded-2xl font-black text-xs uppercase tracking-widest transition-all">
+                                        تطبيق القالب الهيكلي
+                                    </button>
+                                </div>
+                            ))}
+                        </div>
+
+                        <div className="mt-12 pt-8 border-t border-white/5 text-center relative z-10">
+                            <p className="text-[10px] text-slate-600 font-black uppercase tracking-[0.3em]">Advanced Structural Architecture</p>
                         </div>
                     </motion.div>
                 </div>

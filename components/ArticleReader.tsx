@@ -35,10 +35,12 @@ const ArticleReader: React.FC<ArticleReaderProps> = ({ article, onClose }) => {
 
     return (
         <div className="fixed inset-0 z-[20000] flex flex-col bg-slate-950">
-            {/* Ambient Background */}
-            <div className="absolute inset-0 z-0 pointer-events-none opacity-40">
-                <div className="absolute top-[-10%] right-[-10%] w-[70%] h-[70%] bg-indigo-600/20 blur-[150px] rounded-full"></div>
-                <div className="absolute bottom-[-10%] left-[-10%] w-[60%] h-[60%] bg-purple-600/20 blur-[180px] rounded-full"></div>
+            {/* Ambient Background - Deep Intelligence Layering */}
+            <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
+                <div className="absolute top-[-20%] right-[-10%] w-[100%] h-[100%] bg-indigo-900/20 blur-[180px] rounded-full animate-pulse-slow"></div>
+                <div className="absolute bottom-[-20%] left-[-10%] w-[100%] h-[100%] bg-purple-950/20 blur-[200px] rounded-full animate-pulse-slow" style={{ animationDelay: '3s' }}></div>
+                <div className="absolute inset-0 bg-grid-pattern opacity-[0.03]"></div>
+                <div className="absolute inset-0 bg-slate-950/40 backdrop-blur-3xl"></div>
             </div>
 
             {/* Reader Container - Full Page Architecture */}
@@ -89,32 +91,33 @@ const ArticleReader: React.FC<ArticleReaderProps> = ({ article, onClose }) => {
                 {/* Cinematic Scroll Content */}
                 <div
                     id="reader-content"
-                    className="flex-1 overflow-y-auto overflow-x-hidden scroll-smooth custom-scrollbar bg-slate-900"
+                    className="flex-1 overflow-y-auto overflow-x-hidden scroll-smooth custom-scrollbar bg-slate-950"
                 >
                     {/* Immersive Cover Image */}
-                    <div className="relative w-full h-[50vh] md:h-[75vh]">
+                    <div className="relative w-full h-[60vh] md:h-[85vh]">
                         <img
                             src={article.image}
                             alt={article.title}
-                            className="w-full h-full object-cover grayscale-[20%]"
+                            className="w-full h-full object-cover grayscale-[30%] scale-105"
                         />
-                        <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/40 to-transparent"></div>
+                        <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/40 to-transparent"></div>
+                        <div className="absolute inset-0 bg-gradient-to-b from-slate-950/60 to-transparent"></div>
 
-                        <div className="absolute inset-0 flex flex-col items-center justify-end pb-12 md:pb-24 px-6 md:px-10 max-w-5xl mx-auto text-center">
+                        <div className="absolute inset-0 flex flex-col items-center justify-end pb-12 md:pb-32 px-6 md:px-10 max-w-6xl mx-auto text-center">
                             <motion.div
-                                initial={{ opacity: 0, y: 20 }}
-                                animate={{ opacity: 1, y: 0 }}
+                                initial={{ opacity: 0, scale: 0.9 }}
+                                animate={{ opacity: 1, scale: 1 }}
                                 transition={{ delay: 0.3 }}
-                                className="inline-flex items-center gap-3 px-4 py-2 rounded-full bg-indigo-600 text-white text-[9px] md:text-[11px] font-black uppercase tracking-[0.3em] mb-6 md:mb-10 shadow-3xl"
+                                className="inline-flex items-center gap-4 px-6 py-2.5 rounded-full bg-indigo-600 text-white text-[10px] md:text-xs font-black uppercase tracking-[0.4em] mb-8 md:mb-12 shadow-[0_0_40px_rgba(79,70,229,0.5)] border border-white/20"
                             >
-                                <Shield size={14} />
-                                Strategic Insight Lab
+                                <Shield size={16} />
+                                Intelligence Sovereign Access
                             </motion.div>
                             <motion.h1
                                 initial={{ opacity: 0, y: 30 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ delay: 0.4 }}
-                                className="text-3xl sm:text-4xl md:text-7xl lg:text-8xl font-black text-white leading-tight md:leading-[1] mb-8 md:mb-12 tracking-tighter drop-shadow-3xl"
+                                className="text-4xl sm:text-5xl md:text-8xl lg:text-[10rem] font-black text-white leading-[0.9] mb-10 md:mb-16 tracking-tighter drop-shadow-[0_20px_60px_rgba(0,0,0,0.8)]"
                             >
                                 {article.title}
                             </motion.h1>
@@ -123,19 +126,19 @@ const ArticleReader: React.FC<ArticleReaderProps> = ({ article, onClose }) => {
                                 initial={{ opacity: 0 }}
                                 animate={{ opacity: 1 }}
                                 transition={{ delay: 0.5 }}
-                                className="flex flex-wrap items-center justify-center gap-6 md:gap-10 text-white font-black text-xs md:text-sm border-t border-white/10 pt-8 md:pt-10"
+                                className="flex flex-wrap items-center justify-center gap-8 md:gap-14 text-slate-300 font-black text-xs md:text-sm border-t border-white/10 pt-10 md:pt-14 w-full"
                             >
-                                <div className="flex items-center gap-2 md:gap-3 text-indigo-400">
-                                    <Calendar size={16} />
+                                <div className="flex items-center gap-3 text-indigo-400">
+                                    <Calendar size={18} />
                                     {new Date(article.date).toLocaleDateString('ar-EG')}
                                 </div>
-                                <div className="flex items-center gap-2 md:gap-3 text-indigo-400">
-                                    <Clock size={16} />
+                                <div className="flex items-center gap-3 text-indigo-400">
+                                    <Clock size={18} />
                                     {article.readTime}
                                 </div>
-                                <div className="hidden sm:flex items-center gap-2 md:gap-3 text-indigo-400">
-                                    <Zap size={16} />
-                                    بواسطة الذكاء الاصطناعي
+                                <div className="flex items-center gap-3 text-emerald-400">
+                                    <Zap size={18} />
+                                    محتوى سيادي معزز
                                 </div>
                             </motion.div>
                         </div>
@@ -251,15 +254,19 @@ const ArticleReader: React.FC<ArticleReaderProps> = ({ article, onClose }) => {
           background: rgba(79, 70, 229, 0.8);
         }
         
-        :global(.prose h1) { font-size: 5rem; font-weight: 900; margin-bottom: 3rem; color: #fff; line-height: 1; tracking-tighter; }
-        :global(.prose h2) { font-size: 3.5rem; font-weight: 900; margin-top: 6rem; margin-bottom: 2rem; color: #fff; tracking-tight; line-height: 1.1; }
-        :global(.prose h3) { font-size: 2.25rem; font-weight: 900; margin-top: 4rem; margin-bottom: 1.5rem; color: #fff; }
-        :global(.prose p) { font-size: 1.5rem; line-height: 2.2; margin-bottom: 3rem; color: #cbd5e1; font-weight: 500; }
-        :global(.prose ul) { margin-bottom: 3rem; list-style-type: none; padding-right: 2rem; }
-        :global(.prose li) { font-size: 1.4rem; color: #94a3b8; margin-bottom: 1.5rem; position: relative; font-weight: 600; line-height: 1.8; }
-        :global(.prose li::before) { content: ""; position: absolute; right: -2rem; top: 1rem; width: 10px; height: 10px; background: #6366f1; border-radius: 4px; rotate: 45deg; box-shadow: 0 0 15px #6366f1; }
-        :global(.prose blockquote) { margin: 6rem 0; padding: 4rem; background: rgba(79, 70, 229, 0.05); border-right: 8px solid #6366f1; border-radius: 3rem; font-style: normal; font-size: 2rem; color: #fff; line-height: 1.8; font-weight: 900; }
-        :global(.prose strong) { color: #818cf8; font-weight: 900; }
+        :global(.prose h1) { font-size: clamp(3rem, 10vw, 7rem); font-weight: 950; margin-bottom: 4rem; color: #fff; line-height: 0.95; tracking-tighter; letter-spacing: -0.05em; text-transform: uppercase; border-right: 12px solid #6366f1; padding-right: 2rem; }
+        :global(.prose h2) { font-size: clamp(2.5rem, 8vw, 4.5rem); font-weight: 900; margin-top: 8rem; margin-bottom: 2.5rem; color: #fff; tracking-tight; line-height: 1.05; letter-spacing: -0.03em; border-right: 8px solid rgba(99, 102, 241, 0.3); padding-right: 1.5rem; }
+        :global(.prose h3) { font-size: clamp(2rem, 5vw, 3rem); font-weight: 900; margin-top: 5rem; margin-bottom: 2rem; color: #fff; letter-spacing: -0.02em; }
+        :global(.prose p) { font-size: clamp(1.25rem, 3vw, 1.75rem); line-height: 2.3; margin-bottom: 3.5rem; color: #cbd5e1; font-weight: 500; text-align: justify; text-justify: inter-word; }
+        :global(.prose ul) { margin-bottom: 4rem; list-style-type: none; padding-right: 0; }
+        :global(.prose li) { font-size: clamp(1.15rem, 2.5vw, 1.6rem); color: #e2e8f0; margin-bottom: 2rem; position: relative; font-weight: 600; line-height: 2; padding-right: 3rem; }
+        :global(.prose li::before) { content: "›"; position: absolute; right: 0; top: 0; font-size: 2.5rem; color: #6366f1; font-weight: 900; filter: drop-shadow(0 0 8px #6366f1); }
+        :global(.prose blockquote) { margin: 8rem 0; padding: 5rem; background: linear-gradient(135deg, rgba(79, 70, 229, 0.1), rgba(168, 85, 247, 0.05)); border-right: 12px solid #6366f1; border-radius: 4rem; font-style: italic; font-size: clamp(1.5rem, 4vw, 2.5rem); color: #fff; line-height: 1.7; font-weight: 950; position: relative; overflow: hidden; }
+        :global(.prose blockquote::after) { content: '"'; position: absolute; top: -2rem; left: 2rem; font-size: 15rem; color: rgba(255,255,255,0.03); font-family: serif; }
+        :global(.prose strong) { color: #818cf8; font-weight: 950; text-shadow: 0 0 20px rgba(129, 140, 248, 0.3); }
+        :global(.prose a) { color: #6366f1; text-decoration: none; border-bottom: 2px solid rgba(99, 102, 241, 0.3); transition: all 0.3s; font-weight: 800; }
+        :global(.prose a:hover) { border-bottom-color: #6366f1; background: rgba(99, 102, 241, 0.05); }
+        :global(.prose img) { border-radius: 3rem; margin: 6rem 0; border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 30px 100px rgba(0,0,0,0.5); }
         
         @media (max-width: 768px) {
           :global(.prose h1) { font-size: 2.75rem; }

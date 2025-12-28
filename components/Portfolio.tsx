@@ -58,8 +58,8 @@ const ProjectDetail: React.FC<{ project: any; onClose: () => void }> = ({ projec
               transition={{ delay: 0.4 }}
               className="flex flex-wrap justify-end gap-8 text-slate-300 border-r-4 border-indigo-600 pr-6"
             >
-              <div className="flex items-center gap-3 text-sm font-black uppercase tracking-widest"><Calendar size={18} className="text-indigo-400" /> {project.date}</div>
-              <div className="flex items-center gap-3 text-sm font-black uppercase tracking-widest"><User size={18} className="text-indigo-400" /> {project.client}</div>
+              <div className="flex items-center gap-3 text-sm font-black uppercase tracking-widest"><Calendar size={18} className="text-indigo-400" /> {project.date || '2024'}</div>
+              <div className="flex items-center gap-3 text-sm font-black uppercase tracking-widest"><User size={18} className="text-indigo-400" /> {project.client || 'N/A'}</div>
             </motion.div>
           </div>
         </div>
@@ -81,12 +81,12 @@ const ProjectDetail: React.FC<{ project: any; onClose: () => void }> = ({ projec
               <div className="p-10 rounded-[3rem] bg-slate-950/50 border border-white/5 relative overflow-hidden group">
                 <div className="absolute -top-10 -left-10 w-32 h-32 bg-red-600/5 blur-3xl group-hover:bg-red-600/10 transition-colors"></div>
                 <h4 className="text-red-400 font-black text-xl mb-6 flex items-center gap-3">تحديات التنفيذ <Zap size={20} /></h4>
-                <p className="text-slate-400 text-lg leading-relaxed">{project.challenges}</p>
+                <p className="text-slate-400 text-lg leading-relaxed">{project.challenges || project.caseStudy?.problem || 'تم تجاوز التحديات التقنية بنجاح.'}</p>
               </div>
               <div className="p-10 rounded-[3rem] bg-indigo-600/5 border border-indigo-600/20 relative overflow-hidden group">
                 <div className="absolute -top-10 -left-10 w-32 h-32 bg-indigo-600/5 blur-3xl group-hover:bg-indigo-600/10 transition-colors"></div>
                 <h4 className="text-indigo-400 font-black text-xl mb-6 flex items-center gap-3">الحلول الهندسية <ArrowRight size={20} /></h4>
-                <p className="text-slate-400 text-lg leading-relaxed">{project.solutions}</p>
+                <p className="text-slate-400 text-lg leading-relaxed">{project.solutions || project.caseStudy?.solution || 'تطوير بنية تحتية رقمية قوية ومستدامة.'}</p>
               </div>
             </div>
 
@@ -131,7 +131,7 @@ const ProjectDetail: React.FC<{ project: any; onClose: () => void }> = ({ projec
             <div className="space-y-6">
               <h4 className="text-[11px] font-black text-slate-500 uppercase tracking-[0.4em] mb-4 pr-4 border-r-2 border-indigo-600">الترسانة التقنية</h4>
               <div className="flex flex-wrap gap-3 justify-end">
-                {project.technologies.map((tech: string, idx: number) => (
+                {(project.technologies || project.tags || []).map((tech: string, idx: number) => (
                   <span key={idx} className="px-5 py-2.5 rounded-2xl bg-white/5 border border-white/10 text-white text-sm font-black hover:bg-white/10 hover:border-indigo-500 transition-all cursor-default">
                     {tech}
                   </span>

@@ -22,6 +22,7 @@ const ProjectForm: React.FC<ProjectFormProps> = ({ isOpen, onClose, initialData 
                 category: '',
                 status: 'completed',
                 tags: [],
+                technologies: [],
                 date: new Date().getFullYear().toString(),
                 caseStudy: { problem: '', solution: '', result: '' },
                 links: { demo: '', github: '' }
@@ -41,7 +42,8 @@ const ProjectForm: React.FC<ProjectFormProps> = ({ isOpen, onClose, initialData 
     };
 
     const handleTagsChange = (val: string) => {
-        setFormData({ ...formData, tags: val.split(',').map(t => t.trim()).filter(Boolean) });
+        const tags = val.split(',').map(t => t.trim()).filter(Boolean);
+        setFormData({ ...formData, tags, technologies: tags });
     };
 
     return (
@@ -120,18 +122,6 @@ const ProjectForm: React.FC<ProjectFormProps> = ({ isOpen, onClose, initialData 
                                 value={formData.budget || ''}
                                 onChange={e => setFormData({ ...formData, budget: Number(e.target.value) })}
                             />
-                            <div className="space-y-2">
-                                <label className="text-xs font-bold text-slate-400 uppercase tracking-wider block text-right">الأولوية</label>
-                                <select
-                                    className="w-full bg-slate-950 border border-white/10 rounded-xl px-4 py-3 text-white outline-none text-right"
-                                    value={formData.priority || 'medium'}
-                                    onChange={e => setFormData({ ...formData, priority: e.target.value as any })}
-                                >
-                                    <option value="low">منخفضة (Low)</option>
-                                    <option value="medium">متوسطة (Medium)</option>
-                                    <option value="high">عالية (High)</option>
-                                </select>
-                            </div>
                         </div>
                         <div className="space-y-2">
                             <label className="text-xs font-bold text-slate-400 uppercase tracking-wider block text-right">وصف مختصر</label>

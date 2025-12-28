@@ -16,12 +16,34 @@ class NeuroCore {
                 model: isJSON ? "gemini-1.5-flash" : "gemini-1.5-pro",
                 generationConfig: { responseMimeType: isJSON ? "application/json" : "text/plain" }
             });
-            const result = await model.generateContent(prompt);
+            const result = await model.generateContent(prompt || "Connection Test. Reply with 'OK'.");
             return result.response.text();
         } catch (error) {
             console.warn("Gemini Error, falling back to basic text:", error);
             throw error;
         }
+    }
+
+    private static async getAnthropicResponse(prompt: string, config: AIConfig): Promise<string> {
+        const key = config.anthropicKey || import.meta.env.VITE_ANTHROPIC_API_KEY;
+        if (!key) throw new Error("Anthropic Key missing.");
+        // Simplified fetch for browser usage
+        const response = await fetch("https://api.anthropic.com/v1/messages", {
+            method: "POST",
+            headers: {
+                "x-api-key": key,
+                "anthropic-version": "2023-06-01",
+                "content-type": "application/json",
+                "dangerously-allow-browser": "true"
+            } as any,
+            body: JSON.stringify({
+                model: "claude-3-5-sonnet-20240620",
+                max_tokens: 1024,
+                messages: [{ role: "user", content: prompt }]
+            })
+        });
+        const data = await response.json();
+        return data.content?.[0]?.text || "";
     }
 
     private static async getHuggingFaceResponse(prompt: string, config: AIConfig, model: string = "mistralai/Mistral-7B-Instruct-v0.3"): Promise<string> {
@@ -43,7 +65,26 @@ class NeuroCore {
 
         if (!response.ok) throw new Error(`HF Error: ${response.status}`);
         const data = await response.json();
-        return Array.isArray(data) ? data[0].generated_text.trim() : "";
+        return Array.isArray(data) ? data[0].generated_text.trim() : (data.generated_text || "");
+    }
+
+    /**
+     * Diagnostic: Test connection to a specific provider
+     */
+    static async testConnection(provider: string, config: AIConfig): Promise<boolean> {
+        try {
+            const testPrompt = "Ping";
+            switch (provider) {
+                case 'gemini': await this.getGeminiResponse(testPrompt, config); break;
+                case 'huggingface': await this.getHuggingFaceResponse(testPrompt, config); break;
+                case 'anthropic': await this.getAnthropicResponse(testPrompt, config); break;
+                default: throw new Error("Unknown provider");
+            }
+            return true;
+        } catch (e) {
+            console.error(`Connection test failed for ${provider}:`, e);
+            return false;
+        }
     }
 
     /**
@@ -60,8 +101,12 @@ class NeuroCore {
 
         // Strategy: Use Gemini for JSON/Analytical (Better structure), HF for Creative (Uncensored/Raw)
         try {
-            if (config.preferredProvider === 'huggingface' || type === 'creative') {
+            const provider = config.preferredProvider || 'gemini';
+
+            if (provider === 'huggingface' || type === 'creative') {
                 return await this.getHuggingFaceResponse(fullPrompt, config);
+            } else if (provider === 'anthropic') {
+                return await this.getAnthropicResponse(fullPrompt, config);
             } else {
                 return await this.getGeminiResponse(fullPrompt, config, jsonMode);
             }
@@ -266,6 +311,8 @@ export const AIService = {
             type: 'creative'
         });
     },
+
+    testConnection: (provider: string, config: AIConfig) => NeuroCore.testConnection(provider, config),
 
     suggestArticleImage: async (keyword: string) => {
         return `https://source.unsplash.com/1200x600/?${encodeURIComponent(keyword)}`;
