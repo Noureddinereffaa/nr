@@ -368,7 +368,7 @@ const systemConfig = {
     <p class="text-slate-300">دعوة للعمل (Call to Action) الموجهة للنخبة من صناع القرار.</p>
 </div>
         `
-    }
+    },
     {
         id: 'product-launch',
         title: 'إطلاق منتج (Product Launch)',
