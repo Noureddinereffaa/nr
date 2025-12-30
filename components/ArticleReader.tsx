@@ -37,11 +37,28 @@ const ArticleReader: React.FC<ArticleReaderProps> = ({ article, onClose }) => {
         setTimeout(() => setCopySuccess(false), 2000);
     };
 
-    // Safe access to window/props in render, variables defined in scope
-    const shareUrl = typeof window !== 'undefined' ? encodeURIComponent(window.location.href) : '';
+    // Safe access to window/props in render
+    const currentUrl = typeof window !== 'undefined' ? window.location.href : '';
+
+    // Construct Proxy Share URL (Server-Side Generator)
+    // This passes metadata to the /api/social-share endpoint which renders the correct meta tags then redirects
+    const getProxyShareUrl = () => {
+        if (typeof window === 'undefined') return '';
+        const baseUrl = window.location.origin;
+        const params = new URLSearchParams({
+            title: article.title,
+            image: article.image,
+            desc: article.excerpt,
+            url: currentUrl // The destination deep link
+        });
+        return `${baseUrl}/api/social-share?${params.toString()}`;
+    };
+
+    const shareUrl = getProxyShareUrl(); // Use proxy for social sharing
+    const cleanUrl = currentUrl; // Use direct link for clipboard copying
     const shareText = encodeURIComponent(article.title || '');
 
-    // Dynamic Meta Tags for Social Sharing (Open Graph)
+    // Dynamic Meta Tags (Client-Fallback)
     useEffect(() => {
         // Store original values
         const originalTitle = document.title;
@@ -346,7 +363,7 @@ const ArticleReader: React.FC<ArticleReaderProps> = ({ article, onClose }) => {
 
                                 <div className="space-y-3 relative z-10">
                                     <a
-                                        href={`https://twitter.com/intent/tweet?text=${shareText}&url=${shareUrl}`}
+                                        href={`https://twitter.com/intent/tweet?text=${shareText}&url=${encodeURIComponent(shareUrl)}`}
                                         target="_blank"
                                         rel="noopener noreferrer"
                                         className="flex items-center gap-4 p-4 rounded-xl bg-white/5 hover:bg-white/10 hover:translate-x-[-4px] transition-all group"
@@ -358,7 +375,7 @@ const ArticleReader: React.FC<ArticleReaderProps> = ({ article, onClose }) => {
                                     </a>
 
                                     <a
-                                        href={`https://www.facebook.com/sharer/sharer.php?u=${shareUrl}`}
+                                        href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`}
                                         target="_blank"
                                         rel="noopener noreferrer"
                                         className="flex items-center gap-4 p-4 rounded-xl bg-white/5 hover:bg-white/10 hover:translate-x-[-4px] transition-all group"
@@ -370,7 +387,7 @@ const ArticleReader: React.FC<ArticleReaderProps> = ({ article, onClose }) => {
                                     </a>
 
                                     <a
-                                        href={`https://www.linkedin.com/sharing/share-offsite/?url=${shareUrl}`}
+                                        href={`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(shareUrl)}`}
                                         target="_blank"
                                         rel="noopener noreferrer"
                                         className="flex items-center gap-4 p-4 rounded-xl bg-white/5 hover:bg-white/10 hover:translate-x-[-4px] transition-all group"
@@ -389,7 +406,7 @@ const ArticleReader: React.FC<ArticleReaderProps> = ({ article, onClose }) => {
                                             {copySuccess ? <CheckCircle size={20} /> : <div className="font-mono text-xs">URL</div>}
                                         </div>
                                         <span className={`font-bold transition-colors ${copySuccess ? 'text-green-400' : 'text-slate-300'}`}>
-                                            {copySuccess ? 'تم نسخ الرابط بنجاح' : 'نسخ رابط المقال'}
+                                            {copySuccess ? 'تم نسخ الرابط المباشر' : 'نسخ رابط المقال'}
                                         </span>
                                     </button>
                                 </div>
