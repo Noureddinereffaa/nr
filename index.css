@@ -14,16 +14,16 @@
     --z-article-reader: 1000;
     --z-toast: 2000;
 
-    /* Fluid Typography (clamp based) - Optimized for Desktop */
-    --text-xs: clamp(0.65rem, 0.6rem + 0.25vw, 0.75rem);
-    --text-sm: clamp(0.75rem, 0.7rem + 0.25vw, 0.875rem);
-    --text-base: clamp(0.875rem, 0.8rem + 0.25vw, 1rem);
-    --text-lg: clamp(1rem, 0.95rem + 0.3vw, 1.125rem);
-    --text-xl: clamp(1.125rem, 1rem + 0.4vw, 1.25rem);
-    --text-2xl: clamp(1.25rem, 1.1rem + 0.5vw, 1.5rem);
-    --text-4xl: clamp(1.75rem, 1.5rem + 1vw, 2.25rem);
-    --text-6xl: clamp(2.5rem, 2rem + 2vw, 3.5rem);
-    --text-8xl: clamp(3.5rem, 3rem + 3vw, 5rem);
+    /* Fluid Typography - Compact Scale for Desktop */
+    --text-xs: clamp(0.65rem, 0.6rem + 0.15vw, 0.7rem);
+    --text-sm: clamp(0.7rem, 0.65rem + 0.15vw, 0.8rem);
+    --text-base: clamp(0.85rem, 0.8rem + 0.15vw, 0.95rem);
+    --text-lg: clamp(0.95rem, 0.9rem + 0.2vw, 1.05rem);
+    --text-xl: clamp(1rem, 0.95rem + 0.25vw, 1.15rem);
+    --text-2xl: clamp(1.1rem, 1rem + 0.35vw, 1.35rem);
+    --text-4xl: clamp(1.5rem, 1.3rem + 0.6vw, 1.85rem);
+    --text-6xl: clamp(2rem, 1.7rem + 1vw, 2.75rem);
+    --text-8xl: clamp(2.75rem, 2.3rem + 1.5vw, 3.75rem);
 
     /* Original Design System Tokens */
     --bg-main: #020617;
@@ -55,6 +55,11 @@
     --text-secondary: #cccccc;
 }
 
+html {
+    font-size: 14px;
+    /* Base reduction for proper 100% zoom scaling */
+}
+
 body {
     background-color: var(--bg-main);
     color: var(--text-primary);
@@ -62,7 +67,8 @@ body {
     transition: background-color 0.5s cubic-bezier(0.4, 0, 0.2, 1), color 0.5s ease;
     overflow-x: hidden;
     -webkit-font-smoothing: antialiased;
-    line-height: 1.5;
+    line-height: 1.6;
+    font-size: 1rem;
 }
 
 :focus-visible {
