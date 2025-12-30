@@ -25,7 +25,7 @@ const Hero: React.FC = () => {
   const isMinimalist = templateId === 'minimalist-pro';
 
   return (
-    <section id="hero" className="relative min-h-screen flex items-center pt-32 pb-20 md:py-0 overflow-hidden">
+    <section id="hero" className="relative min-h-[85vh] flex items-center pt-20 pb-12 md:py-0 overflow-hidden">
 
       {/* Cinematic Background Architecture */}
       <div className="absolute inset-0 z-0 overflow-hidden">
@@ -49,10 +49,10 @@ const Hero: React.FC = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               className={`inline-flex items-center gap-3 px-5 py-2 rounded-full border text-[11px] font-black mb-10 mx-auto lg:mr-0 lg:ml-auto backdrop-blur-xl ${isCyber
-                  ? 'bg-green-500/10 border-green-500/20 text-green-400'
-                  : isMinimalist
-                    ? 'bg-slate-100 border-slate-200 text-slate-900 shadow-sm'
-                    : 'bg-white/5 border-white/10 text-indigo-400'
+                ? 'bg-green-500/10 border-green-500/20 text-green-400'
+                : isMinimalist
+                  ? 'bg-slate-100 border-slate-200 text-slate-900 shadow-sm'
+                  : 'bg-white/5 border-white/10 text-indigo-400'
                 }`}
             >
               <Sparkles size={16} className={`${isCyber ? 'text-green-500' : isMinimalist ? 'text-slate-900' : 'text-indigo-500'} animate-pulse`} />
@@ -63,7 +63,7 @@ const Hero: React.FC = () => {
               initial={{ opacity: 0, x: 50 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.2, type: 'spring', damping: 20 }}
-              className={`text-5xl sm:text-6xl md:text-8xl lg:text-9xl font-black mb-10 leading-[0.95] tracking-tighter ${isMinimalist ? 'text-slate-950' : 'text-white'}`}
+              className={`text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black mb-6 leading-[0.95] tracking-tighter ${isMinimalist ? 'text-slate-950' : 'text-white'}`}
             >
               {profile.primaryTitle.split(' ').slice(0, -1).join(' ')} <br />
               <span className={isMinimalist ? 'text-indigo-600' : 'gradient-text'}>{profile.primaryTitle.split(' ').pop()}</span>
@@ -73,7 +73,7 @@ const Hero: React.FC = () => {
               initial={{ opacity: 0, x: 30 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.4 }}
-              className={`text-lg md:text-2xl mb-12 max-w-2xl mx-auto lg:mr-0 lg:ml-auto leading-relaxed font-medium ${isMinimalist ? 'text-slate-600' : 'text-slate-400'}`}
+              className={`text-base md:text-lg mb-8 max-w-xl mx-auto lg:mr-0 lg:ml-auto leading-relaxed font-medium ${isMinimalist ? 'text-slate-600' : 'text-slate-400'}`}
             >
               أنا <span className={`font-black border-b-4 pb-1 ${isMinimalist ? 'text-slate-950 border-indigo-600' : 'text-white border-indigo-600/40'}`}>{profile.name}</span>. {profile.bio}
             </motion.p>
@@ -82,15 +82,15 @@ const Hero: React.FC = () => {
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.6 }}
-              className="flex flex-col sm:flex-row gap-6 justify-center lg:justify-end mb-20"
+              className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-end mb-12"
             >
               <button
                 onClick={(e) => scrollToSection(e, '#services')}
                 className={`group relative px-10 py-5 rounded-2xl font-black text-xl overflow-hidden active:scale-95 transition-all shadow-2xl ${isCyber
-                    ? 'bg-green-600 text-black border-2 border-green-400'
-                    : isMinimalist
-                      ? 'bg-slate-950 text-white'
-                      : 'bg-white text-slate-950 hover:shadow-indigo-500/20'
+                  ? 'bg-green-600 text-black border-2 border-green-400'
+                  : isMinimalist
+                    ? 'bg-slate-950 text-white'
+                    : 'bg-white text-slate-950 hover:shadow-indigo-500/20'
                   }`}
               >
                 <div className={`absolute inset-0 translate-y-[101%] group-hover:translate-y-0 transition-transform duration-500 ${isCyber ? 'bg-green-400' : 'bg-indigo-600'}`}></div>
@@ -103,10 +103,10 @@ const Hero: React.FC = () => {
               <button
                 onClick={(e) => { e.preventDefault(); openChat(); }}
                 className={`px-10 py-5 rounded-2xl font-black text-xl active:scale-95 transition-all flex items-center justify-center gap-4 ${isCyber
-                    ? 'bg-black text-green-500 border border-green-500/30'
-                    : isMinimalist
-                      ? 'bg-white text-slate-950 border border-slate-200'
-                      : 'glass-card text-white hover:bg-white/5'
+                  ? 'bg-black text-green-500 border border-green-500/30'
+                  : isMinimalist
+                    ? 'bg-white text-slate-950 border border-slate-200'
+                    : 'glass-card text-white hover:bg-white/5'
                   }`}
               >
                 <Bot size={24} className={isCyber ? 'text-green-500' : 'text-indigo-500'} />
@@ -119,7 +119,7 @@ const Hero: React.FC = () => {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 1 }}
-              className={`grid grid-cols-3 gap-10 border-t pt-12 max-w-xl mx-auto lg:mr-0 lg:ml-auto ${isMinimalist ? 'border-slate-100' : 'border-white/5'}`}
+              className={`grid grid-cols-3 gap-6 border-t pt-8 max-w-lg mx-auto lg:mr-0 lg:ml-auto ${isMinimalist ? 'border-slate-100' : 'border-white/5'}`}
             >
               {[
                 { label: "دقة الأتمتة", val: "100%", icon: Zap },
@@ -128,10 +128,10 @@ const Hero: React.FC = () => {
               ].map((item, i) => (
                 <div key={i} className="flex flex-col items-center lg:items-end gap-2 group cursor-default">
                   <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-500 shadow-xl ${isCyber
-                      ? 'bg-green-500/10 text-green-500 group-hover:bg-green-500 group-hover:text-black'
-                      : isMinimalist
-                        ? 'bg-slate-100 text-slate-900 group-hover:bg-slate-950 group-hover:text-white'
-                        : 'bg-white/5 text-indigo-400 group-hover:bg-indigo-600 group-hover:text-white'
+                    ? 'bg-green-500/10 text-green-500 group-hover:bg-green-500 group-hover:text-black'
+                    : isMinimalist
+                      ? 'bg-slate-100 text-slate-900 group-hover:bg-slate-950 group-hover:text-white'
+                      : 'bg-white/5 text-indigo-400 group-hover:bg-indigo-600 group-hover:text-white'
                     }`}>
                     <item.icon size={20} />
                   </div>
@@ -155,10 +155,10 @@ const Hero: React.FC = () => {
               <motion.div
                 whileHover={{ rotateY: -5, rotateX: 5, scale: 1.02 }}
                 className={`relative aspect-[1/1.3] overflow-hidden transition-all ${isCyber
-                    ? 'rounded-none border-2 border-green-500/40'
-                    : isMinimalist
-                      ? 'rounded-3xl border border-slate-100 shadow-xl grayscale-0'
-                      : 'rounded-[4rem] sm:rounded-[5rem] border border-white/20 shadow-3xl grayscale-[15%] group-hover:grayscale-0'
+                  ? 'rounded-none border-2 border-green-500/40'
+                  : isMinimalist
+                    ? 'rounded-3xl border border-slate-100 shadow-xl grayscale-0'
+                    : 'rounded-[4rem] sm:rounded-[5rem] border border-white/20 shadow-3xl grayscale-[15%] group-hover:grayscale-0'
                   } bg-slate-900`}
               >
                 <img
@@ -179,10 +179,10 @@ const Hero: React.FC = () => {
 
                 {/* Elite Floating Identity Card */}
                 <div className={`absolute bottom-10 inset-x-10 p-6 border transition-all duration-500 group-hover:bottom-12 ${isCyber
-                    ? 'bg-black/90 border-green-500/50 rounded-none'
-                    : isMinimalist
-                      ? 'bg-white border-slate-100 rounded-2xl shadow-2xl'
-                      : 'glass-panel border-white/20 backdrop-blur-3xl shadow-2xl rounded-3xl group-hover:border-indigo-500/50'
+                  ? 'bg-black/90 border-green-500/50 rounded-none'
+                  : isMinimalist
+                    ? 'bg-white border-slate-100 rounded-2xl shadow-2xl'
+                    : 'glass-panel border-white/20 backdrop-blur-3xl shadow-2xl rounded-3xl group-hover:border-indigo-500/50'
                   }`}>
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-4">

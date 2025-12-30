@@ -272,7 +272,7 @@ const ArticleReader: React.FC<ArticleReaderProps> = ({ article, onClose }) => {
                     </div>
 
                     {/* Elite Content Body - Readability Focus */}
-                    <div className="max-w-4xl mx-auto px-6 py-24 md:py-40">
+                    <div className="max-w-3xl mx-auto px-4 py-12 md:py-20">
                         <motion.div
                             initial={{ opacity: 0, y: 20 }}
                             whileInView={{ opacity: 1, y: 0 }}
@@ -283,7 +283,7 @@ const ArticleReader: React.FC<ArticleReaderProps> = ({ article, onClose }) => {
                         />
 
                         {/* Tags Architecture */}
-                        <div className="mt-32 pt-16 border-t border-white/10" dir="rtl">
+                        <div className="mt-16 pt-8 border-t border-white/10" dir="rtl">
                             <h4 className="text-2xl font-black text-white mb-10 flex items-center gap-4">
                                 <Sparkles className="text-indigo-500" size={28} />
                                 المصفوفة التقنية والمفاتيح
@@ -302,7 +302,7 @@ const ArticleReader: React.FC<ArticleReaderProps> = ({ article, onClose }) => {
                             initial={{ opacity: 0, scale: 0.95 }}
                             whileInView={{ opacity: 1, scale: 1 }}
                             viewport={{ once: true }}
-                            className="mt-24 md:mt-40 p-8 md:p-24 rounded-[2.5rem] md:rounded-[4rem] bg-indigo-600 text-white text-center relative group overflow-hidden shadow-3xl"
+                            className="mt-12 md:mt-20 p-6 md:p-12 rounded-2xl bg-indigo-600 text-white text-center relative group overflow-hidden shadow-2xl"
                         >
                             <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
                             <div className="absolute top-0 right-0 w-full h-2 md:h-3 bg-white/20"></div>
@@ -338,7 +338,7 @@ const ArticleReader: React.FC<ArticleReaderProps> = ({ article, onClose }) => {
                         </motion.div>
 
                         {/* Navigation Footer */}
-                        <div className="mt-24 md:mt-32 border-t border-white/5 pt-12 text-center">
+                        <div className="mt-12 md:mt-16 border-t border-white/5 pt-8 text-center">
                             <button
                                 onClick={onClose}
                                 className="text-slate-500 hover:text-white font-black text-sm uppercase tracking-widest flex items-center gap-3 mx-auto transition-colors"

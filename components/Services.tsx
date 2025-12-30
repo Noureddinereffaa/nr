@@ -143,7 +143,7 @@ const Services: React.FC = () => {
   const isMinimalist = templateId === 'minimalist-pro';
 
   return (
-    <section id="services" className="py-24 md:py-32 relative overflow-hidden">
+    <section id="services" className="py-12 md:py-16 relative overflow-hidden">
       {/* Immersive Section Background */}
       {!isMinimalist && (
         <>
@@ -153,7 +153,7 @@ const Services: React.FC = () => {
       )}
 
       <div className="container mx-auto px-6 relative z-10">
-        <div className="max-w-4xl mx-auto text-center mb-24">
+        <div className="max-w-3xl mx-auto text-center mb-12">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -169,7 +169,7 @@ const Services: React.FC = () => {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ delay: 0.1 }}
-            className={`text-5xl md:text-8xl font-black mb-10 tracking-tighter leading-[0.95] ${isMinimalist ? 'text-slate-950' : 'text-white'}`}
+            className={`text-3xl md:text-5xl font-black mb-6 tracking-tighter leading-[0.95] ${isMinimalist ? 'text-slate-950' : 'text-white'}`}
           >
             حلول <span className={isMinimalist ? 'text-indigo-600' : 'gradient-text'}>استراتيجية</span> <br /> لا تقبل المنافسة
           </motion.h2>
@@ -178,13 +178,13 @@ const Services: React.FC = () => {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ delay: 0.2 }}
-            className={`text-xl md:text-2xl leading-relaxed max-w-2xl mx-auto font-medium ${isMinimalist ? 'text-slate-600' : 'text-slate-400'}`}
+            className={`text-base md:text-lg leading-relaxed max-w-xl mx-auto font-medium ${isMinimalist ? 'text-slate-600' : 'text-slate-400'}`}
           >
             نحن لا نبيع مجرد خدمات، نحن نصمم أنظمة ذكية تضمن لك السيطرة الكاملة على السوق الرقمي.
           </motion.p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
           {services.map((service: any, i: number) => {
             const IconComponent = (LucideIcons as any)[service.icon] || Zap;
             return (
@@ -194,7 +194,7 @@ const Services: React.FC = () => {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: i * 0.1 }}
-                className="group relative glass-card p-10 md:p-14 rounded-[3.5rem] overflow-hidden"
+                className="group relative glass-card p-6 md:p-8 rounded-2xl overflow-hidden"
               >
                 {/* ID Watermark */}
                 <div className="absolute top-10 left-10 text-[100px] font-black text-white/5 select-none pointer-events-none group-hover:text-indigo-500/10 transition-colors duration-700">

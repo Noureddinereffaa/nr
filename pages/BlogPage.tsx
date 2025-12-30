@@ -54,7 +54,7 @@ const BlogPage: React.FC = () => {
 
     return (
         <Layout>
-            <div className="pt-32 pb-24 min-h-screen relative overflow-hidden bg-slate-950 animated-bg">
+            <div className="pt-20 pb-12 min-h-screen relative overflow-hidden bg-slate-950 animated-bg">
 
                 {/* Cinematic Background Architecture - Enhanced Depth */}
                 <div className="absolute inset-0 z-0 mesh-gradient opacity-40"></div>
@@ -68,7 +68,7 @@ const BlogPage: React.FC = () => {
                 <div className="container mx-auto px-6 relative z-10">
 
                     {/* Magazine Header Section */}
-                    <div className="flex flex-col md:flex-row justify-between items-end gap-10 mb-20" dir="rtl">
+                    <div className="flex flex-col md:flex-row justify-between items-end gap-6 mb-12" dir="rtl">
                         <div className="max-w-4xl">
                             <motion.div
                                 initial={{ opacity: 0, x: 20 }}
@@ -82,7 +82,7 @@ const BlogPage: React.FC = () => {
                                 initial={{ opacity: 0, y: 30 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ delay: 0.1 }}
-                                className="text-6xl md:text-[12rem] font-black text-white mb-8 tracking-tighter leading-[0.85] uppercase"
+                                className="text-4xl md:text-6xl font-black text-white mb-4 tracking-tighter leading-[0.9] uppercase"
                             >
                                 مركز <span className="gradient-text drop-shadow-[0_10px_40px_rgba(79,70,229,0.4)]">المعرفة</span>
                             </motion.h1>
@@ -90,7 +90,7 @@ const BlogPage: React.FC = () => {
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ delay: 0.2 }}
-                                className="text-2xl md:text-4xl text-slate-300 font-medium leading-relaxed max-w-4xl border-r-8 border-indigo-600 pr-8"
+                                className="text-lg md:text-xl text-slate-300 font-medium leading-relaxed max-w-2xl border-r-4 border-indigo-600 pr-4"
                             >
                                 تحليلات استراتيجية ورؤى هندسية لصناعة الفارق في الاقتصاد الرقمي الحديث.
                             </motion.p>
@@ -116,7 +116,7 @@ const BlogPage: React.FC = () => {
                             initial={{ opacity: 0, y: 40 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: 0.3 }}
-                            className="relative aspect-[21/9] rounded-[4rem] overflow-hidden mb-24 group cursor-pointer border border-white/10 shadow-3xl"
+                            className="relative aspect-[21/9] rounded-2xl overflow-hidden mb-12 group cursor-pointer border border-white/10 shadow-xl"
                             onClick={() => handleOpenArticle(featuredArticle)}
                         >
                             <img
@@ -152,7 +152,7 @@ const BlogPage: React.FC = () => {
                     )}
 
                     {/* Main Grid Architecture */}
-                    <div className="flex flex-col lg:flex-row-reverse gap-16">
+                    <div className="flex flex-col lg:flex-row-reverse gap-8">
 
                         {/* Elite Sidebar - Insights & Trending */}
                         <aside className="lg:w-[30%] space-y-12">
@@ -160,7 +160,7 @@ const BlogPage: React.FC = () => {
                                 initial={{ opacity: 0, x: -20 }}
                                 whileInView={{ opacity: 1, x: 0 }}
                                 viewport={{ once: true }}
-                                className="glass-card p-10 rounded-[3.5rem] sticky top-32 border border-white/5 bg-slate-900/40 backdrop-blur-2xl"
+                                className="glass-card p-6 rounded-2xl sticky top-24 border border-white/5 bg-slate-900/40 backdrop-blur-2xl"
                             >
                                 <h3 className="text-2xl font-black text-white mb-10 flex items-center justify-end gap-4" dir="rtl">
                                     الأكثر تأثيراً
