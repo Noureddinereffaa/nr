@@ -45,9 +45,14 @@ const ArticleReader: React.FC<ArticleReaderProps> = ({ article, onClose }) => {
     const getProxyShareUrl = () => {
         if (typeof window === 'undefined') return '';
         const baseUrl = window.location.origin;
+        // Ensure Image is Absolute URL
+        const absoluteImage = article.image.startsWith('http')
+            ? article.image
+            : `${baseUrl}${article.image.startsWith('/') ? '' : '/'}${article.image}`;
+
         const params = new URLSearchParams({
             title: article.title,
-            image: article.image,
+            image: absoluteImage,
             desc: article.excerpt,
             url: currentUrl // The destination deep link
         });
