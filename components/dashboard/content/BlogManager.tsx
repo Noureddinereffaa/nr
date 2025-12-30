@@ -8,7 +8,7 @@ import {
 import WritingWorkspace from './WritingWorkspace';
 
 const BlogManager: React.FC = () => {
-    const { siteData, updateArticle, deleteArticle } = useData();
+    const { siteData, updateArticle, deleteArticle, addArticle } = useData();
     const { openArticleModal } = useUI();
     const { articles, aiConfig } = siteData;
 
@@ -36,24 +36,28 @@ const BlogManager: React.FC = () => {
                     </h3>
                     <div className="flex gap-4">
                         <button
-                            onClick={() => {
+                            onClick={async () => {
                                 const newArticle = {
-                                    id: Date.now().toString(), // Temp ID
                                     title: 'مقال سيادي جديد',
                                     content: '',
                                     image: 'https://images.unsplash.com/photo-1455390582262-044cdead277a?auto=format&fit=crop&q=80',
                                     category: 'General',
                                     tags: [],
-                                    date: new Date().toISOString(),
-                                    views: 0,
                                     seoScore: 0,
-                                    slug: '',
                                     excerpt: '',
-                                    status: 'draft',
-                                    keywords: []
+                                    status: 'draft' as 'draft',
+                                    keywords: [],
+                                    author: 'Noureddine Reffaa',
+                                    readTime: '5 min',
+                                    seo: {
+                                        title: 'مقال سيادي جديد',
+                                        description: '',
+                                        keywords: [],
+                                        focusKeyword: ''
+                                    }
                                 };
-                                // In a real app we might want to "create" it in DB first or just draft mode
-                                setEditingArticle(newArticle);
+                                const newId = await addArticle(newArticle);
+                                setEditingArticle({ ...newArticle, id: newId, date: new Date().toISOString(), views: 0 });
                             }}
                             className="flex items-center gap-2 px-4 py-2 bg-white/5 hover:bg-white/10 border border-white/5 rounded-xl text-xs font-black text-white transition-all">
                             <Plus size={16} /> مقال يدوي جديد
@@ -119,21 +123,23 @@ const BlogManager: React.FC = () => {
             </div>
 
             {/* Writing Workspace Overlay */}
-            {editingArticle && (
-                <WritingWorkspace
-                    article={editingArticle}
-                    aiConfig={aiConfig}
-                    onSave={(updatedArticle) => {
-                        // Auto-save: just update data, don't close
-                        updateArticle(editingArticle.id!, updatedArticle);
-                    }}
-                    onClose={() => {
-                        // Manual close: save final state and close
-                        setEditingArticle(null);
-                    }}
-                />
-            )}
-        </div>
+            {
+                editingArticle && (
+                    <WritingWorkspace
+                        article={editingArticle}
+                        aiConfig={aiConfig}
+                        onSave={(updatedArticle) => {
+                            // Auto-save: just update data, don't close
+                            updateArticle(editingArticle.id!, updatedArticle);
+                        }}
+                        onClose={() => {
+                            // Manual close: save final state and close
+                            setEditingArticle(null);
+                        }}
+                    />
+                )
+            }
+        </div >
     );
 };
 

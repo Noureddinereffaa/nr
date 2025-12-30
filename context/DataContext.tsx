@@ -32,7 +32,7 @@ interface DataContextType {
   deleteService: (id: string) => Promise<void>;
 
   // Article CRUD
-  addArticle: (article: Omit<Article, 'id' | 'date' | 'slug'>) => Promise<void>;
+  addArticle: (article: Omit<Article, 'id' | 'date' | 'slug'>) => Promise<string>;
   updateArticle: (id: string, data: Partial<Article>) => Promise<void>;
   deleteArticle: (id: string) => Promise<void>;
 
@@ -426,11 +426,12 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  const addArticle = async (article: Omit<Article, 'id' | 'date' | 'slug'>): Promise<void> => {
+  const addArticle = async (article: Omit<Article, 'id' | 'date' | 'slug'>): Promise<string> => {
     const articleData = article as any;
+    const newId = crypto.randomUUID();
     const newArticle: Article = {
       ...article,
-      id: crypto.randomUUID(),
+      id: newId,
       date: new Date().toISOString(),
       slug: articleData.slug || article.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, ''),
       status: article.status || 'draft',
@@ -464,6 +465,8 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         // Optional: Revert optimistic update or show toast
       }
     }
+
+    return newId;
   };
 
   const updateArticle = async (id: string, data: Partial<Article>): Promise<void> => {
