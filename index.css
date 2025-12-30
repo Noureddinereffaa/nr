@@ -14,16 +14,16 @@
     --z-article-reader: 1000;
     --z-toast: 2000;
 
-    /* Fluid Typography (clamp based) */
-    --text-xs: clamp(0.7rem, 0.6rem + 0.5vw, 0.75rem);
-    --text-sm: clamp(0.8rem, 0.75rem + 0.5vw, 0.875rem);
-    --text-base: clamp(0.9rem, 0.85rem + 0.5vw, 1rem);
-    --text-lg: clamp(1.1rem, 1rem + 1vw, 1.25rem);
-    --text-xl: clamp(1.25rem, 1.1rem + 1.2vw, 1.5rem);
-    --text-2xl: clamp(1.5rem, 1.3rem + 1.5vw, 2rem);
-    --text-4xl: clamp(2.2rem, 2rem + 2.5vw, 3.5rem);
-    --text-6xl: clamp(3.5rem, 3rem + 5vw, 6rem);
-    --text-8xl: clamp(5rem, 4rem + 8vw, 9rem);
+    /* Fluid Typography (clamp based) - Optimized for Desktop */
+    --text-xs: clamp(0.65rem, 0.6rem + 0.25vw, 0.75rem);
+    --text-sm: clamp(0.75rem, 0.7rem + 0.25vw, 0.875rem);
+    --text-base: clamp(0.875rem, 0.8rem + 0.25vw, 1rem);
+    --text-lg: clamp(1rem, 0.95rem + 0.3vw, 1.125rem);
+    --text-xl: clamp(1.125rem, 1rem + 0.4vw, 1.25rem);
+    --text-2xl: clamp(1.25rem, 1.1rem + 0.5vw, 1.5rem);
+    --text-4xl: clamp(1.75rem, 1.5rem + 1vw, 2.25rem);
+    --text-6xl: clamp(2.5rem, 2rem + 2vw, 3.5rem);
+    --text-8xl: clamp(3.5rem, 3rem + 3vw, 5rem);
 
     /* Original Design System Tokens */
     --bg-main: #020617;

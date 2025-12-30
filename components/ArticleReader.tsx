@@ -458,19 +458,19 @@ const ArticleReader: React.FC<ArticleReaderProps> = ({ article, onClose }) => {
           background: rgba(79, 70, 229, 0.8);
         }
         
-        :global(.prose h1) { font-size: clamp(3rem, 10vw, 7rem); font-weight: 950; margin-bottom: 4rem; color: #fff; line-height: 0.95; tracking-tighter; letter-spacing: -0.05em; text-transform: uppercase; border-right: 12px solid #6366f1; padding-right: 2rem; }
-        :global(.prose h2) { font-size: clamp(2.5rem, 8vw, 4.5rem); font-weight: 900; margin-top: 8rem; margin-bottom: 2.5rem; color: #fff; tracking-tight; line-height: 1.05; letter-spacing: -0.03em; border-right: 8px solid rgba(99, 102, 241, 0.3); padding-right: 1.5rem; }
-        :global(.prose h3) { font-size: clamp(2rem, 5vw, 3rem); font-weight: 900; margin-top: 5rem; margin-bottom: 2rem; color: #fff; letter-spacing: -0.02em; }
-        :global(.prose p) { font-size: clamp(1.25rem, 3vw, 1.75rem); line-height: 2.3; margin-bottom: 3.5rem; color: #cbd5e1; font-weight: 500; text-align: justify; text-justify: inter-word; }
-        :global(.prose ul) { margin-bottom: 4rem; list-style-type: none; padding-right: 0; }
-        :global(.prose li) { font-size: clamp(1.15rem, 2.5vw, 1.6rem); color: #e2e8f0; margin-bottom: 2rem; position: relative; font-weight: 600; line-height: 2; padding-right: 3rem; }
-        :global(.prose li::before) { content: "›"; position: absolute; right: 0; top: 0; font-size: 2.5rem; color: #6366f1; font-weight: 900; filter: drop-shadow(0 0 8px #6366f1); }
-        :global(.prose blockquote) { margin: 8rem 0; padding: 5rem; background: linear-gradient(135deg, rgba(79, 70, 229, 0.1), rgba(168, 85, 247, 0.05)); border-right: 12px solid #6366f1; border-radius: 4rem; font-style: italic; font-size: clamp(1.5rem, 4vw, 2.5rem); color: #fff; line-height: 1.7; font-weight: 950; position: relative; overflow: hidden; }
-        :global(.prose blockquote::after) { content: '"'; position: absolute; top: -2rem; left: 2rem; font-size: 15rem; color: rgba(255,255,255,0.03); font-family: serif; }
-        :global(.prose strong) { color: #818cf8; font-weight: 950; text-shadow: 0 0 20px rgba(129, 140, 248, 0.3); }
-        :global(.prose a) { color: #6366f1; text-decoration: none; border-bottom: 2px solid rgba(99, 102, 241, 0.3); transition: all 0.3s; font-weight: 800; }
+        :global(.prose h1) { font-size: clamp(2rem, 4vw, 3.5rem); font-weight: 900; margin-bottom: 2rem; color: #fff; line-height: 1.1; letter-spacing: -0.03em; border-right: 6px solid #6366f1; padding-right: 1.5rem; }
+        :global(.prose h2) { font-size: clamp(1.5rem, 3vw, 2.25rem); font-weight: 800; margin-top: 4rem; margin-bottom: 1.5rem; color: #fff; line-height: 1.15; letter-spacing: -0.02em; border-right: 4px solid rgba(99, 102, 241, 0.4); padding-right: 1rem; }
+        :global(.prose h3) { font-size: clamp(1.25rem, 2.5vw, 1.75rem); font-weight: 700; margin-top: 3rem; margin-bottom: 1rem; color: #fff; letter-spacing: -0.01em; }
+        :global(.prose p) { font-size: clamp(1rem, 1.5vw, 1.125rem); line-height: 1.9; margin-bottom: 1.75rem; color: #cbd5e1; font-weight: 400; text-align: justify; }
+        :global(.prose ul) { margin-bottom: 2rem; list-style-type: none; padding-right: 0; }
+        :global(.prose li) { font-size: clamp(0.95rem, 1.4vw, 1.1rem); color: #e2e8f0; margin-bottom: 1rem; position: relative; font-weight: 500; line-height: 1.8; padding-right: 2rem; }
+        :global(.prose li::before) { content: "›"; position: absolute; right: 0; top: 0; font-size: 1.5rem; color: #6366f1; font-weight: 700; }
+        :global(.prose blockquote) { margin: 4rem 0; padding: 2.5rem; background: linear-gradient(135deg, rgba(79, 70, 229, 0.08), rgba(168, 85, 247, 0.04)); border-right: 6px solid #6366f1; border-radius: 1.5rem; font-style: italic; font-size: clamp(1.1rem, 2vw, 1.35rem); color: #fff; line-height: 1.7; font-weight: 600; position: relative; overflow: hidden; }
+        :global(.prose blockquote::after) { content: '"'; position: absolute; top: -1rem; left: 1rem; font-size: 8rem; color: rgba(255,255,255,0.03); font-family: serif; }
+        :global(.prose strong) { color: #818cf8; font-weight: 700; }
+        :global(.prose a) { color: #6366f1; text-decoration: none; border-bottom: 1px solid rgba(99, 102, 241, 0.3); transition: all 0.3s; font-weight: 600; }
         :global(.prose a:hover) { border-bottom-color: #6366f1; background: rgba(99, 102, 241, 0.05); }
-        :global(.prose img) { border-radius: 3rem; margin: 6rem 0; border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 30px 100px rgba(0,0,0,0.5); }
+        :global(.prose img) { border-radius: 1.5rem; margin: 3rem 0; border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 20px 60px rgba(0,0,0,0.4); }
         
         @media (max-width: 768px) {
           :global(.prose h1) { font-size: 2.75rem; }
