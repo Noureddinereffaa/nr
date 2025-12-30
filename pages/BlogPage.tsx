@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import Layout from '../components/Layout';
 import { useData } from '../context/DataContext';
 import { Calendar, Clock, ArrowRight, Search, Sparkles, TrendingUp, Filter, Share2, Newspaper, Zap, Bookmark } from 'lucide-react';
@@ -12,6 +12,27 @@ const BlogPage: React.FC = () => {
     const [selectedArticle, setSelectedArticle] = useState<Article | null>(null);
     const [filter, setFilter] = useState('');
     const [activeCategory, setActiveCategory] = useState('الكل');
+
+    // Deep Linking: Check URL on mount
+    useEffect(() => {
+        const params = new URLSearchParams(window.location.search);
+        const articleId = params.get('article');
+        if (articleId && articles.length > 0) {
+            const targetArticle = articles.find(a => a.id === articleId);
+            if (targetArticle) setSelectedArticle(targetArticle);
+        }
+    }, [articles]);
+
+    const handleOpenArticle = (article: Article) => {
+        setSelectedArticle(article);
+        window.history.pushState({}, '', `?article=${article.id}`);
+    };
+
+    const handleCloseArticle = () => {
+        setSelectedArticle(null);
+        window.history.pushState({}, '', window.location.pathname);
+    };
+
 
     // Extract unique categories
     const categories = useMemo(() => {
@@ -96,7 +117,7 @@ const BlogPage: React.FC = () => {
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: 0.3 }}
                             className="relative aspect-[21/9] rounded-[4rem] overflow-hidden mb-24 group cursor-pointer border border-white/10 shadow-3xl"
-                            onClick={() => setSelectedArticle(featuredArticle)}
+                            onClick={() => handleOpenArticle(featuredArticle)}
                         >
                             <img
                                 src={featuredArticle.image}
@@ -150,7 +171,7 @@ const BlogPage: React.FC = () => {
                                         <div
                                             key={article.id}
                                             className="group cursor-pointer flex flex-col items-end text-right border-b border-white/5 pb-8 last:border-0 last:pb-0" dir="rtl"
-                                            onClick={() => setSelectedArticle(article)}
+                                            onClick={() => handleOpenArticle(article)}
                                         >
                                             <span className="text-indigo-600 font-black text-sm mb-3">#0{idx + 1}</span>
                                             <h4 className="text-lg font-black text-white group-hover:text-indigo-400 transition-colors line-clamp-2 leading-tight">
@@ -210,7 +231,8 @@ const BlogPage: React.FC = () => {
                                             animate={{ opacity: 1, y: 0 }}
                                             exit={{ opacity: 0, scale: 0.95 }}
                                             transition={{ delay: i * 0.05 }}
-                                            onClick={() => setSelectedArticle(article)}
+                                            transition={{ delay: i * 0.05 }}
+                                            onClick={() => handleOpenArticle(article)}
                                             className="group flex flex-col glass-morph rounded-[3.5rem] overflow-hidden hover:border-indigo-500/50 transition-all duration-700 cursor-pointer shadow-2xl premium-border"
                                         >
                                             <div className="aspect-[16/10] overflow-hidden relative">
@@ -265,7 +287,7 @@ const BlogPage: React.FC = () => {
                 </div>
 
                 <AnimatePresence>
-                    {selectedArticle && <ArticleReader article={selectedArticle} onClose={() => setSelectedArticle(null)} />}
+                    {selectedArticle && <ArticleReader article={selectedArticle} onClose={handleCloseArticle} />}
                 </AnimatePresence>
             </div>
         </Layout>
