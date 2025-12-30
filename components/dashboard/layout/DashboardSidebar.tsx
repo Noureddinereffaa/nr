@@ -47,7 +47,7 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
             className={`
                 fixed md:relative top-0 bottom-0 right-0
                 z-[var(--z-modal)] md:z-[var(--z-nav)] w-72 h-full 
-                glass-morph border-l border-white/5 shadow-2xl
+                bg-slate-950/80 backdrop-blur-xl border-l border-white/5 shadow-2xl
                 transition-transform duration-700 cubic-bezier(0.4, 0, 0.2, 1)
                 ${mobileMenuOpen ? 'translate-x-0' : 'translate-x-full md:translate-x-0'}
                 overflow-y-auto p-6 flex flex-col gap-8
@@ -61,10 +61,10 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
             </div>
 
             <div className="space-y-8">
-                {/* Section: القيادة */}
+                {/* Section: Command */}
                 <div>
-                    <h3 className="px-3 mb-3 text-[10px] font-black uppercase tracking-[0.2em] text-slate-500/60 text-right">القيادة (Control)</h3>
-                    <div className="space-y-1">
+                    <h3 className="px-3 mb-2 text-[9px] font-black uppercase tracking-[0.2em] text-indigo-500/80 text-right font-mono">Running Processes</h3>
+                    <div className="space-y-0.5">
                         <TabButton
                             id="overview"
                             label="لوحة القيادة"
@@ -82,10 +82,10 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
                     </div>
                 </div>
 
-                {/* Section: العمليات */}
+                {/* Section: Operations */}
                 <div>
-                    <h3 className="px-3 mb-3 text-[10px] font-black uppercase tracking-[0.2em] text-slate-500/60 text-right">العمليات (Operations)</h3>
-                    <div className="space-y-1">
+                    <h3 className="px-3 mb-2 text-[9px] font-black uppercase tracking-[0.2em] text-indigo-500/80 text-right font-mono">Operations</h3>
+                    <div className="space-y-0.5">
                         <TabButton
                             id="projects"
                             label="ستوديو المشاريع"
@@ -112,10 +112,10 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
                     </div>
                 </div>
 
-                {/* Section: الذكاء */}
+                {/* Section: Intelligence */}
                 <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.3 }}>
-                    <h3 className="px-3 mb-3 text-[10px] font-black uppercase tracking-[0.2em] text-slate-500/60 text-right">الذكاء والإنتاج</h3>
-                    <div className="space-y-1">
+                    <h3 className="px-3 mb-2 text-[9px] font-black uppercase tracking-[0.2em] text-indigo-500/80 text-right font-mono">Intelligence</h3>
+                    <div className="space-y-0.5">
                         {features.aiBrain && (
                             <TabButton
                                 id="aibrain"
@@ -144,11 +144,11 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
                     </div>
                 </motion.div>
 
-                {/* Section: المالية */}
+                {/* Section: Finance */}
                 {features.financials && (
                     <div>
-                        <h3 className="px-3 mb-3 text-[10px] font-black uppercase tracking-[0.2em] text-slate-500/60 text-right">القوة المالية</h3>
-                        <div className="space-y-1">
+                        <h3 className="px-3 mb-2 text-[9px] font-black uppercase tracking-[0.2em] text-emerald-500/80 text-right font-mono">Finance</h3>
+                        <div className="space-y-0.5">
                             <TabButton
                                 id="financial-hub"
                                 label="المركز المالي"

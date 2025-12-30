@@ -103,10 +103,15 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({ onMenuToggle, isMenuO
                     </div>
                     <div>
                         <h2 className="text-base md:text-xl font-black text-white uppercase tracking-tighter">
-                            نظام <span className="text-[var(--accent-indigo)]">NR OS</span>
+                            NR OS <span className="hidden sm:inline text-[var(--accent-indigo)]">Sovereign</span>
                         </h2>
                     </div>
                 </div>
+
+                {/* Mobile Search Trigger */}
+                <button className="lg:hidden p-2 text-slate-400 hover:text-white">
+                    <Search size={20} />
+                </button>
 
                 {/* Global Command Bar */}
                 <div className="hidden lg:flex items-center gap-3 bg-slate-950/50 border border-white/10 rounded-[var(--border-radius-elite)] px-4 py-2 w-96 focus-within:border-[var(--accent-indigo)] transition-all group">
