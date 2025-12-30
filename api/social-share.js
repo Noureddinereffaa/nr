@@ -1,13 +1,13 @@
 export default function handler(request, response) {
-    const { title, image, desc, url } = request.query;
+  const { title, image, desc, url } = request.query;
 
-    // Decode params to ensure correct display
-    const decodedTitle = decodeURIComponent(title || 'NR-OS Article');
-    const decodedDesc = decodeURIComponent(desc || 'Read this article on NR-OS');
-    const decodedImage = decodeURIComponent(image || '');
-    const targetUrl = decodeURIComponent(url || 'https://www.noureddinereffaa.xyz');
+  // Decode params to ensure correct display
+  const decodedTitle = decodeURIComponent(title || 'NR-OS Article');
+  const decodedDesc = decodeURIComponent(desc || 'Read this article on NR-OS');
+  const decodedImage = decodeURIComponent(image || '');
+  const targetUrl = decodeURIComponent(url || 'https://www.noureddinereffaa.xyz');
 
-    const html = `<!DOCTYPE html>
+  const html = `<!DOCTYPE html>
   <html lang="ar" dir="rtl">
   <head>
     <meta charset="UTF-8">
@@ -19,8 +19,16 @@ export default function handler(request, response) {
     <meta property="og:title" content="${decodedTitle}">
     <meta property="og:description" content="${decodedDesc}">
     <meta property="og:image" content="${decodedImage}">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:type" content="image/jpeg">
     <meta property="og:type" content="article">
     <meta property="og:url" content="${targetUrl}">
+    
+    <!-- WhatsApp / General -->
+    <meta itemprop="name" content="${decodedTitle}">
+    <meta itemprop="description" content="${decodedDesc}">
+    <meta itemprop="image" content="${decodedImage}">
     
     <!-- Twitter -->
     <meta name="twitter:card" content="summary_large_image">
@@ -48,7 +56,7 @@ export default function handler(request, response) {
   </body>
   </html>`;
 
-    response.setHeader('Content-Type', 'text/html; charset=utf-8');
-    response.setHeader('Cache-Control', 's-maxage=1, stale-while-revalidate'); // Ensure fresh tags
-    response.send(html);
+  response.setHeader('Content-Type', 'text/html; charset=utf-8');
+  response.setHeader('Cache-Control', 's-maxage=1, stale-while-revalidate'); // Ensure fresh tags
+  response.send(html);
 }

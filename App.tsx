@@ -4,7 +4,6 @@ import { DataProvider } from './context/DataContext';
 import { UIProvider } from './context/UIContext';
 import { AuthProvider } from './context/AuthContext';
 
-import SmartChatbot from './components/SmartChatbot';
 import LoadingSpinner from './components/ui/LoadingSpinner';
 import ProtectedRoute from './components/dashboard/auth/ProtectedRoute';
 
@@ -23,7 +22,6 @@ const App: React.FC = () => {
     <AuthProvider>
       <DataProvider>
         <UIProvider>
-          <SmartChatbot />
           <Suspense fallback={<div className="h-screen w-full flex items-center justify-center bg-slate-950"><LoadingSpinner /></div>}>
             <Routes>
               <Route path="/" element={<HomePage />} />

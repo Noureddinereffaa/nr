@@ -32,7 +32,8 @@ const ArticleReader: React.FC<ArticleReaderProps> = ({ article, onClose }) => {
     };
 
     const copyToClipboard = () => {
-        navigator.clipboard.writeText(window.location.href);
+        // Copy the Proxy URL to ensure social previews work when pasted
+        navigator.clipboard.writeText(cleanUrl);
         setCopySuccess(true);
         setTimeout(() => setCopySuccess(false), 2000);
     };
@@ -60,7 +61,9 @@ const ArticleReader: React.FC<ArticleReaderProps> = ({ article, onClose }) => {
     };
 
     const shareUrl = getProxyShareUrl(); // Use proxy for social sharing
-    const cleanUrl = currentUrl; // Use direct link for clipboard copying
+    // CRITICAL FIX: Use the Proxy URL for clipboard actions too, so users pasting into Facebook get the preview.
+    // The proxy will handle the redirect to the actual article.
+    const cleanUrl = shareUrl;
     const shareText = encodeURIComponent(article.title || '');
 
     // Dynamic Meta Tags (Client-Fallback)
@@ -206,31 +209,42 @@ const ArticleReader: React.FC<ArticleReaderProps> = ({ article, onClose }) => {
                     id="reader-content"
                     className="flex-1 overflow-y-auto overflow-x-hidden scroll-smooth custom-scrollbar bg-slate-950"
                 >
-                    {/* Immersive Cover Image */}
-                    <div className="relative w-full h-[60vh] md:h-[85vh]">
-                        <img
-                            src={article.image}
-                            alt={article.title}
-                            className="w-full h-full object-cover grayscale-[30%] scale-105"
-                        />
-                        <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/40 to-transparent"></div>
-                        <div className="absolute inset-0 bg-gradient-to-b from-slate-950/60 to-transparent"></div>
+                    {/* Immersive Cover Image & Hero Section */}
+                    <div className="relative w-full flex flex-col md:block">
+                        {/* Image Container - Stacked on Mobile, Absolute Cover on Desktop */}
+                        <div className="relative w-full h-[40vh] md:h-[85vh] md:absolute md:inset-0 z-0">
+                            <img
+                                src={article.image}
+                                alt={article.title}
+                                className="w-full h-full object-cover"
+                                loading="eager"
+                                fetchPriority="high"
+                            />
+                            {/* Desktop Overlay Gradients */}
+                            <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/40 to-transparent hidden md:block"></div>
+                            <div className="absolute inset-0 bg-gradient-to-b from-slate-950/60 to-transparent hidden md:block"></div>
 
-                        <div className="absolute inset-0 flex flex-col items-center justify-end pb-12 md:pb-32 px-6 md:px-10 max-w-6xl mx-auto text-center">
+                            {/* Mobile Bottom Fade */}
+                            <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-slate-950 to-transparent md:hidden"></div>
+                        </div>
+
+                        {/* Content Container - Relative Content on Mobile, Absolute Overlay on Desktop */}
+                        <div className="relative z-10 md:h-[85vh] flex flex-col items-center justify-end px-6 pb-8 md:pb-32 md:px-10 max-w-6xl mx-auto text-center -mt-12 md:mt-0">
                             <motion.div
                                 initial={{ opacity: 0, scale: 0.9 }}
                                 animate={{ opacity: 1, scale: 1 }}
                                 transition={{ delay: 0.3 }}
-                                className="inline-flex items-center gap-4 px-6 py-2.5 rounded-full bg-indigo-600 text-white text-[10px] md:text-xs font-black uppercase tracking-[0.4em] mb-8 md:mb-12 shadow-[0_0_40px_rgba(79,70,229,0.5)] border border-white/20"
+                                className="inline-flex items-center gap-4 px-5 py-2 md:px-6 md:py-2.5 rounded-full bg-indigo-600 text-white text-[10px] md:text-xs font-black uppercase tracking-[0.3em] md:tracking-[0.4em] mb-6 md:mb-12 shadow-[0_0_40px_rgba(79,70,229,0.5)] border border-white/20"
                             >
-                                <Shield size={16} />
+                                <Shield size={14} className="md:w-4 md:h-4" />
                                 Intelligence Sovereign Access
                             </motion.div>
+
                             <motion.h1
                                 initial={{ opacity: 0, y: 30 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ delay: 0.4 }}
-                                className="text-4xl sm:text-5xl md:text-8xl lg:text-[10rem] font-black text-white leading-[0.9] mb-10 md:mb-16 tracking-tighter drop-shadow-[0_20px_60px_rgba(0,0,0,0.8)]"
+                                className="text-3xl sm:text-4xl md:text-8xl lg:text-[10rem] font-black text-white leading-tight md:leading-[0.9] mb-8 md:mb-16 tracking-tighter drop-shadow-2xl md:drop-shadow-[0_20px_60px_rgba(0,0,0,0.8)]"
                             >
                                 {article.title}
                             </motion.h1>
@@ -239,18 +253,18 @@ const ArticleReader: React.FC<ArticleReaderProps> = ({ article, onClose }) => {
                                 initial={{ opacity: 0 }}
                                 animate={{ opacity: 1 }}
                                 transition={{ delay: 0.5 }}
-                                className="flex flex-wrap items-center justify-center gap-8 md:gap-14 text-slate-300 font-black text-xs md:text-sm border-t border-white/10 pt-10 md:pt-14 w-full"
+                                className="flex flex-wrap items-center justify-center gap-6 md:gap-14 text-slate-300 font-bold text-[10px] md:text-sm border-t border-white/10 pt-8 md:pt-14 w-full"
                             >
-                                <div className="flex items-center gap-3 text-indigo-400">
-                                    <Calendar size={18} />
+                                <div className="flex items-center gap-2 md:gap-3 text-indigo-400">
+                                    <Calendar size={14} className="md:w-[18px]" />
                                     {new Date(article.date).toLocaleDateString('ar-EG')}
                                 </div>
-                                <div className="flex items-center gap-3 text-indigo-400">
-                                    <Clock size={18} />
+                                <div className="flex items-center gap-2 md:gap-3 text-indigo-400">
+                                    <Clock size={14} className="md:w-[18px]" />
                                     {article.readTime}
                                 </div>
-                                <div className="flex items-center gap-3 text-emerald-400">
-                                    <Zap size={18} />
+                                <div className="flex items-center gap-2 md:gap-3 text-emerald-400">
+                                    <Zap size={14} className="md:w-[18px]" />
                                     محتوى سيادي معزز
                                 </div>
                             </motion.div>

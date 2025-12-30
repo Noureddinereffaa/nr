@@ -25,8 +25,7 @@ export default defineConfig(({ mode }) => {
         output: {
           manualChunks: {
             vendor: ['react', 'react-dom', 'react-router-dom'],
-            icons: ['lucide-react'],
-            ui: ['@google/genai']
+            icons: ['lucide-react']
           }
         }
       }

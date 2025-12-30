@@ -58,13 +58,6 @@ const ModuleSettings: React.FC = () => {
             desc: 'توليد المقالات، خطة المحتوى، وتحسين SEO.',
             icon: FileText,
             color: 'text-amber-400'
-        },
-        {
-            key: 'aiBrain',
-            name: 'AI Global Brain',
-            desc: 'إعدادات الذكاء الاصطناعي، الشخصية، والمهمة العامة.',
-            icon: Cpu,
-            color: 'text-indigo-400'
         }
     ];
 
