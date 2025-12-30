@@ -231,7 +231,6 @@ const BlogPage: React.FC = () => {
                                             animate={{ opacity: 1, y: 0 }}
                                             exit={{ opacity: 0, scale: 0.95 }}
                                             transition={{ delay: i * 0.05 }}
-                                            transition={{ delay: i * 0.05 }}
                                             onClick={() => handleOpenArticle(article)}
                                             className="group flex flex-col glass-morph rounded-[3.5rem] overflow-hidden hover:border-indigo-500/50 transition-all duration-700 cursor-pointer shadow-2xl premium-border"
                                         >
