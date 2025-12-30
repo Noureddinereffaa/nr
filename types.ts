@@ -338,3 +338,220 @@ export interface ChatMessage {
   role: 'user' | 'model';
   text: string;
 }
+
+// Comprehensive Site Text Customization Interface
+export interface SiteTexts {
+  // Navigation
+  nav: {
+    home: string;
+    services: string;
+    portfolio: string;
+    process: string;
+    blog: string;
+    contact: string;
+    aiAssistant: string;
+    dashboard: string;
+  };
+
+  // Hero Section
+  hero: {
+    badge: string;
+    primaryButton: string;
+    secondaryButton: string;
+    stat1Label: string;
+    stat2Label: string;
+    stat3Label: string;
+  };
+
+  // Services Section
+  services: {
+    badge: string;
+    title: string;
+    titleHighlight: string;
+    subtitle: string;
+    featuresLabel: string;
+    requestButton: string;
+  };
+
+  // Portfolio Section
+  portfolio: {
+    badge: string;
+    title: string;
+    titleHighlight: string;
+    subtitle: string;
+    exploreButton: string;
+  };
+
+  // Process Section
+  process: {
+    badge: string;
+    title: string;
+    titleHighlight: string;
+    subtitle: string;
+  };
+
+  // Testimonials Section
+  testimonials: {
+    badge: string;
+    title: string;
+    titleHighlight: string;
+  };
+
+  // Contact Section
+  contact: {
+    badge: string;
+    title: string;
+    titleHighlight: string;
+    subtitle: string;
+    whatsappLabel: string;
+    emailLabel: string;
+    phoneLabel: string;
+    addressLabel: string;
+    formTitle: string;
+    formSubtitle: string;
+    nameLabel: string;
+    emailFieldLabel: string;
+    projectLabel: string;
+    detailsLabel: string;
+    submitButton: string;
+    whatsappCta: string;
+    whatsappCtaSubtitle: string;
+  };
+
+  // Blog Section
+  blog: {
+    badge: string;
+    title: string;
+    titleHighlight: string;
+    subtitle: string;
+    searchPlaceholder: string;
+    categoryLabel: string;
+    allCategories: string;
+    readMore: string;
+    trendingTitle: string;
+    newsletterTitle: string;
+    newsletterSubtitle: string;
+    subscribeButton: string;
+  };
+
+  // Footer
+  footer: {
+    copyright: string;
+    privacyPolicy: string;
+    termsOfService: string;
+    madeWith: string;
+  };
+
+  // Common Buttons & Labels
+  common: {
+    loading: string;
+    error: string;
+    success: string;
+    cancel: string;
+    save: string;
+    delete: string;
+    edit: string;
+    close: string;
+    viewAll: string;
+    backToTop: string;
+  };
+}
+
+// Default Arabic texts
+export const DEFAULT_SITE_TEXTS: SiteTexts = {
+  nav: {
+    home: 'الرئيسية',
+    services: 'الخدمات',
+    portfolio: 'النتائج',
+    process: 'المنهجية',
+    blog: 'المقالات',
+    contact: 'تواصل معنا',
+    aiAssistant: 'المساعد الذكي',
+    dashboard: 'لوحة التحكم'
+  },
+  hero: {
+    badge: 'The Sovereign Digital Era 2025',
+    primaryButton: 'اكتشف خدماتنا النخبوية',
+    secondaryButton: 'حلول ذكاء اصطناعي',
+    stat1Label: 'دقة الأتمتة',
+    stat2Label: 'حلول منجزة',
+    stat3Label: 'خبرة دولية'
+  },
+  services: {
+    badge: 'Strategic Command Center',
+    title: 'حلول',
+    titleHighlight: 'استراتيجية',
+    subtitle: 'نحن لا نبيع مجرد خدمات، نحن نصمم أنظمة ذكية تضمن لك السيطرة الكاملة على السوق الرقمي.',
+    featuresLabel: 'المميزات الاستراتيجية',
+    requestButton: 'طلب الخدمة'
+  },
+  portfolio: {
+    badge: 'Elite Case Studies',
+    title: 'معرض',
+    titleHighlight: 'الإنجازات',
+    subtitle: 'شاهد كيف تحولت الرؤى الطموحة إلى واقع رقمي ملموس من خلال حلولنا الهندسية المبتكرة.',
+    exploreButton: 'استكشف تفاصيل المشروع'
+  },
+  process: {
+    badge: 'Strategic Architecture',
+    title: 'كيف نصنع',
+    titleHighlight: 'الفارق؟',
+    subtitle: 'نتبع منهجية هندسية صارمة تضمن تحويل الرؤى المعقدة إلى أنظمة رقمية تتسم بالسيادة والنمو المستدام.'
+  },
+  testimonials: {
+    badge: 'Clients Trust',
+    title: 'ماذا يقول',
+    titleHighlight: 'شركاؤنا؟'
+  },
+  contact: {
+    badge: 'Get in Touch',
+    title: 'لنحول رؤيتك إلى',
+    titleHighlight: 'واقع رقمي',
+    subtitle: 'تواصل معي اليوم لمناقشة مشروعك القادم. سواء كان فكرة ناشئة أو تطوير لنظام قائم، أنا هنا لتقديم الخبرة المطلوبة.',
+    whatsappLabel: 'واتساب مباشر',
+    emailLabel: 'البريد للتواصل الرسمي',
+    phoneLabel: 'رقم الهاتف والاتصال',
+    addressLabel: 'المقر الرئيسي',
+    formTitle: 'محرك الطلبات الرقمي',
+    formSubtitle: 'Project Submission Engine v1.0',
+    nameLabel: 'الاسم الكامل',
+    emailFieldLabel: 'البريد الإلكتروني',
+    projectLabel: 'مجال المشروع',
+    detailsLabel: 'تفاصيل الرؤية والأهداف',
+    submitButton: 'إرسال رسالتك الآن',
+    whatsappCta: 'استشارة فورية عبر الواتساب؟',
+    whatsappCtaSubtitle: 'متاح الآن للرد على استفساراتكم'
+  },
+  blog: {
+    badge: 'Sovereign Intelligence Hub 2025',
+    title: 'مركز',
+    titleHighlight: 'المعرفة',
+    subtitle: 'تحليلات استراتيجية ورؤى هندسية لصناعة الفارق في الاقتصاد الرقمي الحديث.',
+    searchPlaceholder: 'ابحث في الأرشيف الذكي...',
+    categoryLabel: 'تصنيف الرؤى:',
+    allCategories: 'الكل',
+    readMore: 'استكشاف التحليل',
+    trendingTitle: 'الأكثر تأثيراً',
+    newsletterTitle: 'انضم إلى مجتمع النخبة الرقمية',
+    newsletterSubtitle: 'احصل على تحليلات استراتيجية أسبوعية لا تتوفر للعموم.',
+    subscribeButton: 'الاشتراك في النشرة'
+  },
+  footer: {
+    copyright: '© 2025 جميع الحقوق محفوظة',
+    privacyPolicy: 'سياسة الخصوصية',
+    termsOfService: 'شروط الخدمة',
+    madeWith: 'صنع بـ ❤️ في الجزائر'
+  },
+  common: {
+    loading: 'جاري التحميل...',
+    error: 'حدث خطأ',
+    success: 'تم بنجاح',
+    cancel: 'إلغاء',
+    save: 'حفظ',
+    delete: 'حذف',
+    edit: 'تعديل',
+    close: 'إغلاق',
+    viewAll: 'عرض الكل',
+    backToTop: 'العودة للأعلى'
+  }
+};

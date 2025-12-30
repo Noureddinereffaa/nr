@@ -3,12 +3,19 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { Menu, X, Zap, Mail, Linkedin, Facebook, ChevronLeft, Bot, Sparkles, MessageCircle, ArrowRight } from 'lucide-react';
 import { useData } from '../context/DataContext';
 import { motion, AnimatePresence } from 'framer-motion';
+import { DEFAULT_SITE_TEXTS, SiteTexts } from '../types';
 
 const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const { siteData } = useData();
   const { profile, brand, contactInfo } = siteData;
+
+  // Get site texts with fallback to defaults
+  const siteTexts: SiteTexts = {
+    ...DEFAULT_SITE_TEXTS,
+    ...(siteData as any).siteTexts
+  };
 
   // Build social URLs
   const whatsappUrl = contactInfo?.whatsapp?.startsWith('http')
@@ -87,13 +94,14 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     }
   };
 
+  // Dynamic navigation links using siteTexts
   const navLinks = [
-    { name: 'الرئيسية', href: '#hero' },
-    { name: 'الخدمات', href: '#services' },
-    { name: 'النتائج', href: '#portfolio' },
-    { name: 'المنهجية', href: '#process' },
-    { name: 'المقالات', href: '#blog' },
-    { name: 'تواصل معنا', href: '#contact' },
+    { name: siteTexts.nav.home, href: '#hero' },
+    { name: siteTexts.nav.services, href: '#services' },
+    { name: siteTexts.nav.portfolio, href: '#portfolio' },
+    { name: siteTexts.nav.process, href: '#process' },
+    { name: siteTexts.nav.blog, href: '#blog' },
+    { name: siteTexts.nav.contact, href: '#contact' },
   ];
 
   const templateClass = brand?.templateId ? `tmpl-${brand.templateId.split('-')[0]}` : '';

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { User, Palette, Landmark, Scale, Code, Layout, Terminal } from 'lucide-react';
+import { User, Palette, Landmark, Scale, Code, Layout, Terminal, Type } from 'lucide-react';
 import ProfileSettings from './ProfileSettings';
 import BrandSettings from './BrandSettings';
 import FinancialSettings from './FinancialSettings';
@@ -7,9 +7,10 @@ import LegalSettingsComponent from './LegalSettings';
 import LayoutSettings from './LayoutSettings';
 import ModuleSettings from './ModuleSettings';
 import APISettings from './APISettings';
+import TextSettings from './TextSettings';
 
-const SettingsLayout: React.FC<{ initialTab?: 'profile' | 'brand' | 'financial' | 'legal' | 'layout' | 'modules' | 'api' }> = ({ initialTab = 'profile' }) => {
-    const [activeTab, setActiveTab] = useState<'profile' | 'brand' | 'financial' | 'legal' | 'layout' | 'modules' | 'api'>(initialTab);
+const SettingsLayout: React.FC<{ initialTab?: 'profile' | 'brand' | 'texts' | 'financial' | 'legal' | 'layout' | 'modules' | 'api' }> = ({ initialTab = 'profile' }) => {
+    const [activeTab, setActiveTab] = useState<'profile' | 'brand' | 'texts' | 'financial' | 'legal' | 'layout' | 'modules' | 'api'>(initialTab);
 
     return (
         <div className="flex flex-col md:flex-row h-full gap-6">
@@ -30,6 +31,14 @@ const SettingsLayout: React.FC<{ initialTab?: 'profile' | 'brand' | 'financial' 
                 >
                     <Palette size={18} />
                     الهوية البصرية
+                </button>
+                <button
+                    onClick={() => setActiveTab('texts')}
+                    className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold transition-all ${activeTab === 'texts' ? 'bg-indigo-600 text-white' : 'bg-slate-900 text-slate-400 hover:text-white hover:bg-slate-800'
+                        }`}
+                >
+                    <Type size={18} />
+                    نصوص الموقع
                 </button>
                 <button
                     onClick={() => setActiveTab('financial')}
@@ -81,6 +90,7 @@ const SettingsLayout: React.FC<{ initialTab?: 'profile' | 'brand' | 'financial' 
                 <div className="max-w-4xl mx-auto pb-10">
                     {activeTab === 'profile' && <ProfileSettings />}
                     {activeTab === 'brand' && <BrandSettings />}
+                    {activeTab === 'texts' && <TextSettings />}
                     {activeTab === 'financial' && <FinancialSettings />}
                     {activeTab === 'legal' && <LegalSettingsComponent />}
                     {activeTab === 'layout' && <LayoutSettings />}
