@@ -61,7 +61,7 @@ const BlogPage: React.FC = () => {
                                 initial={{ opacity: 0, y: 30 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ delay: 0.1 }}
-                                className="text-7xl md:text-[12rem] font-black text-white mb-8 tracking-tighter leading-[0.85] uppercase"
+                                className="text-6xl md:text-[12rem] font-black text-white mb-8 tracking-tighter leading-[0.85] uppercase"
                             >
                                 مركز <span className="gradient-text drop-shadow-[0_10px_40px_rgba(79,70,229,0.4)]">المعرفة</span>
                             </motion.h1>
@@ -200,7 +200,7 @@ const BlogPage: React.FC = () => {
                                 ))}
                             </div>
 
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-10">
                                 <AnimatePresence mode="popLayout">
                                     {latestArticles.map((article, i) => (
                                         <motion.div
@@ -232,7 +232,7 @@ const BlogPage: React.FC = () => {
                                             </div>
 
                                             <div className="p-10 text-right flex-1 flex flex-col bg-slate-900/60" dir="rtl">
-                                                <div className="flex items-center gap-6 text-indigo-400/80 text-[10px] font-black uppercase tracking-widest mb-6">
+                                                <div className="flex items-center gap-6 text-indigo-400/80 text-[10px] md:text-xs font-black uppercase tracking-widest mb-6">
                                                     <span className="flex items-center gap-2"><Calendar size={14} className="text-indigo-500" /> {new Date(article.date).toLocaleDateString('ar-EG')}</span>
                                                     <span className="flex items-center gap-2"><Clock size={14} className="text-indigo-500" /> {article.readTime}</span>
                                                 </div>

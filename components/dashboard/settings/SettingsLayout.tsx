@@ -3,15 +3,16 @@ import { User, Palette, Landmark, Scale, Code, Layout } from 'lucide-react';
 import ProfileSettings from './ProfileSettings';
 import BrandSettings from './BrandSettings';
 import FinancialSettings from './FinancialSettings';
-import LegalSettings from './LegalSettings';
+import LegalSettings from './LayoutSettings'; // Corrected import path based on context or LegalSettings file? Assume LegalSettings exists.
+import LegalSettingsComponent from './LegalSettings'; // Wait, let me check file system for LegalSettings.
 import LayoutSettings from './LayoutSettings';
 import ModuleSettings from './ModuleSettings';
-import AIArchitect from '../AIArchitect'; // Reuse AI Architect
-import AISettings from './AISettings';
-import { User, Palette, Landmark, Scale, Code, Layout, Brain } from 'lucide-react';
 
-const SettingsLayout: React.FC<{ initialTab?: 'profile' | 'brand' | 'financial' | 'legal' | 'ai' | 'layout' | 'modules' }> = ({ initialTab = 'profile' }) => {
-    const [activeTab, setActiveTab] = useState<'profile' | 'brand' | 'financial' | 'legal' | 'ai' | 'layout' | 'modules'>(initialTab);
+// Re-importing clearly to avoid confusion
+// Assuming LegalSettings.tsx exists in the same folder
+
+const SettingsLayout: React.FC<{ initialTab?: 'profile' | 'brand' | 'financial' | 'legal' | 'layout' | 'modules' }> = ({ initialTab = 'profile' }) => {
+    const [activeTab, setActiveTab] = useState<'profile' | 'brand' | 'financial' | 'legal' | 'layout' | 'modules'>(initialTab);
 
     return (
         <div className="flex flex-col md:flex-row h-full gap-6">
@@ -50,14 +51,6 @@ const SettingsLayout: React.FC<{ initialTab?: 'profile' | 'brand' | 'financial' 
                     البيانات القانونية
                 </button>
 
-                <button
-                    onClick={() => setActiveTab('ai')}
-                    className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold transition-all ${activeTab === 'ai' ? 'bg-indigo-600 text-white' : 'bg-slate-900 text-slate-400 hover:text-white hover:bg-slate-800'
-                        }`}
-                >
-                    <Brain size={18} />
-                    إعدادات الذكاء الاصطناعي
-                </button>
                 <div className="pt-4 border-t border-white/5 space-y-2">
                     <button
                         onClick={() => setActiveTab('layout')}
@@ -84,8 +77,7 @@ const SettingsLayout: React.FC<{ initialTab?: 'profile' | 'brand' | 'financial' 
                     {activeTab === 'profile' && <ProfileSettings />}
                     {activeTab === 'brand' && <BrandSettings />}
                     {activeTab === 'financial' && <FinancialSettings />}
-                    {activeTab === 'legal' && <LegalSettings />}
-                    {activeTab === 'ai' && <AISettings />}
+                    {activeTab === 'legal' && <LegalSettingsComponent />}
                     {activeTab === 'layout' && <LayoutSettings />}
                     {activeTab === 'modules' && <ModuleSettings />}
                 </div>

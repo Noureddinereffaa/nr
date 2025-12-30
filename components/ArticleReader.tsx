@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Article } from '../types';
-import { X, Clock, User, Calendar, Share2, Bookmark, ArrowRight, Sparkles, Tag, Target, Globe, Shield, Zap } from 'lucide-react';
+import { X, Clock, User, Calendar, Share2, Bookmark, ArrowRight, Sparkles, Tag, Target, Globe, Shield, Zap, CheckCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface ArticleReaderProps {
@@ -10,6 +10,36 @@ interface ArticleReaderProps {
 
 const ArticleReader: React.FC<ArticleReaderProps> = ({ article, onClose }) => {
     const [scrollProgress, setScrollProgress] = useState(0);
+    const [showShareModal, setShowShareModal] = useState(false);
+    const [copySuccess, setCopySuccess] = useState(false);
+
+    const handleShare = async () => {
+        const shareData = {
+            title: article.title,
+            text: article.excerpt,
+            url: window.location.href,
+        };
+
+        if (navigator.share) {
+            try {
+                await navigator.share(shareData);
+            } catch (err) {
+                console.log('Share canceled');
+            }
+        } else {
+            setShowShareModal(true);
+        }
+    };
+
+    const copyToClipboard = () => {
+        navigator.clipboard.writeText(window.location.href);
+        setCopySuccess(true);
+        setTimeout(() => setCopySuccess(false), 2000);
+    };
+
+    // Safe access to window/props in render, variables defined in scope
+    const shareUrl = typeof window !== 'undefined' ? encodeURIComponent(window.location.href) : '';
+    const shareText = encodeURIComponent(article.title || '');
 
     useEffect(() => {
         const handleScroll = () => {
@@ -61,29 +91,40 @@ const ArticleReader: React.FC<ArticleReaderProps> = ({ article, onClose }) => {
                 </div>
 
                 {/* Dynamic Header - Sovereign Control */}
-                <div className="sticky top-0 left-0 right-0 p-4 md:px-16 md:py-8 border-b border-white/5 bg-slate-950/80 backdrop-blur-3xl z-[100] flex items-center justify-between">
-                    <div className="flex items-center gap-4 md:gap-10 overflow-hidden">
-                        <button
-                            onClick={onClose}
-                            className="shrink-0 w-12 h-12 md:w-16 md:h-16 flex items-center justify-center rounded-2xl bg-white/5 border border-white/10 text-white hover:bg-indigo-600 hover:border-indigo-500 transition-all active:scale-95"
-                        >
-                            <X size={24} className="group-hover:rotate-90 transition-transform duration-500" />
-                        </button>
-                        <div className="text-right overflow-hidden" dir="rtl">
-                            <h4 className="text-white font-black text-sm md:text-lg truncate max-w-[180px] sm:max-w-xs md:max-w-xl">{article.title}</h4>
-                            <p className="text-indigo-500 text-[9px] font-black uppercase tracking-[0.2em] mt-0.5 flex items-center gap-2 justify-end">
-                                <Target size={10} /> {article.category}
-                            </p>
-                        </div>
+                <div className="sticky top-0 left-0 right-0 p-4 md:px-16 md:py-6 border-b border-white/5 bg-slate-950/90 backdrop-blur-xl z-[100] flex flex-row-reverse items-center justify-between gap-4">
+
+                    {/* Right: Title & Category (RTL) */}
+                    <div className="flex-1 min-w-0 flex flex-col items-end text-right">
+                        <h4 className="text-white font-black text-sm md:text-lg leading-tight truncate w-full pl-4" dir="rtl">
+                            {article.title}
+                        </h4>
+                        <p className="text-indigo-500 text-[9px] font-black uppercase tracking-widest mt-1 flex items-center gap-2">
+                            {article.category} <Target size={10} />
+                        </p>
                     </div>
 
-                    <div className="flex items-center gap-4">
-                        <div className="hidden lg:flex flex-col items-end border-r border-white/10 pr-6 mr-2" dir="rtl">
-                            <span className="text-white font-black text-xs uppercase tracking-widest">Noureddine Reffaa</span>
+                    {/* Left: Actions (LTR visual order: Share then Close) */}
+                    <div className="flex items-center gap-3 shrink-0">
+                        <div className="hidden lg:flex flex-col items-start border-l border-white/10 pl-6 ml-2 text-left">
+                            <span className="text-white font-black text-xs uppercase tracking-widest">Noureddine</span>
                             <span className="text-slate-500 text-[10px] font-black tracking-widest mt-1">Sovereign Expert</span>
                         </div>
-                        <button className="p-3 md:p-4 rounded-xl bg-white/5 hover:bg-indigo-600 text-white transition-all shadow-xl">
-                            <Share2 size={20} />
+
+                        <button
+                            onClick={handleShare}
+                            className="p-3 rounded-xl bg-white/5 hover:bg-indigo-600 text-white transition-all shadow-xl relative group"
+                        >
+                            <Share2 size={18} />
+                            <span className="absolute top-full left-1/2 -translate-x-1/2 mt-2 px-2 py-1 bg-black text-white text-[10px] rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
+                                مشاركة المقال
+                            </span>
+                        </button>
+
+                        <button
+                            onClick={onClose}
+                            className="w-12 h-12 flex items-center justify-center rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 hover:bg-red-500 hover:text-white transition-all active:scale-95"
+                        >
+                            <X size={20} />
                         </button>
                     </div>
                 </div>
@@ -237,7 +278,84 @@ const ArticleReader: React.FC<ArticleReaderProps> = ({ article, onClose }) => {
                         </motion.button>
                     )}
                 </AnimatePresence>
+
+                {/* Custom Share Modal (Fallback) */}
+                <AnimatePresence>
+                    {showShareModal && (
+                        <div onClick={() => setShowShareModal(false)} className="fixed inset-0 z-[200] bg-black/80 backdrop-blur-sm flex items-center justify-center p-6">
+                            <motion.div
+                                initial={{ opacity: 0, scale: 0.9 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                exit={{ opacity: 0, scale: 0.9 }}
+                                onClick={(e) => e.stopPropagation()}
+                                className="bg-slate-900 border border-white/10 rounded-3xl p-8 max-w-sm w-full shadow-2xl relative overflow-hidden"
+                            >
+                                <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-600/20 blur-[80px] rounded-full"></div>
+
+                                <h3 className="text-white font-black text-xl mb-6 text-center relative z-10">مشاركة الرؤية</h3>
+
+                                <div className="space-y-3 relative z-10">
+                                    <a
+                                        href={`https://twitter.com/intent/tweet?text=${shareText}&url=${shareUrl}`}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="flex items-center gap-4 p-4 rounded-xl bg-white/5 hover:bg-white/10 hover:translate-x-[-4px] transition-all group"
+                                    >
+                                        <div className="w-10 h-10 rounded-full bg-black flex items-center justify-center text-white border border-white/10 group-hover:border-indigo-500 transition-colors">
+                                            <svg viewBox="0 0 24 24" className="w-5 h-5 fill-current"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"></path></svg>
+                                        </div>
+                                        <span className="text-slate-300 font-bold">نشر على X</span>
+                                    </a>
+
+                                    <a
+                                        href={`https://www.facebook.com/sharer/sharer.php?u=${shareUrl}`}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="flex items-center gap-4 p-4 rounded-xl bg-white/5 hover:bg-white/10 hover:translate-x-[-4px] transition-all group"
+                                    >
+                                        <div className="w-10 h-10 rounded-full bg-[#1877F2] flex items-center justify-center text-white group-hover:shadow-[0_0_20px_rgba(24,119,242,0.5)] transition-all">
+                                            <svg viewBox="0 0 24 24" className="w-5 h-5 fill-current"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.791-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"></path></svg>
+                                        </div>
+                                        <span className="text-slate-300 font-bold">مشاركة على Facebook</span>
+                                    </a>
+
+                                    <a
+                                        href={`https://www.linkedin.com/sharing/share-offsite/?url=${shareUrl}`}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="flex items-center gap-4 p-4 rounded-xl bg-white/5 hover:bg-white/10 hover:translate-x-[-4px] transition-all group"
+                                    >
+                                        <div className="w-10 h-10 rounded-full bg-[#0A66C2] flex items-center justify-center text-white group-hover:shadow-[0_0_20px_rgba(10,102,194,0.5)] transition-all">
+                                            <svg viewBox="0 0 24 24" className="w-5 h-5 fill-current"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"></path></svg>
+                                        </div>
+                                        <span className="text-slate-300 font-bold">نشر عبر LinkedIn</span>
+                                    </a>
+
+                                    <button
+                                        onClick={copyToClipboard}
+                                        className="w-full flex items-center gap-4 p-4 rounded-xl bg-white/5 hover:bg-white/10 hover:translate-x-[-4px] transition-all group mt-4 border-t border-white/10"
+                                    >
+                                        <div className={`w-10 h-10 rounded-full flex items-center justify-center text-white transition-all ${copySuccess ? 'bg-green-500' : 'bg-slate-700'}`}>
+                                            {copySuccess ? <CheckCircle size={20} /> : <div className="font-mono text-xs">URL</div>}
+                                        </div>
+                                        <span className={`font-bold transition-colors ${copySuccess ? 'text-green-400' : 'text-slate-300'}`}>
+                                            {copySuccess ? 'تم نسخ الرابط بنجاح' : 'نسخ رابط المقال'}
+                                        </span>
+                                    </button>
+                                </div>
+
+                                <button
+                                    onClick={() => setShowShareModal(false)}
+                                    className="absolute top-4 right-4 text-slate-500 hover:text-white"
+                                >
+                                    <X size={20} />
+                                </button>
+                            </motion.div>
+                        </div>
+                    )}
+                </AnimatePresence>
             </motion.div>
+
 
             <style>{`
         .custom-scrollbar::-webkit-scrollbar {

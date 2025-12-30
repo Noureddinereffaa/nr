@@ -7,8 +7,7 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Article, AIConfig } from '../../../types';
-import { AIService, DigitalCouncil } from '../../../lib/ai-service';
-import AIMagicToolbar from './AIMagicToolbar';
+
 import { SOVEREIGN_TEMPLATES, ArticleTemplate } from '../../../lib/article-templates';
 
 interface WritingWorkspaceProps {
@@ -21,8 +20,9 @@ interface WritingWorkspaceProps {
 const WritingWorkspace: React.FC<WritingWorkspaceProps> = ({ article: initialArticle, aiConfig, onSave, onClose }) => {
     const [article, setArticle] = useState<Article>(initialArticle);
     const [view, setView] = useState<'split' | 'editor' | 'preview'>('split');
-    const [aiStatus, setAiStatus] = useState<'idle' | 'working'>('idle');
-    const [aiTools, setAiTools] = useState(false);
+    // AI Status Removed
+    // const [aiStatus, setAiStatus] = useState<'idle' | 'working'>('idle');
+    // const [aiTools, setAiTools] = useState(false);
     const [activeSection, setActiveSection] = useState<string>('');
     const [selectedTone, setSelectedTone] = useState<'Sovereign' | 'Analytical' | 'Storyteller'>('Sovereign');
     const [generatedOutline, setGeneratedOutline] = useState<any[]>([]);
@@ -157,67 +157,14 @@ const WritingWorkspace: React.FC<WritingWorkspaceProps> = ({ article: initialArt
     }, [article, focusMode]);
 
     // Selection Handling for AI Magic
+    // Selection Handling for AI Magic - Removed
     const handleSelection = () => {
-        const textarea = editorRef.current;
-        if (!textarea) return;
-
-        const start = textarea.selectionStart;
-        const end = textarea.selectionEnd;
-        const text = textarea.value.substring(start, end);
-
-        if (text && text.trim().length > 5) {
-            // Estimate position (Simplified for textareas)
-            const rect = textarea.getBoundingClientRect();
-            // This is a rough estimate. For perfect positioning in textareas we'd need a ghost div.
-            // But for now, we'll place it near the cursor/top.
-            setSelection({
-                text: text.trim(),
-                x: rect.left + 50,
-                y: rect.top - 60,
-                visible: true
-            });
-        } else {
-            setSelection(prev => ({ ...prev, visible: false }));
-        }
+        // Disabled
     };
 
+    // AI Actions Removed
     const handleMagicAction = async (action: string) => {
-        if (!selection.text) return;
-        setAiStatus('working');
-        setSelection(prev => ({ ...prev, visible: false }));
-
-        try {
-            let result = '';
-            switch (action) {
-                case 'rewrite':
-                    result = await AIService.refineTone(selection.text, selectedTone, aiConfig);
-                    break;
-                case 'expand':
-                    result = await AIService.draftSection(selection.text, article.content, aiConfig);
-                    break;
-                case 'summarize':
-                    result = await AIService.generateWithGemini(`Summarize this text in 2-3 bullet points: "${selection.text}"`, aiConfig);
-                    break;
-                case 'magic':
-                    result = await AIService.generateWithGemini(`Improve this content for a high-end strategy blog, adding authority and impact: "${selection.text}"`, aiConfig);
-                    break;
-            }
-
-            if (result) {
-                const textarea = editorRef.current;
-                if (textarea) {
-                    const start = textarea.selectionStart;
-                    const end = textarea.selectionEnd;
-                    const text = textarea.value;
-                    const newContent = text.substring(0, start) + result + text.substring(end);
-                    setArticle(prev => ({ ...prev, content: newContent }));
-                }
-            }
-        } catch (e) {
-            console.error("Magic action failed", e);
-        } finally {
-            setAiStatus('idle');
-        }
+        console.log("AI Magic Disabled");
     };
 
     // Insert Link
@@ -291,113 +238,11 @@ const WritingWorkspace: React.FC<WritingWorkspaceProps> = ({ article: initialArt
         }, 0);
     };
 
-    // AI Actions
-    const handleRefineTone = async () => {
-        if (!article.content || article.content.length < 50) {
-            alert('المحتوى قصير جداً للتحسين. اكتب المزيد أولاً.');
-            return;
-        }
-        setAiStatus('working');
-        try {
-            const refined = await AIService.refineTone(article.content, selectedTone, aiConfig);
-            setArticle(prev => ({ ...prev, content: refined }));
-        } catch (error) {
-            console.error("Tone refinement failed", error);
-        } finally {
-            setAiStatus('idle');
-        }
-    };
-    const handleSuggestOutline = async () => {
-        setAiStatus('working');
-        try {
-            const sections = await AIService.suggestOutline(article.title, aiConfig);
-            setGeneratedOutline(sections);
-        } catch (error) {
-            console.error("Outline suggestion failed", error);
-        } finally {
-            setAiStatus('idle');
-        }
-    };
-
-    const handleDraftSection = async (sectionTitle?: string) => {
-        const targetSection = sectionTitle || activeSection;
-        if (!targetSection) {
-            alert('الرجاء كتابة اسم القسم الذي تريد توليده أولاً');
-            return;
-        }
-
-        /* Verification of AI Config */
-        if (!aiConfig.apiKey && !import.meta.env.VITE_GEMINI_API_KEY) {
-            alert('مفتاح الذكاء الاصطناعي مفقود. يرجى التحقق من الإعدادات.');
-            return;
-        }
-
-        setAiStatus('working');
-        try {
-            console.log(`Starting draft for: ${targetSection}`);
-            // Use DIGITAL COUNCIL - Chief Editor
-            const draft = await DigitalCouncil.ChiefEditor.draftSection(targetSection, article.content, selectedTone, aiConfig);
-
-            if (!draft) throw new Error("Empty response from AI");
-
-            setArticle(prev => ({
-                ...prev,
-                content: prev.content + "\n" + draft
-            }));
-            setActiveSection('');
-        } catch (error: any) {
-            console.error("Drafting failed", error);
-            alert(`فشل توليد القسم: ${error.message || "خطأ غير معروف"}`);
-        } finally {
-            setAiStatus('idle');
-        }
-    };
-
-    const handleSuggestImage = async () => {
-        setAiStatus('working');
-        try {
-            // New: Generate REAL AI Image via Hugging Face (FLUX/SDXL)
-            const imageUrl = await DigitalCouncil.VisualDirector.generateHeaderImage(article.title, aiConfig);
-            setArticle(prev => ({ ...prev, image: imageUrl }));
-        } catch (e) {
-            console.error("Image Gen Failed", e);
-            alert("فشل توليد الصورة (تأكد من مفتاح Hugging Face)");
-        } finally {
-            setAiStatus('idle');
-        }
-    };
-
-    // --- New Council Handlers ---
-
-    const handleSEOAnalyze = async () => {
-        setAiStatus('working');
-        try {
-            const analysis = await DigitalCouncil.SEOAnalyst.analyze(article.content, article.keywords[0] || '', aiConfig);
-            alert(`SEO Score: ${analysis.score}/100\nMissing: ${analysis.missingKeywords.join(', ')}`);
-            // In a real app we would save this to state, but alert is fine for V1 verification
-        } catch (e) { alert("SEO Analysis failed"); }
-        finally { setAiStatus('idle'); }
-    };
-
-    const handleGenerateSchema = async () => {
-        setAiStatus('working');
-        try {
-            const schema = await DigitalCouncil.SchemaEngineer.generateFAQSchema(article.content, aiConfig);
-            console.log("Generated Schema:", schema);
-            alert("FAQ Schema generated successfully (Logged to Console for V1)");
-            // Future: Inject into article meta
-        } catch (e) { alert("Schema generation failed"); }
-        finally { setAiStatus('idle'); }
-    };
+    // AI Actions Removed
 
     return (
         <div className="fixed inset-0 z-[1500] bg-slate-950 flex flex-col overflow-hidden animate-in fade-in duration-500">
-            <AIMagicToolbar
-                x={selection.x}
-                y={selection.y}
-                isVisible={selection.visible}
-                onAction={handleMagicAction}
-            />
+            {/* Toolbar Removed */}
             {/* Elite Header */}
             <div className="h-24 border-b border-white/5 bg-slate-900/50 backdrop-blur-3xl px-8 flex items-center justify-between">
                 <div className="flex items-center gap-6">
@@ -681,7 +526,7 @@ const WritingWorkspace: React.FC<WritingWorkspaceProps> = ({ article: initialArt
                         </div>
 
                         <div className="flex-1 overflow-y-auto p-6 space-y-6 scrollbar-none">
-                            {/* 1. Visuals */}
+                            {/* Visuals - Manual Only */}
                             <div className="space-y-4">
                                 <div className="flex items-center gap-2 mb-2">
                                     <ImageIcon size={14} className="text-blue-400" />
@@ -690,44 +535,7 @@ const WritingWorkspace: React.FC<WritingWorkspaceProps> = ({ article: initialArt
                                 <div className="aspect-video rounded-2xl overflow-hidden border border-white/10 relative group">
                                     <img src={article.image} alt="Article" className="w-full h-full object-cover grayscale opacity-50 group-hover:grayscale-0 group-hover:opacity-100 transition-all duration-700" />
                                     <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent to-transparent opacity-60" />
-                                    <button
-                                        onClick={handleSuggestImage}
-                                        className="absolute bottom-4 right-4 bg-slate-900/80 hover:bg-indigo-600 backdrop-blur-xl p-2 rounded-xl border border-white/10 text-white transition-all">
-                                        <RefreshCw size={14} />
-                                    </button>
                                 </div>
-                            </div>
-
-                            {/* 2. SEO Tools */}
-                            <div className="bg-slate-900/50 border border-white/5 rounded-[2.5rem] p-5 space-y-4">
-                                <div className="flex items-center justify-between">
-                                    <div className="w-8 h-8 rounded-xl bg-green-500/20 flex items-center justify-center text-green-400">
-                                        <Search size={14} />
-                                    </div>
-                                    <span className="text-xs font-black text-green-300">SEO Check</span>
-                                </div>
-                                <button
-                                    onClick={handleSEOAnalyze}
-                                    className="w-full py-4 bg-white text-slate-950 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:shadow-xl transition-all active:scale-95"
-                                >
-                                    فحص التوافق (SEO)
-                                </button>
-                            </div>
-
-                            {/* 3. Schema Tools */}
-                            <div className="bg-slate-900/50 border border-white/5 rounded-[2.5rem] p-5 space-y-4">
-                                <div className="flex items-center justify-between">
-                                    <div className="w-8 h-8 rounded-xl bg-orange-500/20 flex items-center justify-center text-orange-400">
-                                        <Code2 size={14} />
-                                    </div>
-                                    <span className="text-xs font-black text-orange-300">Technical Schema</span>
-                                </div>
-                                <button
-                                    onClick={handleGenerateSchema}
-                                    className="w-full py-4 bg-white text-slate-950 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:shadow-xl transition-all active:scale-95"
-                                >
-                                    توليد بيانات مهيكلة (Schema)
-                                </button>
                             </div>
                         </div>
                     </div>

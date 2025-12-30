@@ -30,13 +30,6 @@ export const WIDGET_REGISTRY: Record<string, WidgetDefinition> = {
         defaultProps: { title: 'المشاريع النشطة' },
         size: 'large'
     },
-    'ai_insights': {
-        id: 'ai_insights',
-        type: 'intelligence',
-        component: React.lazy(() => import('./AIInsightsWidget.tsx')),
-        defaultProps: { title: 'تحليلات الذكاء الاصطناعي' },
-        size: 'medium'
-    },
     'quick_actions': {
         id: 'quick_actions',
         type: 'system',

@@ -4,12 +4,10 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { ChatMessage, ChatSession, INITIAL_SESSION, generateId, simulateTyping } from '../lib/chat-service';
 import { useData } from '../context/DataContext';
 import { useUI } from '../context/UIContext';
-import { useAI } from '../context/AIContext';
 
 const SmartChatbot: React.FC = () => {
     const { addRequest, siteData } = useData();
     const { isChatOpen, toggleChat, openChat } = useUI();
-    const { generateText } = useAI();
 
     // Load session from localStorage for persistence across pages
     const [session, setSession] = useState<ChatSession>(() => {
@@ -157,8 +155,7 @@ const SmartChatbot: React.FC = () => {
                                 { label: '🚀 تطوير مشروع رقمي', value: 'project' },
                                 { label: '💼 استشارة إدارية', value: 'consultation' },
                                 { label: '💰 استفسار عن الأسعار', value: 'pricing' },
-                                { label: '📞 تواصل مع نورالدين', value: 'contact' },
-                                { label: '🧠 سؤال عام (AI)', value: 'ai_chat' }
+                                { label: '📞 تواصل مع نورالدين', value: 'contact' }
                             ]
                         }
                     ]
@@ -225,36 +222,28 @@ const SmartChatbot: React.FC = () => {
                 return;
 
             case 'AI_CHAT_REPLY':
-                // This is the new Dynamic RAG Logic
-                try {
-                    const context = buildContext();
-                    const refinedPrompt = `CONTEXT: ${context}\n\nUSER QUESTION: ${userResponse}`;
+                setIsTyping(false);
+                setSession(prev => ({
+                    ...prev,
+                    messages: [...prev.messages, { id: generateId(), text: "عذراً، خدمة الذكاء الاصطناعي متوقفة حالياً بقرار إداري.", sender: 'bot', timestamp: new Date() }]
+                }));
+                return;
 
-                    // We use standard generateText from context which handles provider switching
-                    const reply = await generateText(refinedPrompt);
-
-                    setIsTyping(false);
-                    setSession(prev => ({
-                        ...prev,
-                        messages: [...prev.messages, { id: generateId(), text: reply, sender: 'bot', timestamp: new Date() }]
-                    }));
-                } catch (e) {
-                    setIsTyping(false);
-                    setSession(prev => ({
-                        ...prev,
-                        messages: [...prev.messages, { id: generateId(), text: "عذراً، حدث خطأ تقني. يرجى المحاولة لاحقاً.", sender: 'bot', timestamp: new Date() }]
-                    }));
-                }
+            case 'DEFAULT_REPLY':
+                setIsTyping(false);
+                setSession(prev => ({
+                    ...prev,
+                    messages: [...prev.messages, { id: generateId(), text: "كيف يمكنني خدمتك بشكل أفضل؟ يمكنك اختيار أحد الخيارات من القائمة أو طرح سؤال عام.", sender: 'bot', timestamp: new Date() }]
+                }));
                 return;
 
             default:
                 // Fallback for AI Chat Mode
-                if (session.currentState === 'AI_CHAT_MODE') {
+                if (session.currentState === 'AI_CHAT_MODE' && state !== 'AI_CHAT_REPLY') {
                     handleBotResponse('AI_CHAT_REPLY', userResponse);
                     return;
                 }
-
-                handleBotResponse('DEFAULT_REPLY'); // Or just ignore
+                setIsTyping(false);
                 return;
         }
     };
@@ -305,7 +294,7 @@ const SmartChatbot: React.FC = () => {
                     initial={{ opacity: 0, y: 20, scale: 0.95 }}
                     animate={{ opacity: 1, y: 0, scale: 1 }}
                     exit={{ opacity: 0, y: 20, scale: 0.95 }}
-                    className="mb-4 w-[calc(100vw-32px)] sm:w-[380px] md:w-[420px] h-[550px] sm:h-[650px] glass-morph rounded-[3rem] shadow-[0_40px_100px_rgba(0,0,0,0.6)] flex flex-col overflow-hidden border border-white/10"
+                    className="mb-4 w-[calc(100vw-32px)] sm:w-[380px] md:w-[420px] h-[550px] sm:h-[650px] glass-morph rounded-[3rem] shadow-[0_40px_100px_rgba(0,0,0,0.6)] flex flex-col overflow-hidden border border-white/20 bg-slate-900/80"
                 >
                     {/* Header - Deep Intelligence Style */}
                     <div className="bg-slate-950 p-6 flex items-center justify-between border-b border-white/10 relative overflow-hidden">

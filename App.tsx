@@ -3,7 +3,7 @@ import { Routes, Route } from 'react-router-dom';
 import { DataProvider } from './context/DataContext';
 import { UIProvider } from './context/UIContext';
 import { AuthProvider } from './context/AuthContext';
-import { AIProvider } from './context/AIContext';
+
 import SmartChatbot from './components/SmartChatbot';
 import LoadingSpinner from './components/ui/LoadingSpinner';
 import ProtectedRoute from './components/dashboard/auth/ProtectedRoute';
@@ -23,25 +23,23 @@ const App: React.FC = () => {
     <AuthProvider>
       <DataProvider>
         <UIProvider>
-          <AIProvider>
-            <SmartChatbot />
-            <Suspense fallback={<div className="h-screen w-full flex items-center justify-center bg-slate-950"><LoadingSpinner /></div>}>
-              <Routes>
-                <Route path="/" element={<HomePage />} />
-                <Route path="/dashboard" element={
-                  <ProtectedRoute>
-                    <Dashboard />
-                  </ProtectedRoute>
-                } />
-                <Route path="/services" element={<ServicesPage />} />
-                <Route path="/portfolio" element={<PortfolioPage />} />
-                <Route path="/blog" element={<BlogPage />} />
-                <Route path="/faq" element={<FaqPage />} />
-                <Route path="/contact" element={<ContactPage />} />
-                <Route path="/reset-data" element={<ResetData />} />
-              </Routes>
-            </Suspense>
-          </AIProvider>
+          <SmartChatbot />
+          <Suspense fallback={<div className="h-screen w-full flex items-center justify-center bg-slate-950"><LoadingSpinner /></div>}>
+            <Routes>
+              <Route path="/" element={<HomePage />} />
+              <Route path="/dashboard" element={
+                <ProtectedRoute>
+                  <Dashboard />
+                </ProtectedRoute>
+              } />
+              <Route path="/services" element={<ServicesPage />} />
+              <Route path="/portfolio" element={<PortfolioPage />} />
+              <Route path="/blog" element={<BlogPage />} />
+              <Route path="/faq" element={<FaqPage />} />
+              <Route path="/contact" element={<ContactPage />} />
+              <Route path="/reset-data" element={<ResetData />} />
+            </Routes>
+          </Suspense>
         </UIProvider>
       </DataProvider>
     </AuthProvider>

@@ -20,7 +20,6 @@ import CommandBar from '../components/ui/CommandBar';
 // Lazy Load Content Components
 const Overview = React.lazy(() => import('../components/dashboard/overview/Overview'));
 const ContentManager = React.lazy(() => import('../components/dashboard/modules/strategic-content/ContentManager'));
-const AIArchitect = React.lazy(() => import('../components/dashboard/modules/ai-global-brain/AIArchitect'));
 const Projects = React.lazy(() => import('../components/dashboard/modules/project-studio/Projects'));
 const ServicesList = React.lazy(() => import('../components/dashboard/modules/project-studio/ServicesList'));
 const SettingsLayout = React.lazy(() => import('../components/dashboard/settings/SettingsLayout'));
@@ -111,7 +110,6 @@ const DashboardPage: React.FC = () => {
                   {activeTab === 'projects' && <Projects />}
                   {activeTab === 'services' && <ServicesList />}
                   {activeTab === 'identity' && <SettingsLayout key="identity" initialTab="profile" />}
-                  {activeTab === 'aibrain' && <AIArchitect />}
                   {activeTab === 'content-manager' && <ContentManager />}
                   {activeTab === 'branding' && <SettingsLayout key="branding" initialTab="brand" />}
                   {activeTab === 'system' && <SettingsLayout key="system" initialTab="brand" />}
