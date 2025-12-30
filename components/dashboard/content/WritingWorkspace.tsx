@@ -7,6 +7,7 @@ import {
 import { motion, AnimatePresence } from 'framer-motion';
 import { Article, AIConfig } from '../../../types';
 import { SOVEREIGN_TEMPLATES, ArticleTemplate } from '../../../lib/article-templates';
+import ImageUploader from '../../ui/ImageUploader';
 
 interface WritingWorkspaceProps {
     article: Article;
@@ -231,29 +232,24 @@ const WritingWorkspace: React.FC<WritingWorkspaceProps> = ({ article: initialArt
                         </div>
 
                         <div className="p-6 space-y-8">
-                            {/* Hero Image Field */}
+                            {/* Hero Image Upload */}
                             <div className="space-y-3">
-                                <label className="text-xs font-bold text-slate-400 flex items-center gap-2 uppercase tracking-wide">
-                                    <ImageIcon size={12} /> Hero Image
-                                </label>
-                                <div className="aspect-video rounded-xl bg-slate-950 border border-white/10 overflow-hidden relative group">
-                                    {article.image ? (
-                                        <img src={article.image} alt="Hero" className="w-full h-full object-cover" />
-                                    ) : (
-                                        <div className="absolute inset-0 flex items-center justify-center text-slate-600 bg-grid-pattern opacity-20">
-                                            <ImageIcon size={32} />
-                                        </div>
-                                    )}
-                                    <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center p-4">
-                                        <input
-                                            type="text"
-                                            value={article.image}
-                                            onChange={(e) => setArticle({ ...article, image: e.target.value })}
-                                            className="w-full bg-slate-900 border border-white/20 text-white text-xs p-2 rounded outline-none"
-                                            placeholder="Paste Image URL..."
-                                        />
-                                    </div>
-                                </div>
+                                <ImageUploader
+                                    currentImage={article.image}
+                                    onUpload={(url) => setArticle({ ...article, image: url })}
+                                    folder="articles"
+                                    label="صورة المقال الرئيسية (Hero Image)"
+                                    aspectRatio="16/9"
+                                    maxSizeMB={5}
+                                />
+                                <p className="text-[9px] text-slate-500">أو أدخل رابط الصورة:</p>
+                                <input
+                                    type="text"
+                                    value={article.image}
+                                    onChange={(e) => setArticle({ ...article, image: e.target.value })}
+                                    className="w-full bg-slate-950 border border-white/10 text-white text-xs p-2 rounded-lg outline-none focus:border-indigo-500/50"
+                                    placeholder="https://..."
+                                />
                             </div>
 
                             {/* Tags Field */}

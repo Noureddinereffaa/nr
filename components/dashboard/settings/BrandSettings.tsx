@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { useData } from '../../../context/DataContext';
 import { useUI } from '../../../context/UIContext';
-import { Palette, Check, Sparkles, Eye, Layout } from 'lucide-react';
+import { Palette, Check, Sparkles, Eye, Layout, Upload } from 'lucide-react';
+import ImageUploader from '../../ui/ImageUploader';
 
 const PRESET_THEMES = [
     { name: 'Indigo', primary: '#6366f1', secondary: '#818cf8', label: 'أزرق نيلي' },
@@ -106,25 +107,26 @@ const BrandSettings: React.FC = () => {
                                 className="w-full bg-slate-950 border border-white/10 rounded-lg p-2.5 text-white focus:border-indigo-500/50 outline-none transition-colors"
                             />
                         </div>
-                        <div>
-                            <label className="text-xs font-bold text-slate-400 block mb-1">الشعار (صورة URL)</label>
-                            <div className="flex gap-2">
-                                <input
-                                    type="text"
-                                    value={brand.logo || ''}
-                                    onChange={(e) => handleChange('logo', e.target.value)}
-                                    className="flex-1 bg-slate-950 border border-white/10 rounded-lg p-2.5 text-white text-left focus:border-indigo-500/50 outline-none transition-colors"
-                                    dir="ltr"
-                                    placeholder="https://..."
-                                />
-                                <div className="w-10 h-10 bg-slate-800 rounded-lg flex items-center justify-center overflow-hidden border border-white/10 shrink-0">
-                                    {brand.logo ? (
-                                        <img src={brand.logo} alt="Logo" className="w-full h-full object-cover" />
-                                    ) : (
-                                        <Sparkles size={16} className="text-slate-600" />
-                                    )}
-                                </div>
-                            </div>
+
+                        {/* Logo Upload */}
+                        <div className="space-y-3">
+                            <ImageUploader
+                                currentImage={brand.logo}
+                                onUpload={(url) => handleChange('logo', url)}
+                                folder="logos"
+                                label="شعار الموقع (Logo)"
+                                aspectRatio="1/1"
+                                maxSizeMB={2}
+                            />
+                            <p className="text-[9px] text-slate-500">أو أدخل رابط الصورة يدوياً:</p>
+                            <input
+                                type="text"
+                                value={brand.logo || ''}
+                                onChange={(e) => handleChange('logo', e.target.value)}
+                                className="w-full bg-slate-950 border border-white/10 rounded-lg p-2 text-white text-xs text-left focus:border-indigo-500/50 outline-none transition-colors"
+                                dir="ltr"
+                                placeholder="https://..."
+                            />
                         </div>
                     </div>
 
@@ -231,8 +233,8 @@ const BrandSettings: React.FC = () => {
                                         key={tmpl.id}
                                         onClick={() => handleChange('templateId', tmpl.id)}
                                         className={`flex items-start gap-4 p-4 rounded-2xl border text-right transition-all ${isActive
-                                                ? 'bg-indigo-600/10 border-indigo-500 shadow-xl'
-                                                : 'bg-slate-950 border-white/5 hover:border-white/10'
+                                            ? 'bg-indigo-600/10 border-indigo-500 shadow-xl'
+                                            : 'bg-slate-950 border-white/5 hover:border-white/10'
                                             }`}
                                         dir="rtl"
                                     >
