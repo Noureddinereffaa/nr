@@ -46,7 +46,7 @@ const HomePage: React.FC = () => {
           <Process />
           <StrategicBlog />
 
-          <div className="py-16 relative overflow-hidden bg-slate-900/40">
+          <div className="py-8 relative overflow-hidden bg-slate-900/40">
             <div className="absolute top-0 right-0 w-full h-full bg-[radial-gradient(circle_at_20%_50%,rgba(99,102,241,0.05)_0%,transparent_70%)] pointer-events-none"></div>
             <Testimonials />
           </div>
@@ -55,8 +55,8 @@ const HomePage: React.FC = () => {
 
           <Contact />
 
-          <div className="relative pb-16">
-            <div className="absolute inset-x-0 bottom-0 h-96 bg-gradient-to-t from-indigo-600/10 to-transparent blur-[120px] opacity-20 pointer-events-none"></div>
+          <div className="relative pb-8">
+            <div className="absolute inset-x-0 bottom-0 h-48 bg-gradient-to-t from-indigo-600/10 to-transparent blur-[80px] opacity-20 pointer-events-none"></div>
           </div>
         </div>
       </div>

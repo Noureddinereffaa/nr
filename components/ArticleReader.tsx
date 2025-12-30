@@ -229,7 +229,7 @@ const ArticleReader: React.FC<ArticleReaderProps> = ({ article, onClose }) => {
                         </div>
 
                         {/* Content Container - Relative Content on Mobile, Absolute Overlay on Desktop */}
-                        <div className="relative z-10 md:h-[85vh] flex flex-col items-center justify-end px-6 pb-8 md:pb-32 md:px-10 max-w-6xl mx-auto text-center -mt-12 md:mt-0">
+                        <div className="relative z-10 md:h-[85vh] flex flex-col items-center justify-end px-6 pb-6 md:pb-20 md:px-10 max-w-5xl mx-auto text-center -mt-8 md:mt-0">
                             <motion.div
                                 initial={{ opacity: 0, scale: 0.9 }}
                                 animate={{ opacity: 1, scale: 1 }}
@@ -244,7 +244,7 @@ const ArticleReader: React.FC<ArticleReaderProps> = ({ article, onClose }) => {
                                 initial={{ opacity: 0, y: 30 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ delay: 0.4 }}
-                                className="text-3xl sm:text-4xl md:text-8xl lg:text-[10rem] font-black text-white leading-tight md:leading-[0.9] mb-8 md:mb-16 tracking-tighter drop-shadow-2xl md:drop-shadow-[0_20px_60px_rgba(0,0,0,0.8)]"
+                                className="text-2xl sm:text-3xl md:text-5xl lg:text-6xl font-black text-white leading-tight md:leading-[0.95] mb-6 md:mb-10 tracking-tighter drop-shadow-xl"
                             >
                                 {article.title}
                             </motion.h1>

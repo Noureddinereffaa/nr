@@ -10,12 +10,12 @@ const Process: React.FC = () => {
   const icons = [Target, Zap, Shield, Sparkles];
 
   return (
-    <section id="process" className="py-24 md:py-32 relative overflow-hidden">
+    <section id="process" className="py-12 md:py-16 relative overflow-hidden">
       {/* Background Accents */}
       <div className="absolute top-1/2 left-0 w-[400px] h-[400px] bg-indigo-600/5 blur-[120px] rounded-full pointer-events-none"></div>
 
       <div className="container mx-auto px-6 relative z-10">
-        <div className="max-w-4xl mx-auto text-center mb-20">
+        <div className="max-w-3xl mx-auto text-center mb-12">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -29,7 +29,7 @@ const Process: React.FC = () => {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ delay: 0.1 }}
-            className="text-5xl md:text-8xl font-black mb-10 text-white tracking-tighter leading-none"
+            className="text-3xl md:text-5xl font-black mb-6 text-white tracking-tighter leading-none"
           >
             كيف نصنع <span className="gradient-text">الفارق؟</span>
           </motion.h2>
@@ -38,13 +38,13 @@ const Process: React.FC = () => {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ delay: 0.2 }}
-            className="text-xl md:text-2xl text-slate-400 leading-relaxed max-w-2xl mx-auto font-medium"
+            className="text-base md:text-lg text-slate-400 leading-relaxed max-w-xl mx-auto font-medium"
           >
             نتبع منهجية هندسية صارمة تضمن تحويل الرؤى المعقدة إلى أنظمة رقمية تتسم بالسيادة والنمو المستدام.
           </motion.p>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 md:gap-10">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {process.map((item: any, idx: number) => {
             const Icon = icons[idx % icons.length];
             return (
@@ -54,7 +54,7 @@ const Process: React.FC = () => {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: idx * 0.1 }}
-                className="group relative glass-card p-10 rounded-[3.5rem] overflow-hidden transition-all duration-700 hover:-translate-y-3"
+                className="group relative glass-card p-6 rounded-2xl overflow-hidden transition-all duration-700 hover:-translate-y-2"
               >
                 {/* Step ID Silk Shimmer */}
                 <div className="absolute -top-6 -right-6 text-[120px] font-black text-white/5 select-none pointer-events-none group-hover:text-indigo-500/10 transition-colors duration-700">

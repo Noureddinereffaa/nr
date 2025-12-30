@@ -163,13 +163,13 @@ const Portfolio: React.FC = () => {
   const isMinimalist = templateId === 'minimalist-pro';
 
   return (
-    <section id="portfolio" className={`py-24 md:py-32 relative overflow-hidden ${isMinimalist ? 'bg-slate-50' : ''}`}>
+    <section id="portfolio" className={`py-12 md:py-16 relative overflow-hidden ${isMinimalist ? 'bg-slate-50' : ''}`}>
       {!isMinimalist && (
         <div className="absolute top-0 right-1/4 w-[600px] h-[600px] bg-indigo-600/5 blur-[150px] rounded-full pointer-events-none"></div>
       )}
 
       <div className="container mx-auto px-6 relative z-10">
-        <div className="max-w-4xl mx-auto text-center mb-24">
+        <div className="max-w-3xl mx-auto text-center mb-12">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -185,7 +185,7 @@ const Portfolio: React.FC = () => {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ delay: 0.1 }}
-            className={`text-5xl md:text-8xl font-black mb-10 tracking-tighter leading-[0.95] ${isMinimalist ? 'text-slate-950' : 'text-white'}`}
+            className={`text-3xl md:text-5xl font-black mb-6 tracking-tighter leading-[0.95] ${isMinimalist ? 'text-slate-950' : 'text-white'}`}
           >
             معرض <span className={isMinimalist ? 'text-indigo-600' : 'gradient-text'}>الإنجازات</span> <br /> الاستراتيجي
           </motion.h2>
@@ -194,13 +194,13 @@ const Portfolio: React.FC = () => {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ delay: 0.2 }}
-            className={`text-xl md:text-2xl leading-relaxed max-w-2xl mx-auto font-medium ${isMinimalist ? 'text-slate-600' : 'text-slate-400'}`}
+            className={`text-base md:text-lg leading-relaxed max-w-xl mx-auto font-medium ${isMinimalist ? 'text-slate-600' : 'text-slate-400'}`}
           >
             شاهد كيف تحولت الرؤى الطموحة إلى واقع رقمي ملموس من خلال حلولنا الهندسية المبتكرة.
           </motion.p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-10">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {projects.map((project: any, i: number) => (
             <motion.div
               key={project.id || i}
