@@ -41,6 +41,56 @@ const ArticleReader: React.FC<ArticleReaderProps> = ({ article, onClose }) => {
     const shareUrl = typeof window !== 'undefined' ? encodeURIComponent(window.location.href) : '';
     const shareText = encodeURIComponent(article.title || '');
 
+    // Dynamic Meta Tags for Social Sharing (Open Graph)
+    useEffect(() => {
+        // Store original values
+        const originalTitle = document.title;
+        const metaTags = {
+            'og:title': getMetaContent('og:title'),
+            'og:description': getMetaContent('og:description'),
+            'og:image': getMetaContent('og:image'),
+            'twitter:title': getMetaContent('twitter:title'),
+            'twitter:description': getMetaContent('twitter:description'),
+            'twitter:image': getMetaContent('twitter:image'),
+        };
+
+        // Update values
+        document.title = `${article.title} | NR-OS Center`;
+        setMetaTag('og:title', article.title);
+        setMetaTag('og:description', article.excerpt);
+        setMetaTag('og:image', article.image); // Ensure this is an absolute URL if possible
+        setMetaTag('twitter:title', article.title);
+        setMetaTag('twitter:description', article.excerpt);
+        setMetaTag('twitter:image', article.image);
+
+        return () => {
+            // Restore original values
+            document.title = originalTitle;
+            Object.entries(metaTags).forEach(([key, value]) => {
+                if (value) setMetaTag(key, value);
+            });
+        };
+    }, [article]);
+
+    // Helper to get meta content
+    function getMetaContent(property: string) {
+        return document.querySelector(`meta[property="${property}"]`)?.getAttribute('content') ||
+            document.querySelector(`meta[name="${property}"]`)?.getAttribute('content');
+    }
+
+    // Helper to set meta content
+    function setMetaTag(property: string, content: string) {
+        let tag = document.querySelector(`meta[property="${property}"]`) ||
+            document.querySelector(`meta[name="${property}"]`);
+
+        if (!tag) {
+            tag = document.createElement('meta');
+            tag.setAttribute(property.startsWith('twitter') ? 'name' : 'property', property);
+            document.head.appendChild(tag);
+        }
+        tag.setAttribute('content', content);
+    }
+
     useEffect(() => {
         const handleScroll = () => {
             const container = document.getElementById('reader-content');
