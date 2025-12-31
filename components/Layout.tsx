@@ -7,7 +7,6 @@ import { DEFAULT_SITE_TEXTS, SiteTexts } from '../types';
 
 const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [scrolled, setScrolled] = useState(false);
   const { siteData } = useData();
   const { profile, brand, contactInfo } = siteData;
 
@@ -42,11 +41,6 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     return `${parseInt(result[1], 16)}, ${parseInt(result[2], 16)}, ${parseInt(result[3], 16)}`;
   };
 
-  useEffect(() => {
-    const handleScroll = () => setScrolled(window.scrollY > 20);
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
 
   useEffect(() => {
     if (isMenuOpen) {
@@ -125,42 +119,46 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
         <span className="text-xs font-black uppercase tracking-[0.15em] whitespace-nowrap">استشارة ذكية مجانية</span>
       </motion.button>
 
-      <nav className={`fixed top-0 left-0 right-0 z-[var(--z-nav)] transition-all duration-700 ${scrolled ? 'py-4' : 'py-8'}`}>
-        <div className="container mx-auto px-6">
-          <div className={`flex justify-between items-center p-3 rounded-[2rem] transition-all duration-700 ${scrolled ? 'glass-panel border-white/10 shadow-3xl px-6' : 'bg-transparent'}`}>
-            <div onClick={(e) => scrollToSection(e, '#hero')} className="flex items-center gap-3 group cursor-pointer">
-              <div className="w-11 h-11 bg-indigo-600 rounded-2xl flex items-center justify-center text-white shadow-xl shadow-indigo-600/40 group-hover:rotate-[15deg] transition-all duration-500">
-                <Zap className="text-white fill-current" size={22} />
+      <nav className="fixed top-6 left-0 right-0 z-[var(--z-nav)] px-6">
+        <div className="container mx-auto max-w-7xl">
+          <div className="flex justify-between items-center px-8 py-4 glass-panel border border-white/10 rounded-[2.5rem] shadow-[0_20px_50px_rgba(0,0,0,0.5)] relative overflow-hidden group/nav">
+            {/* Ambient Shimmer Effect */}
+            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full group-hover/nav:translate-x-full transition-transform duration-1000"></div>
+
+            <div onClick={(e) => scrollToSection(e, '#hero')} className="flex items-center gap-4 group cursor-pointer relative z-10">
+              <div className="w-12 h-12 bg-indigo-600 rounded-2xl flex items-center justify-center text-white shadow-[0_0_20px_rgba(79,70,229,0.4)] group-hover:rotate-[15deg] transition-all duration-500">
+                <Zap className="text-white fill-current" size={24} />
               </div>
               <div className="flex flex-col items-start leading-none text-right">
-                <span className="text-lg font-black text-white tracking-tighter uppercase leading-none">REFF<span className="text-indigo-500">AA</span></span>
-                <span className="text-[8px] font-black text-slate-500 uppercase tracking-[0.25em] mt-0.5">{profile?.nameEn?.split(' ')[0] || 'NR'} STRATEGY</span>
+                <span className="text-xl font-black text-white tracking-tighter uppercase leading-none">REFF<span className="text-indigo-500">AA</span></span>
+                <span className="text-[9px] font-black text-slate-500 uppercase tracking-[0.3em] mt-1">{profile?.nameEn?.split(' ')[0] || 'NR'} STRATEGY</span>
               </div>
             </div>
 
-            <div className="hidden lg:flex gap-10 items-center">
+            <div className="hidden lg:flex gap-12 items-center relative z-10">
               {navLinks.map((link, i) => (
                 <button
                   key={i}
                   onClick={(e) => scrollToSection(e, link.href)}
-                  className="text-[11px] font-black text-slate-400 hover:text-white transition-all uppercase tracking-[0.15em] relative group/link"
+                  className="text-[12px] font-black text-slate-400 hover:text-white transition-all uppercase tracking-[0.2em] relative group/link"
                 >
                   {link.name}
-                  <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-indigo-500 transition-all duration-300 group-hover/link:w-full"></span>
+                  <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-0 h-0.5 bg-indigo-500 transition-all duration-300 group-hover/link:w-full"></span>
                 </button>
               ))}
+              <div className="h-6 w-px bg-white/10 mx-2"></div>
               <button
                 onClick={(e) => scrollToSection(e, '#assistant')}
-                className="glow-accent bg-white text-slate-950 px-8 py-3.5 rounded-2xl text-[11px] font-black transition-all shadow-2xl flex items-center gap-3 active:scale-95"
+                className="glow-accent bg-white text-slate-950 px-8 py-3.5 rounded-2xl text-[11px] font-black transition-all shadow-2xl flex items-center gap-3 active:scale-95 group/btn"
               >
-                <Bot size={16} className="text-indigo-600 animate-bounce" />
+                <Bot size={16} className="text-indigo-600 group-hover:rotate-12 transition-transform" />
                 المساعد الذكي
               </button>
             </div>
 
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className={`lg:hidden p-3.5 rounded-2xl border transition-all duration-500 ${isMenuOpen ? 'bg-indigo-600 border-indigo-600 text-white rotate-90' : 'bg-white/5 border-white/10 text-white'}`}
+              className={`lg:hidden p-3.5 rounded-2xl border transition-all duration-500 relative z-10 ${isMenuOpen ? 'bg-indigo-600 border-indigo-600 text-white shadow-lg shadow-indigo-600/40' : 'bg-white/5 border-white/10 text-white'}`}
             >
               {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
             </button>

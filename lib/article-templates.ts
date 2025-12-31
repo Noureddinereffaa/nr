@@ -469,6 +469,195 @@ const systemConfig = {
   }
 }
         `
+  },
+  {
+    id: 'growth-masterclass',
+    title: 'ماستر كلاس النمو (Growth Masterclass)',
+    description: 'قالب استراتيجي ضخم مكون من 10+ أقسام لخطط النمو العميق والسيطرة على السوق.',
+    icon: 'TrendingUp',
+    structure: `
+<div class="text-right space-y-24" dir="rtl">
+    <!-- Hero Section -->
+    <header class="text-center py-20 px-6 bg-slate-900 border border-white/5 rounded-[3rem] relative overflow-hidden">
+        <div class="absolute inset-0 bg-gradient-to-br from-indigo-500/10 via-transparent to-purple-500/10"></div>
+        <span class="relative z-10 px-4 py-1.5 bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 rounded-full text-[10px] font-black uppercase tracking-[0.3em] mb-8 inline-block italic">Elite Growth Strategy</span>
+        <h1 class="relative z-10 text-5xl md:text-7xl font-black text-white mb-8 leading-[1.1] tracking-tighter">الخريطة السيادية للنمو المليوني: <span class="elite-text-shimmer">دليل السيطرة المطلقة</span></h1>
+        <p class="relative z-10 text-xl text-slate-400 max-w-3xl mx-auto leading-relaxed">كيف تبني إمبراطورية رقمية تعتمد على القوانين النفسية والنمو التلقائي بعيداً عن صراعات المنافسة التقليدية.</p>
+    </header>
+
+    <!-- Part 1: Psychological Foundation -->
+    <section>
+        <div class="flex items-center gap-6 mb-12">
+            <span class="w-16 h-px bg-indigo-500/30"></span>
+            <h2 class="text-3xl font-black text-white">01. سيكولوجية الاستحواذ (Market Psychology)</h2>
+        </div>
+        <p class="text-lg text-slate-300 mb-10 leading-relaxed">النمو لا يبدأ بالحملات الإعلانية، بل يبدأ بفهم <strong class="text-white">المحفزات النفسية</strong> التي تجعل العميل يختارك كخيار وحيد في عقله. السيطرة تبدأ من التحكم في "الإدراك" قبل التحكم في "المنتجات".</p>
+        <img src="https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&q=80" alt="Strategy Foundation" class="w-full h-[500px] object-cover rounded-[3rem] border border-white/5 mb-12" />
+    </section>
+
+    <!-- Part 2: Competitive Moats -->
+    <section>
+        <h2 class="text-3xl font-black text-white mb-12">02. الخنادق التنافسية (Competitive Moats)</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-10">
+            <div class="glass-panel p-10 rounded-[2.5rem] border-white/5 group hover:border-indigo-500/30 transition-all">
+                <h3 class="text-xl font-black text-indigo-400 mb-4">بناء السلطة (Authority Moat)</h3>
+                <p class="text-slate-400 leading-relaxed">كيف تجعل اسمك مرادفاً للتخصص في مجالك، بحيث يصبح البحث عن الحل يبدأ وينتهي عندك.</p>
+            </div>
+            <div class="glass-panel p-10 rounded-[2.5rem] border-white/5 group hover:border-purple-500/30 transition-all">
+                <h3 class="text-xl font-black text-purple-400 mb-4">أثر الشبكة (Network Effect)</h3>
+                <p class="text-slate-400 leading-relaxed">تصميم منتج تزداد قيمته آلياً كلما زاد عدد مستخدميه، مما يخلق عائقاً هائلاً أمام أي منافس جديد.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Part 3: Growth Loops -->
+    <section class="bg-indigo-600 rounded-[4rem] p-16 text-center text-white relative overflow-hidden">
+        <div class="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 pointer-events-none"></div>
+        <h2 class="text-4xl font-black mb-8 relative z-10">03. محركات النمو التلقائي (Growth Loops)</h2>
+        <p class="text-xl text-indigo-100 max-w-2xl mx-auto mb-12 relative z-10 leading-relaxed">انسَ مفهوم "الأقماع" التقليدية (Funnels). المستقبل هو للدوائر المغلقة التي تغذي نفسها بنفسها، حيث يتحول كل عاصفة بيعية إلى وقود للنمو القادم.</p>
+        <div class="inline-flex items-center gap-4 bg-white/10 backdrop-blur-xl border border-white/20 px-8 py-4 rounded-full font-bold relative z-10 italic">
+            Loop Efficiency: +450% ROI
+        </div>
+    </section>
+
+    <!-- Part 4: Data Driven Execution -->
+    <section>
+        <h2 class="text-3xl font-black text-white mb-12">04. التنفيذ المبني على البيانات (Data Tactics)</h2>
+        <div class="overflow-x-auto rounded-[2rem] border border-white/5">
+            <table class="w-full text-right border-collapse">
+                <thead class="bg-slate-900 text-indigo-400 uppercase text-[10px] font-black tracking-widest">
+                    <tr>
+                        <th class="p-8 border-b border-white/5">Metric Area</th>
+                        <th class="p-8 border-b border-white/5">Elite Target</th>
+                        <th class="p-8 border-b border-white/5">Strategic Action</th>
+                    </tr>
+                </thead>
+                <tbody class="text-slate-300 divide-y divide-white/5">
+                    <tr>
+                        <td class="p-8 font-black text-white text-lg italic">LTV:CAC Ratio</td>
+                        <td class="p-8 text-emerald-400 font-bold">> 5:1</td>
+                        <td class="p-8">Aggressive re-investment in authority assets.</td>
+                    </tr>
+                    <tr>
+                        <td class="p-8 font-black text-white text-lg italic">Churn Rate</td>
+                        <td class="p-8 text-indigo-400 font-bold">< 2%</td>
+                        <td class="p-8">Implementing high-touch predictive loyalty loops.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <!-- Final Call -->
+    <section class="border-t border-white/5 pt-24 text-center">
+        <h2 class="text-4xl font-black text-white mb-8">هل أنت مستعد لقيادة التحول؟</h2>
+        <p class="text-slate-400 max-w-2xl mx-auto mb-12 italic">هذا الدليل هو البداية فقط. السيادة الرقمية تتطلب تنفيذاً دقيقاً واستراتيجية مفصلة حسب حجم أهدافك.</p>
+        <a href="/contact" class="inline-flex items-center gap-4 bg-white text-slate-950 px-12 py-5 rounded-3xl font-black text-xl hover:scale-105 transition-all shadow-[0_20px_60px_rgba(255,255,255,0.1)] group">
+            احجز استشارة السيطرة الآن
+            <span class="w-8 h-8 bg-indigo-600 rounded-full flex items-center justify-center text-white group-hover:rotate-45 transition-transform italic text-sm">→</span>
+        </a>
+    </section>
+</div>
+        `
+  },
+  {
+    id: 'ecosystem-architect',
+    title: 'معمارية المنظومات (Ecosystem Architect)',
+    description: 'قالب هندسي عميق لشرح البنى التحتية، التدفقات البرمجية، والأتمتة المتقدمة.',
+    icon: 'Layers',
+    structure: `
+<div class="text-right space-y-24" dir="rtl">
+    <!-- Hero Technical -->
+    <header class="border-b border-white/5 pb-16">
+        <div class="flex items-center gap-4 text-emerald-500 font-mono text-xs mb-6 tracking-widest uppercase">
+            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+            System: Fully Operational
+        </div>
+        <h1 class="text-5xl md:text-6xl font-black text-white mb-8 tracking-tighter leading-tight">معمارية الـ Zero-Failure: <br/> هـندسة المنظومات السيادية المتكاملة</h1>
+        <p class="text-xl text-slate-500 font-bold border-r-2 border-slate-800 pr-8">دليل هندسي شامل لبناء بنية تحتية رقمية لا تقبل السقوط، تجمع بين الذكاء الصناعي والأتمتة اللحظية.</p>
+    </header>
+
+    <!-- Technical Stack -->
+    <section>
+        <h2 class="text-2xl font-black text-emerald-400 mb-12 flex items-center gap-4">
+            <span class="w-10 h-px bg-emerald-500/20"></span>
+            01. المكدس التقني (The Infrastructure Stack)
+        </h2>
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div class="p-8 bg-slate-900/50 rounded-2xl border border-white/5">
+                <span class="text-[10px] text-slate-500 font-black uppercase mb-2 block">Core Engine</span>
+                <p class="text-white font-bold">Go / Rust</p>
+            </div>
+            <div class="p-8 bg-slate-900/50 rounded-2xl border border-white/5">
+                <span class="text-[10px] text-slate-500 font-black uppercase mb-2 block">Intelligence</span>
+                <p class="text-white font-bold">LLM Orchestrator</p>
+            </div>
+            <div class="p-8 bg-slate-900/50 rounded-2xl border border-white/5">
+                <span class="text-[10px] text-slate-500 font-black uppercase mb-2 block">Storage</span>
+                <p class="text-white font-bold">Vector DB / SQL</p>
+            </div>
+            <div class="p-8 bg-slate-900/50 rounded-2xl border border-white/5">
+                <span class="text-[10px] text-slate-500 font-black uppercase mb-2 block">Edge</span>
+                <p class="text-white font-bold">Cloudflare / WASM</p>
+            </div>
+        </div>
+        <img src="https://images.unsplash.com/photo-1558494949-ef010cbdcc51?auto=format&fit=crop&q=80" alt="Technical Stack Blueprint" class="w-full h-[400px] object-cover rounded-3xl mt-12 grayscale brightness-75 border border-white/5" />
+    </section>
+
+    <!-- Data Orchestration -->
+    <section class="grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
+        <div>
+            <h2 class="text-3xl font-black text-white mb-8">02. أوركسترا البيانات (Data Orchestration)</h2>
+            <p class="text-slate-400 leading-relaxed mb-8">كيف تتحرك البيانات من المدخلات العشوائية إلى القرارات الاستراتيجية في أقل من 150 ملي ثانية. الأتمتة لا تعني "التكرار"، بل تعني "التفكير التلقائي".</p>
+            <div class="space-y-4">
+                <div class="flex items-center gap-4 p-4 bg-emerald-500/5 border border-emerald-500/10 rounded-xl">
+                    <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                    <span class="text-sm font-bold text-emerald-100 italic font-mono">Real-time Stream Integration</span>
+                </div>
+                <div class="flex items-center gap-4 p-4 bg-white/5 border border-white/10 rounded-xl">
+                    <span class="w-2 h-2 rounded-full bg-slate-500"></span>
+                    <span class="text-sm font-bold text-slate-300 italic font-mono">Predictive Scaling Protocols</span>
+                </div>
+            </div>
+        </div>
+        <div class="bg-black/40 p-12 rounded-[3rem] border border-white/5 font-mono text-sm shadow-2xl">
+            <div class="text-emerald-500 mb-4">// System Logic v4.0</div>
+            <div class="text-slate-400">async function <span class="text-indigo-400">orchestrate</span>(payload) {</div>
+            <div class="text-slate-500 pl-8 italic">// Initialize Sovereign Intelligence</div>
+            <div class="text-slate-400 pl-8">const decision = await <span class="text-emerald-400">Core.analyze</span>(payload);</div>
+            <div class="text-slate-400 pl-8">if (decision.highPriority) {</div>
+            <div class="text-slate-400 pl-16">return <span class="text-indigo-400">Automate.execute</span>(decision);</div>
+            <div class="text-slate-400 pl-8">}</div>
+            <div class="text-slate-400">}</div>
+        </div>
+    </section>
+
+    <!-- Scalability Benchmarks -->
+    <section class="bg-slate-900 border border-white/10 p-16 rounded-[4rem]">
+        <h2 class="text-3xl font-black text-white mb-12 text-center">بنشمارك الأداء (Performance Engineering)</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-16">
+            <div class="space-y-4">
+                <div class="flex justify-between text-xs font-black uppercase tracking-widest text-slate-500">
+                    <span>Latency (P99)</span>
+                    <span class="text-emerald-500">85ms</span>
+                </div>
+                <div class="h-2 bg-white/5 rounded-full overflow-hidden">
+                    <div class="h-full bg-emerald-500 w-[92%]"></div>
+                </div>
+            </div>
+            <div class="space-y-4">
+                <div class="flex justify-between text-xs font-black uppercase tracking-widest text-slate-500">
+                    <span>Throughput</span>
+                    <span class="text-indigo-500">50k req/sec</span>
+                </div>
+                <div class="h-2 bg-white/5 rounded-full overflow-hidden">
+                    <div class="h-full bg-indigo-500 w-[88%] shadow-[0_0_20px_rgba(99,102,241,0.5)]"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+        `
   }
 ];
 
