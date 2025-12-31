@@ -16,7 +16,8 @@ export default async function handler(req) {
             return new Response(JSON.stringify({ error: "No API Key provided" }), { status: 401 });
         }
 
-        const GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1/models/gemini-1.5-pro:generateContent";
+        // Primary Strategy: Use Gemini 1.5 Flash on stable v1 (Fast & Reliable)
+        const GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent";
 
         let prompt = "";
         if (stage === 'architect') {
@@ -70,7 +71,7 @@ export default async function handler(req) {
             return new Response(JSON.stringify({ error: "Invalid stage" }), { status: 400 });
         }
 
-        const response = await fetch(`${GEMINI_API_URL}?key=${finalKey}`, {
+        let response = await fetch(`${GEMINI_API_URL}?key=${finalKey}`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -84,10 +85,31 @@ export default async function handler(req) {
             })
         });
 
+        // FALLBACK: If Pro/Flash (v1) fails, try Flash on v1beta as a last resort
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            console.warn("Primary Gemini model failed, trying fallback...", errorData);
+
+            const FALLBACK_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent";
+            response = await fetch(`${FALLBACK_URL}?key=${finalKey}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    contents: [{ parts: [{ text: prompt }] }],
+                    generationConfig: {
+                        temperature: 0.7,
+                        maxOutputTokens: 2048,
+                    }
+                })
+            });
+        }
+
         const data = await response.json();
 
         if (!response.ok) {
-            return new Response(JSON.stringify({ error: data.error?.message || "Gemini API Error" }), { status: response.status });
+            return new Response(JSON.stringify({
+                error: data.error?.message || "All Gemini models failed. Please check your API Key and regional availability."
+            }), { status: response.status });
         }
 
         const content = data.candidates?.[0]?.content?.parts?.[0]?.text || "";
