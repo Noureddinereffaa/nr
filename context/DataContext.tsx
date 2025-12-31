@@ -174,7 +174,14 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       try {
         const extractJsonbData = <T,>(rows: any[] | null): T[] => {
           if (!rows || rows.length === 0) return [];
-          return rows.map(row => row.data ? { ...row.data, id: row.id } : row);
+          return rows.map(row => {
+            const { data, ...rest } = row;
+            return {
+              ...rest,
+              ...(data && typeof data === 'object' ? data : {}),
+              id: row.id // Ensure ID from database always takes priority
+            };
+          }) as T[];
         };
 
         const [
