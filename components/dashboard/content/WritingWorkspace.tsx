@@ -8,6 +8,7 @@ import {
 import { motion, AnimatePresence } from 'framer-motion';
 import { Article, AIConfig } from '../../../types';
 import { SOVEREIGN_TEMPLATES, ArticleTemplate } from '../../../lib/article-templates';
+import { useData } from '../../../context/DataContext';
 import ImageUploader from '../../ui/ImageUploader';
 
 interface WritingWorkspaceProps {
@@ -18,6 +19,7 @@ interface WritingWorkspaceProps {
 }
 
 const WritingWorkspace: React.FC<WritingWorkspaceProps> = ({ article: initialArticle, onSave, onClose }) => {
+    const { siteData } = useData();
     // Core State
     const [article, setArticle] = useState<Article>(initialArticle);
     const [view, setView] = useState<'editor' | 'preview'>('editor');
@@ -147,7 +149,7 @@ const WritingWorkspace: React.FC<WritingWorkspaceProps> = ({ article: initialArt
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     stage: 'architect',
-                    apiKey: initialArticle.author === 'system' ? undefined : (window as any).GEMINI_API_KEY, // Dynamic fallback
+                    apiKey: siteData.aiConfig.apiKey, // Use configured key
                     payload: {
                         topic: aiTopic,
                         templateTitle: SOVEREIGN_TEMPLATES.find(t => t.id === article.category)?.title || 'General'
@@ -183,6 +185,7 @@ const WritingWorkspace: React.FC<WritingWorkspaceProps> = ({ article: initialArt
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         stage: 'forge',
+                        apiKey: siteData.aiConfig.apiKey, // Use configured key
                         payload: {
                             topic: aiTopic,
                             section: section,

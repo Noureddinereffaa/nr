@@ -184,10 +184,11 @@ export interface AIConfig {
   painPoints: string;
   sellingPoints: string;
   ctaAction: string;
-  apiKey?: string; // Legacy/Gemini Key
-  openaiKey?: string; // Legacy/OpenAI
-  huggingFaceKey?: string; // Primary Sovereign Key
+  apiKey?: string; // Gemini/General Key
+  openaiKey?: string;
+  huggingFaceKey?: string;
   anthropicKey?: string;
+  unsplashKey?: string; // NEW: For Unsplash API logic
   preferredProvider?: 'gemini' | 'openai' | 'anthropic' | 'huggingface';
   huggingFaceModel?: string;
   enabledAgents?: string[]; // IDs of active Council members
