@@ -3,7 +3,7 @@ import Layout from '../components/Layout';
 import { useData } from '../context/DataContext';
 import { Calendar, Clock, ArrowRight, Search, Sparkles, TrendingUp, Filter, Share2, Newspaper, Zap, Bookmark } from 'lucide-react';
 import ArticleReader from '../components/ArticleReader';
-import { Article } from '../types';
+import { Article, DEFAULT_SITE_TEXTS, SiteTexts } from '../types';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const BlogPage: React.FC = () => {
@@ -12,6 +12,12 @@ const BlogPage: React.FC = () => {
     const [selectedArticle, setSelectedArticle] = useState<Article | null>(null);
     const [filter, setFilter] = useState('');
     const [activeCategory, setActiveCategory] = useState('الكل');
+
+    // Get site texts with fallback to defaults
+    const siteTexts: SiteTexts = {
+        ...DEFAULT_SITE_TEXTS,
+        ...(siteData as any).siteTexts
+    };
 
     // Deep Linking: Check URL on mount
     useEffect(() => {
@@ -76,7 +82,7 @@ const BlogPage: React.FC = () => {
                                 className="inline-flex items-center gap-3 px-5 py-2 rounded-full bg-white/5 border border-white/10 text-indigo-400 text-[11px] font-black uppercase tracking-[0.4em] mb-8"
                             >
                                 <Newspaper size={16} className="text-indigo-500" />
-                                Sovereign Intelligence Hub 2025
+                                {siteTexts.blog.badge}
                             </motion.div>
                             <motion.h1
                                 initial={{ opacity: 0, y: 30 }}
@@ -84,7 +90,7 @@ const BlogPage: React.FC = () => {
                                 transition={{ delay: 0.1 }}
                                 className="text-4xl md:text-6xl font-black text-white mb-4 tracking-tighter leading-[0.9] uppercase"
                             >
-                                مركز <span className="gradient-text drop-shadow-[0_10px_40px_rgba(79,70,229,0.4)]">المعرفة</span>
+                                {siteTexts.blog.title} <span className="gradient-text drop-shadow-[0_10px_40px_rgba(79,70,229,0.4)]">{siteTexts.blog.titleHighlight}</span>
                             </motion.h1>
                             <motion.p
                                 initial={{ opacity: 0, y: 20 }}
@@ -92,7 +98,7 @@ const BlogPage: React.FC = () => {
                                 transition={{ delay: 0.2 }}
                                 className="text-lg md:text-xl text-slate-300 font-medium leading-relaxed max-w-2xl border-r-4 border-indigo-600 pr-4"
                             >
-                                تحليلات استراتيجية ورؤى هندسية لصناعة الفارق في الاقتصاد الرقمي الحديث.
+                                {siteTexts.blog.subtitle}
                             </motion.p>
                         </div>
 
@@ -103,8 +109,8 @@ const BlogPage: React.FC = () => {
                                     type="text"
                                     value={filter}
                                     onChange={(e) => setFilter(e.target.value)}
-                                    placeholder="ابحث في الأرشيف الذكي..."
-                                    className="w-full md:w-96 bg-slate-900 border border-white/10 rounded-2xl px-10 py-5 pr-14 text-white focus:border-indigo-600 outline-none transition-all shadow-2xl"
+                                    placeholder={siteTexts.blog.searchPlaceholder}
+                                    className="w-full md:w-96 bg-slate-900 border border-white/10 rounded-2xl px-10 py-5 pr-14 text-white focus:border-indigo-600 outline-none transition-all shadow-2xl placeholder:opacity-50"
                                 />
                             </div>
                         </div>
@@ -129,22 +135,22 @@ const BlogPage: React.FC = () => {
                             <div className="absolute bottom-0 inset-x-0 p-10 md:p-20 flex flex-col items-end text-right" dir="rtl">
                                 <motion.span
                                     whileHover={{ scale: 1.05 }}
-                                    className="bg-indigo-600 text-white px-6 py-2 rounded-2xl text-xs font-black uppercase tracking-[0.2em] shadow-2xl mb-8"
+                                    className="bg-indigo-600 text-white px-6 py-2 rounded-2xl text-[10px] md:text-xs font-black uppercase tracking-[0.2em] shadow-2xl mb-8"
                                 >
-                                    الافتتاحية الاستراتيجية
+                                    {siteTexts.blog.trendingTitle}
                                 </motion.span>
-                                <h2 className="text-4xl md:text-7xl font-black text-white mb-8 max-w-5xl leading-[1.05] group-hover:text-indigo-400 transition-colors tracking-tighter">
+                                <h2 className="text-3xl md:text-7xl font-black text-white mb-8 max-w-5xl leading-[1.05] group-hover:text-indigo-400 transition-colors tracking-tighter">
                                     {featuredArticle.title}
                                 </h2>
-                                <p className="text-slate-300 text-xl md:text-2xl max-w-3xl mb-10 opacity-80 line-clamp-2 font-medium">
+                                <p className="text-slate-300 text-lg md:text-2xl max-w-3xl mb-10 opacity-80 line-clamp-2 md:line-clamp-3 font-medium">
                                     {featuredArticle.excerpt}
                                 </p>
-                                <div className="flex items-center gap-10 text-slate-400 font-black text-sm mb-10">
-                                    <span className="flex items-center gap-3"><Calendar size={20} className="text-indigo-500" /> {new Date(featuredArticle.date).toLocaleDateString('ar-EG')}</span>
-                                    <span className="flex items-center gap-3"><Clock size={20} className="text-indigo-500" /> {featuredArticle.readTime}</span>
+                                <div className="flex items-center gap-6 md:gap-10 text-slate-400 font-black text-[10px] md:text-sm mb-10">
+                                    <span className="flex items-center gap-2 md:gap-3"><Calendar size={18} className="text-indigo-500" /> {new Date(featuredArticle.date).toLocaleDateString('ar-EG')}</span>
+                                    <span className="flex items-center gap-2 md:gap-3"><Clock size={18} className="text-indigo-500" /> {featuredArticle.readTime}</span>
                                 </div>
-                                <button className="group px-12 py-5 bg-white text-slate-950 rounded-2xl font-black text-xl flex items-center gap-5 hover:bg-indigo-600 hover:text-white transition-all shadow-3xl active:scale-95">
-                                    تحليل المقال الكامل
+                                <button className="group px-8 md:px-12 py-4 md:py-5 bg-white text-slate-950 rounded-2xl font-black text-lg md:text-xl flex items-center gap-5 hover:bg-indigo-600 hover:text-white transition-all shadow-3xl active:scale-95">
+                                    {siteTexts.blog.readMore}
                                     <ArrowRight size={24} className="rotate-180 group-hover:translate-x-[-8px] transition-transform" />
                                 </button>
                             </div>
@@ -163,7 +169,7 @@ const BlogPage: React.FC = () => {
                                 className="glass-card p-6 rounded-2xl sticky top-24 border border-white/5 bg-slate-900/40 backdrop-blur-2xl"
                             >
                                 <h3 className="text-2xl font-black text-white mb-10 flex items-center justify-end gap-4" dir="rtl">
-                                    الأكثر تأثيراً
+                                    {siteTexts.blog.trendingTitle}
                                     <TrendingUp className="text-indigo-500" size={28} />
                                 </h3>
                                 <div className="space-y-10">
@@ -189,10 +195,10 @@ const BlogPage: React.FC = () => {
                                 <div className="mt-16 p-8 rounded-[2.5rem] bg-indigo-600 text-white relative overflow-hidden group">
                                     <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
                                     <Sparkles size={32} className="mb-6 opacity-40" />
-                                    <h4 className="text-2xl font-black mb-4 leading-tight">انضم إلى مجتمع النخبة الرقمية</h4>
-                                    <p className="text-indigo-100 text-sm mb-8 font-medium">احصل على تحليلات استراتيجية أسبوعية لا تتوفر للعموم.</p>
+                                    <h4 className="text-2xl font-black mb-4 leading-tight">{siteTexts.blog.newsletterTitle}</h4>
+                                    <p className="text-indigo-100 text-sm mb-8 font-medium">{siteTexts.blog.newsletterSubtitle}</p>
                                     <button className="w-full py-4 bg-white text-slate-950 rounded-2xl font-black text-sm hover:scale-105 active:scale-95 transition-all shadow-xl">
-                                        الاشتراك في النشرة
+                                        {siteTexts.blog.subscribeButton}
                                     </button>
                                 </div>
                             </motion.div>
@@ -202,21 +208,21 @@ const BlogPage: React.FC = () => {
                         <div className="lg:w-[70%]">
 
                             {/* Category Command Bar */}
-                            <div className="flex items-center justify-end gap-4 mb-16 flex-wrap" dir="rtl">
+                            <div className="flex items-center justify-end gap-3 mb-12 flex-wrap" dir="rtl">
                                 <div className="flex items-center gap-3 ml-6 text-slate-500">
                                     <Filter size={20} className="text-indigo-500" />
-                                    <span className="text-[11px] font-black uppercase tracking-[0.3em]">تصنيف الرؤى:</span>
+                                    <span className="text-[11px] font-black uppercase tracking-[0.3em]">{siteTexts.blog.categoryLabel}</span>
                                 </div>
                                 {categories.map(cat => (
                                     <button
                                         key={cat}
                                         onClick={() => setActiveCategory(cat)}
-                                        className={`px-8 py-3 rounded-2xl text-xs font-black transition-all border ${activeCategory === cat
+                                        className={`px-6 py-2.5 rounded-2xl text-[10px] md:text-xs font-black transition-all border ${activeCategory === cat
                                             ? 'bg-indigo-600 border-indigo-500 text-white shadow-3xl'
                                             : 'bg-white/5 border-white/10 text-slate-400 hover:bg-white/10 hover:text-white'
                                             }`}
                                     >
-                                        {cat}
+                                        {cat === 'الكل' ? siteTexts.blog.allCategories : cat}
                                     </button>
                                 ))}
                             </div>
@@ -272,7 +278,7 @@ const BlogPage: React.FC = () => {
                                                         <Bookmark size={20} className="text-slate-500 hover:text-indigo-400 transition-colors cursor-pointer" />
                                                     </div>
                                                     <span className="flex items-center gap-4 text-indigo-500 font-black text-sm group-hover:text-white transition-all">
-                                                        استكشاف التحليل
+                                                        {siteTexts.blog.readMore}
                                                         <ArrowRight size={20} className="rotate-180 group-hover:translate-x-[-6px] transition-transform" />
                                                     </span>
                                                 </div>

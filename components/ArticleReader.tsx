@@ -1,7 +1,8 @@
-import React, { useEffect, useState } from 'react';
-import { Article } from '../types';
-import { X, Clock, User, Calendar, Share2, Bookmark, ArrowRight, Sparkles, Tag, Target, Globe, Shield, Zap, CheckCircle } from 'lucide-react';
+import React, { useEffect, useState, useMemo } from 'react';
+import { Article, DEFAULT_SITE_TEXTS, SiteTexts } from '../types';
+import { X, Clock, User, Calendar, Share2, Bookmark, ArrowRight, Sparkles, Tag, Target, Globe, Shield, Zap, CheckCircle, TrendingUp } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useData } from '../context/DataContext';
 
 interface ArticleReaderProps {
     article: Article;
@@ -9,9 +10,17 @@ interface ArticleReaderProps {
 }
 
 const ArticleReader: React.FC<ArticleReaderProps> = ({ article, onClose }) => {
+    const { siteData } = useData();
+    const articles = useMemo(() => siteData.articles || [], [siteData.articles]);
     const [scrollProgress, setScrollProgress] = useState(0);
     const [showShareModal, setShowShareModal] = useState(false);
     const [copySuccess, setCopySuccess] = useState(false);
+
+    // Get site texts with fallback to defaults
+    const siteTexts: SiteTexts = {
+        ...DEFAULT_SITE_TEXTS,
+        ...(siteData as any).siteTexts
+    };
 
     const handleShare = async () => {
         const shareData = {
@@ -191,13 +200,14 @@ const ArticleReader: React.FC<ArticleReaderProps> = ({ article, onClose }) => {
                         >
                             <Share2 size={18} />
                             <span className="absolute top-full left-1/2 -translate-x-1/2 mt-2 px-2 py-1 bg-black text-white text-[10px] rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
-                                مشاركة المقال
+                                {siteTexts.common.viewAll}
                             </span>
                         </button>
 
                         <button
                             onClick={onClose}
                             className="w-12 h-12 flex items-center justify-center rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 hover:bg-red-500 hover:text-white transition-all active:scale-95"
+                            title={siteTexts.common.close}
                         >
                             <X size={20} />
                         </button>
@@ -237,14 +247,14 @@ const ArticleReader: React.FC<ArticleReaderProps> = ({ article, onClose }) => {
                                 className="inline-flex items-center gap-4 px-5 py-2 md:px-6 md:py-2.5 rounded-full bg-indigo-600 text-white text-[10px] md:text-xs font-black uppercase tracking-[0.3em] md:tracking-[0.4em] mb-6 md:mb-12 shadow-[0_0_40px_rgba(79,70,229,0.5)] border border-white/20"
                             >
                                 <Shield size={14} className="md:w-4 md:h-4" />
-                                Intelligence Sovereign Access
+                                {siteTexts.blog.badge}
                             </motion.div>
 
                             <motion.h1
                                 initial={{ opacity: 0, y: 30 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ delay: 0.4 }}
-                                className="text-2xl sm:text-3xl md:text-5xl lg:text-6xl font-black text-white leading-tight md:leading-[0.95] mb-6 md:mb-10 tracking-tighter drop-shadow-xl"
+                                className="text-3xl sm:text-4xl md:text-5xl lg:text-7xl font-black text-white leading-tight md:leading-[0.95] mb-6 md:mb-10 tracking-tighter drop-shadow-xl"
                             >
                                 {article.title}
                             </motion.h1>
@@ -265,7 +275,7 @@ const ArticleReader: React.FC<ArticleReaderProps> = ({ article, onClose }) => {
                                 </div>
                                 <div className="flex items-center gap-2 md:gap-3 text-emerald-400">
                                     <Zap size={14} className="md:w-[18px]" />
-                                    محتوى سيادي معزز
+                                    {siteTexts.blog.titleHighlight}
                                 </div>
                             </motion.div>
                         </div>
@@ -286,7 +296,7 @@ const ArticleReader: React.FC<ArticleReaderProps> = ({ article, onClose }) => {
                         <div className="mt-16 pt-8 border-t border-white/10" dir="rtl">
                             <h4 className="text-2xl font-black text-white mb-10 flex items-center gap-4">
                                 <Sparkles className="text-indigo-500" size={28} />
-                                المصفوفة التقنية والمفاتيح
+                                {siteTexts.blog.categoryLabel}
                             </h4>
                             <div className="flex flex-wrap gap-4">
                                 {article.tags.map((tag, idx) => (
@@ -302,24 +312,26 @@ const ArticleReader: React.FC<ArticleReaderProps> = ({ article, onClose }) => {
                             initial={{ opacity: 0, scale: 0.95 }}
                             whileInView={{ opacity: 1, scale: 1 }}
                             viewport={{ once: true }}
-                            className="mt-12 md:mt-20 p-6 md:p-12 rounded-2xl bg-indigo-600 text-white text-center relative group overflow-hidden shadow-2xl"
+                            className="mt-12 md:mt-24 p-6 md:p-16 rounded-[3rem] bg-indigo-600 text-white text-center relative group overflow-hidden shadow-[0_40px_100px_rgba(79,70,229,0.4)]"
                         >
                             <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                            <div className="absolute top-0 right-0 w-full h-2 md:h-3 bg-white/20"></div>
+                            <div className="absolute top-0 right-0 w-full h-3 bg-white/20"></div>
 
-                            <h3 className="text-3xl md:text-7xl font-black mb-6 md:mb-8 tracking-tighter leading-tight relative z-10">نحول الرؤية إلى سلطة رقمية</h3>
-                            <p className="text-indigo-100 text-lg md:text-2xl mb-10 md:mb-16 max-w-4xl mx-auto leading-relaxed font-medium relative z-10">
-                                لا نكتفي بالتنظير، بل نمنحك الأنظمة التي تدير أعمالك وتضاعف نموك بأتمتة ذكية ومسارات استراتيجية لا تُقهر.
+                            <h3 className="text-3xl md:text-6xl font-black mb-6 md:mb-10 tracking-tighter leading-tight relative z-10" dir="rtl">
+                                {siteTexts.contact.title}
+                            </h3>
+                            <p className="text-indigo-100 text-lg md:text-2xl mb-10 md:mb-16 max-w-4xl mx-auto leading-relaxed font-medium relative z-10" dir="rtl">
+                                {siteTexts.contact.subtitle}
                             </p>
 
-                            <div className="flex flex-col md:flex-row items-center justify-center gap-4 md:gap-8 relative z-10">
+                            <div className="flex flex-col md:flex-row items-center justify-center gap-4 md:gap-8 relative z-10" dir="rtl">
                                 <a
                                     href={article.ctaWhatsApp || '#'}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="w-full md:w-auto bg-white text-slate-950 px-8 md:px-16 py-4 md:py-6 rounded-2xl md:rounded-3xl font-black text-lg md:text-xl hover:scale-105 active:scale-95 transition-all shadow-4xl flex items-center justify-center gap-4 group/btn"
+                                    className="w-full md:w-auto bg-white text-slate-950 px-8 md:px-16 py-5 md:py-6 rounded-2xl md:rounded-3xl font-black text-lg md:text-xl hover:scale-105 active:scale-95 transition-all shadow-4xl flex items-center justify-center gap-4 group/btn"
                                 >
-                                    حجز استشارة هاتفية
+                                    {siteTexts.contact.whatsappCta}
                                     <Sparkles size={20} className="text-indigo-600 group-hover/btn:animate-pulse" />
                                 </a>
 
@@ -328,23 +340,63 @@ const ArticleReader: React.FC<ArticleReaderProps> = ({ article, onClose }) => {
                                         href={article.ctaDownloadUrl}
                                         target="_blank"
                                         rel="noopener noreferrer"
-                                        className="w-full md:w-auto bg-indigo-500/30 backdrop-blur-md text-white border border-white/20 px-8 md:px-12 py-4 md:py-6 rounded-2xl md:rounded-3xl font-black text-base md:text-lg hover:bg-white hover:text-slate-950 transition-all flex items-center justify-center gap-4 group/dl"
+                                        className="w-full md:w-auto bg-indigo-500/30 backdrop-blur-md text-white border border-white/20 px-8 md:px-12 py-5 md:py-6 rounded-2xl md:rounded-3xl font-black text-base md:text-lg hover:bg-white hover:text-slate-950 transition-all flex items-center justify-center gap-4 group/dl"
                                     >
-                                        تحميل دليل التنفيذ
+                                        تحميل الملف العملي
                                         <ArrowRight size={20} className="rotate-180 group-hover/dl:translate-x-[-8px] transition-transform" />
                                     </a>
                                 )}
                             </div>
                         </motion.div>
 
+                        {/* Related Articles Matrix */}
+                        <div className="mt-24 border-t border-white/5 pt-16" dir="rtl">
+                            <h4 className="text-3xl font-black text-white mb-10 flex items-center gap-4">
+                                <TrendingUp className="text-indigo-500" size={32} />
+                                {siteTexts.blog.trendingTitle}
+                            </h4>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                {articles
+                                    .filter(a => a.id !== article.id)
+                                    .slice(0, 2)
+                                    .map((related) => (
+                                        <div
+                                            key={related.id}
+                                            onClick={() => {
+                                                onClose();
+                                                setTimeout(() => {
+                                                    const params = new URLSearchParams(window.location.search);
+                                                    params.set('article', related.id);
+                                                    window.history.pushState({}, '', `?${params.toString()}`);
+                                                    window.dispatchEvent(new Event('popstate'));
+                                                }, 300);
+                                            }}
+                                            className="group cursor-pointer bg-slate-900/50 border border-white/5 rounded-3xl overflow-hidden hover:border-indigo-500/50 transition-all shadow-xl"
+                                        >
+                                            <div className="aspect-[21/9] relative">
+                                                <img src={related.image} alt={related.title} className="w-full h-full object-cover grayscale-[30%] group-hover:grayscale-0 transition-all duration-700" />
+                                                <div className="absolute inset-0 bg-gradient-to-t from-slate-950 to-transparent"></div>
+                                            </div>
+                                            <div className="p-8">
+                                                <h5 className="text-xl font-black text-white group-hover:text-indigo-400 transition-colors leading-tight mb-4">{related.title}</h5>
+                                                <div className="flex items-center gap-4 text-[10px] text-slate-500 font-bold uppercase tracking-widest">
+                                                    <span className="flex items-center gap-2"><Clock size={12} /> {related.readTime}</span>
+                                                    <span className="text-indigo-500">{related.category}</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))}
+                            </div>
+                        </div>
+
                         {/* Navigation Footer */}
-                        <div className="mt-12 md:mt-16 border-t border-white/5 pt-8 text-center">
+                        <div className="mt-20 border-t border-white/5 pt-8 text-center">
                             <button
                                 onClick={onClose}
-                                className="text-slate-500 hover:text-white font-black text-sm uppercase tracking-widest flex items-center gap-3 mx-auto transition-colors"
+                                className="text-slate-500 hover:text-white font-black text-sm uppercase tracking-widest flex items-center gap-3 mx-auto transition-colors group"
                             >
                                 <ArrowRight size={18} />
-                                العودة إلى مركز المعرفة
+                                {siteTexts.nav.blog}
                             </button>
                         </div>
                     </div>
@@ -458,25 +510,26 @@ const ArticleReader: React.FC<ArticleReaderProps> = ({ article, onClose }) => {
           background: rgba(79, 70, 229, 0.8);
         }
         
-        :global(.prose h1) { font-size: clamp(1.5rem, 3vw, 2.5rem); font-weight: 800; margin-bottom: 1.5rem; color: #fff; line-height: 1.15; letter-spacing: -0.02em; border-right: 4px solid #6366f1; padding-right: 1rem; }
-        :global(.prose h2) { font-size: clamp(1.25rem, 2.5vw, 1.75rem); font-weight: 700; margin-top: 2.5rem; margin-bottom: 1rem; color: #fff; line-height: 1.2; letter-spacing: -0.01em; border-right: 3px solid rgba(99, 102, 241, 0.4); padding-right: 0.75rem; }
-        :global(.prose h3) { font-size: clamp(1rem, 2vw, 1.35rem); font-weight: 600; margin-top: 2rem; margin-bottom: 0.75rem; color: #fff; }
-        :global(.prose p) { font-size: clamp(0.9rem, 1.2vw, 1rem); line-height: 1.8; margin-bottom: 1.25rem; color: #cbd5e1; font-weight: 400; text-align: justify; }
-        :global(.prose ul) { margin-bottom: 1.5rem; list-style-type: none; padding-right: 0; }
-        :global(.prose li) { font-size: clamp(0.85rem, 1.1vw, 0.95rem); color: #e2e8f0; margin-bottom: 0.75rem; position: relative; font-weight: 500; line-height: 1.7; padding-right: 1.5rem; }
-        :global(.prose li::before) { content: "›"; position: absolute; right: 0; top: 0; font-size: 1.25rem; color: #6366f1; font-weight: 600; }
-        :global(.prose blockquote) { margin: 2.5rem 0; padding: 1.5rem; background: linear-gradient(135deg, rgba(79, 70, 229, 0.08), rgba(168, 85, 247, 0.04)); border-right: 4px solid #6366f1; border-radius: 1rem; font-style: italic; font-size: clamp(0.95rem, 1.5vw, 1.1rem); color: #fff; line-height: 1.6; font-weight: 500; position: relative; overflow: hidden; }
-        :global(.prose blockquote::after) { content: '"'; position: absolute; top: -0.5rem; left: 0.5rem; font-size: 5rem; color: rgba(255,255,255,0.03); font-family: serif; }
-        :global(.prose strong) { color: #818cf8; font-weight: 600; }
-        :global(.prose a) { color: #6366f1; text-decoration: none; border-bottom: 1px solid rgba(99, 102, 241, 0.3); transition: all 0.3s; font-weight: 500; }
-        :global(.prose a:hover) { border-bottom-color: #6366f1; background: rgba(99, 102, 241, 0.05); }
-        :global(.prose img) { border-radius: 1rem; margin: 2rem 0; border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 15px 40px rgba(0,0,0,0.3); }
+        :global(.prose h1) { font-size: clamp(1.75rem, 4vw, 3rem); font-weight: 900; margin-bottom: 2rem; color: #fff; line-height: 1.1; letter-spacing: -0.03em; border-right: 6px solid #6366f1; padding-right: 1.5rem; text-transform: uppercase; }
+        :global(.prose h2) { font-size: clamp(1.5rem, 3.5vw, 2.25rem); font-weight: 800; margin-top: 3.5rem; margin-bottom: 1.5rem; color: #fff; line-height: 1.2; letter-spacing: -0.02em; border-right: 4px solid rgba(99, 102, 241, 0.5); padding-right: 1.25rem; }
+        :global(.prose h3) { font-size: clamp(1.25rem, 2.5vw, 1.75rem); font-weight: 700; margin-top: 2.5rem; margin-bottom: 1rem; color: #fff; line-height: 1.3; }
+        :global(.prose p) { font-size: clamp(1rem, 1.3vw, 1.15rem); line-height: 1.9; margin-bottom: 1.75rem; color: #cbd5e1; font-weight: 400; text-align: right; }
+        :global(.prose ul) { margin-bottom: 2rem; list-style-type: none; padding-right: 0; }
+        :global(.prose li) { font-size: clamp(1rem, 1.3vw, 1.1rem); color: #e2e8f0; margin-bottom: 1rem; position: relative; font-weight: 500; line-height: 1.8; padding-right: 2rem; }
+        :global(.prose li::before) { content: "›"; position: absolute; right: 0; top: 0; font-size: 1.5rem; color: #6366f1; font-weight: 800; }
+        :global(.prose blockquote) { margin: 3rem 0; padding: 2.5rem; background: linear-gradient(135deg, rgba(79, 70, 229, 0.12), rgba(168, 85, 247, 0.08)); border-right: 6px solid #6366f1; border-radius: 1.5rem; font-style: italic; font-size: clamp(1.1rem, 1.8vw, 1.4rem); color: #fff; line-height: 1.7; font-weight: 500; position: relative; overflow: hidden; box-shadow: 0 20px 50px rgba(0,0,0,0.2); }
+        :global(.prose blockquote::after) { content: '"'; position: absolute; top: -1rem; left: 1rem; font-size: 8rem; color: rgba(255,255,255,0.05); font-family: serif; }
+        :global(.prose strong) { color: #818cf8; font-weight: 700; }
+        :global(.prose a) { color: #6366f1; text-decoration: none; border-bottom: 2px solid rgba(99, 102, 241, 0.3); transition: all 0.3s; font-weight: 600; }
+        :global(.prose a:hover) { border-bottom-color: #6366f1; background: rgba(99, 102, 241, 0.1); color: #fff; }
+        :global(.prose img) { border-radius: 2rem; margin: 3.5rem 0; border: 1px solid rgba(255,255,255,0.15); box-shadow: 0 30px 60px rgba(0,0,0,0.4); width: 100%; transition: transform 0.5s ease; }
+        :global(.prose img:hover) { transform: scale(1.02); }
         
         @media (max-width: 768px) {
-          :global(.prose h1) { font-size: 2.75rem; }
-          :global(.prose h2) { font-size: 2.25rem; }
-          :global(.prose p) { font-size: 1.2rem; line-height: 2; }
-          :global(.prose blockquote) { font-size: 1.4rem; padding: 2rem; }
+          :global(.prose h1) { font-size: 2rem; border-right-width: 4px; padding-right: 1rem; }
+          :global(.prose h2) { font-size: 1.5rem; border-right-width: 3px; padding-right: 0.75rem; }
+          :global(.prose p) { font-size: 1.05rem; line-height: 1.8; }
+          :global(.prose blockquote) { font-size: 1.15rem; padding: 1.5rem; }
         }
       `}</style>
         </div>
