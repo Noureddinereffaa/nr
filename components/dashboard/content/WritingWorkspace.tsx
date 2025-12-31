@@ -409,6 +409,15 @@ const WritingWorkspace: React.FC<WritingWorkspaceProps> = ({ article: initialArt
         }, 0);
     };
 
+    const handleTogglePublish = async () => {
+        const newStatus = article.status === 'published' ? 'draft' : 'published';
+        const updatedArticle = { ...article, status: newStatus as any };
+        setArticle(updatedArticle);
+        setSaveStatus('saving');
+        await onSave(updatedArticle);
+        setSaveStatus('saved');
+    };
+
     const isNew = !initialArticle.id;
 
     return (
@@ -434,9 +443,17 @@ const WritingWorkspace: React.FC<WritingWorkspaceProps> = ({ article: initialArt
                 </div>
 
                 <div className="flex items-center gap-3">
+                    {/* Real-time Status Badge */}
+                    <div className={`hidden lg:flex items-center gap-2 px-4 py-1.5 rounded-full border ${article.status === 'published' ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400' : 'bg-amber-500/10 border-amber-500/20 text-amber-400'} mr-2`}>
+                        <div className={`w-1.5 h-1.5 rounded-full ${article.status === 'published' ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]' : 'bg-amber-500'}`} />
+                        <span className="text-[9px] font-black uppercase tracking-[0.2em]">
+                            {article.status === 'published' ? 'Live on Site' : 'Draft Mode'}
+                        </span>
+                    </div>
+
                     {/* Real-time Sync Indicator */}
                     <div className="hidden lg:flex items-center gap-2 px-4 py-2 bg-slate-900/50 rounded-full border border-white/5 mr-4">
-                        <div className={`w-1.5 h-1.5 rounded-full ${saveStatus === 'saved' ? 'bg-emerald-500' : 'bg-amber-500 animate-pulse'}`} />
+                        <div className={`w-1.5 h-1.5 rounded-full ${saveStatus === 'saved' ? 'bg-indigo-500' : 'bg-amber-500 animate-pulse'}`} />
                         <span className="text-[9px] font-black uppercase tracking-[0.2em] text-slate-500">
                             {saveStatus === 'saved' ? 'Sovereign Cloud: Synced' : 'Syncing Core...'}
                         </span>
@@ -452,10 +469,18 @@ const WritingWorkspace: React.FC<WritingWorkspaceProps> = ({ article: initialArt
                     </div>
 
                     <button
-                        onClick={() => { setSaveStatus('saving'); onSave(article); setTimeout(() => setSaveStatus('saved'), 1000); }}
-                        className="bg-white text-slate-950 px-6 py-2 rounded-xl font-black text-[10px] uppercase tracking-[0.1em] flex items-center gap-2 hover:bg-white/90 transition-all hover:scale-[1.02] active:scale-95 shadow-xl shadow-white/5"
+                        onClick={handleTogglePublish}
+                        className={`px-6 py-2 rounded-xl font-black text-[10px] uppercase tracking-[0.1em] flex items-center gap-2 transition-all hover:scale-[1.02] active:scale-95 shadow-xl ${article.status === 'published' ? 'bg-amber-500/10 text-amber-500 border border-amber-500/20 hover:bg-amber-500/20' : 'bg-emerald-600 text-white hover:bg-emerald-500 shadow-emerald-600/20'}`}
                     >
-                        <Save size={14} /> Deploy Studio
+                        {article.status === 'published' ? <X size={14} /> : <CheckCircle size={14} />}
+                        {article.status === 'published' ? 'Set to Draft' : 'Publish Now'}
+                    </button>
+
+                    <button
+                        onClick={() => { setSaveStatus('saving'); onSave(article); setTimeout(() => setSaveStatus('saved'), 1000); }}
+                        className="bg-white text-slate-950 px-6 py-2 rounded-xl font-black text-[10px] uppercase tracking-[0.1em] flex items-center gap-2 hover:bg-white/90 transition-all hover:scale-[1.02] active:scale-95 shadow-xl shadow-white/5 border border-white/10"
+                    >
+                        <Save size={14} /> Deploy Changes
                     </button>
                 </div>
             </div>
