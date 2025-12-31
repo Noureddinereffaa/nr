@@ -16,8 +16,6 @@ export default async function handler(req) {
             return new Response(JSON.stringify({ error: "No API Key provided" }), { status: 401 });
         }
 
-        // Primary Strategy: Use Gemini 1.5 Flash on stable v1 (Fast & Reliable)
-        const GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent";
 
         let prompt = "";
         if (stage === 'architect') {
@@ -71,48 +69,52 @@ export default async function handler(req) {
             return new Response(JSON.stringify({ error: "Invalid stage" }), { status: 400 });
         }
 
-        let response = await fetch(`${GEMINI_API_URL}?key=${finalKey}`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                contents: [{ parts: [{ text: prompt }] }],
-                generationConfig: {
-                    temperature: 0.7,
-                    topK: 40,
-                    topP: 0.95,
-                    maxOutputTokens: 2048,
+        const modelsToTry = [
+            "https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent",
+            "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent",
+            "https://generativelanguage.googleapis.com/v1/models/gemini-1.5-pro:generateContent",
+            "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent",
+            "https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent"
+        ];
+
+        let finalResponse = null;
+        let lastErrorMsg = "Unknown Error";
+
+        for (const baseUrl of modelsToTry) {
+            try {
+                const response = await fetch(`${baseUrl}?key=${finalKey}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        contents: [{ parts: [{ text: prompt }] }],
+                        generationConfig: {
+                            temperature: 0.7,
+                            maxOutputTokens: 2048,
+                        }
+                    })
+                });
+
+                if (response.ok) {
+                    finalResponse = await response.json();
+                    break;
+                } else {
+                    const errData = await response.json().catch(() => ({}));
+                    lastErrorMsg = errData.error?.message || "Model unsupported";
+                    console.warn(`Attempt failed with ${baseUrl}:`, lastErrorMsg);
+                    if (response.status === 401 || response.status === 403) break;
                 }
-            })
-        });
-
-        // FALLBACK: If Pro/Flash (v1) fails, try Flash on v1beta as a last resort
-        if (!response.ok) {
-            const errorData = await response.json().catch(() => ({}));
-            console.warn("Primary Gemini model failed, trying fallback...", errorData);
-
-            const FALLBACK_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent";
-            response = await fetch(`${FALLBACK_URL}?key=${finalKey}`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    contents: [{ parts: [{ text: prompt }] }],
-                    generationConfig: {
-                        temperature: 0.7,
-                        maxOutputTokens: 2048,
-                    }
-                })
-            });
+            } catch (err) {
+                lastErrorMsg = err.message;
+            }
         }
 
-        const data = await response.json();
-
-        if (!response.ok) {
+        if (!finalResponse) {
             return new Response(JSON.stringify({
-                error: data.error?.message || "All Gemini models failed. Please check your API Key and regional availability."
-            }), { status: response.status });
+                error: `All models failed: ${lastErrorMsg}. Verify your API Key permits these models.`
+            }), { status: 500 });
         }
 
-        const content = data.candidates?.[0]?.content?.parts?.[0]?.text || "";
+        const content = finalResponse.candidates?.[0]?.content?.parts?.[0]?.text || "";
 
         // If architect stage, try to extract JSON even if there is markdown wrapper
         let result = content;
