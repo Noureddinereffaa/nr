@@ -18,7 +18,7 @@ interface WritingWorkspaceProps {
     onClose: () => void;
 }
 
-const WritingWorkspace: React.FC<WritingWorkspaceProps> = ({ article: initialArticle, onSave, onClose }) => {
+const WritingWorkspace: React.FC<WritingWorkspaceProps> = ({ article: initialArticle, aiConfig, onSave, onClose }) => {
     const { siteData } = useData();
     // Core State
     const [article, setArticle] = useState<Article>(initialArticle);
@@ -61,7 +61,7 @@ const WritingWorkspace: React.FC<WritingWorkspaceProps> = ({ article: initialArt
 
     // Initial check for mode
     useEffect(() => {
-        if (article.content.startsWith('{"nextjs":true')) {
+        if (article?.content?.startsWith('{"nextjs":true')) {
             try {
                 const parsed = JSON.parse(article.content);
                 setEditorMode('nextjs');
@@ -89,7 +89,7 @@ const WritingWorkspace: React.FC<WritingWorkspaceProps> = ({ article: initialArt
     });
 
     useEffect(() => {
-        const contentForAnalysis = editorMode === 'nextjs' ? projectFiles['page.tsx'] : article.content;
+        const contentForAnalysis = editorMode === 'nextjs' ? projectFiles['page.tsx'] : (article.content || '');
         const words = contentForAnalysis.split(/\s+/).filter(w => w.length > 0);
         const wordCount = words.length;
         const readingTime = Math.ceil(wordCount / 200);
