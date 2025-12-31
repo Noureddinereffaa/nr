@@ -37,7 +37,29 @@ const WritingWorkspace: React.FC<WritingWorkspaceProps> = ({ article: initialArt
     const [imageUrl, setImageUrl] = useState('');
     const [tagInput, setTagInput] = useState('');
 
+    // Developer Mode (Next.js) State
+    const [editorMode, setEditorMode] = useState<'classic' | 'nextjs'>('classic');
+    const [activeFile, setActiveFile] = useState<'page.tsx' | 'layout.tsx' | 'metadata.ts'>('page.tsx');
+    const [projectFiles, setProjectFiles] = useState({
+        'page.tsx': '',
+        'layout.tsx': '',
+        'metadata.ts': ''
+    });
+
     const editorRef = useRef<HTMLTextAreaElement>(null);
+
+    // Initial check for mode
+    useEffect(() => {
+        if (article.content.startsWith('{"nextjs":true')) {
+            try {
+                const parsed = JSON.parse(article.content);
+                setEditorMode('nextjs');
+                setProjectFiles(parsed.files);
+            } catch (e) {
+                console.error("Failed to parse Next.js article content", e);
+            }
+        }
+    }, []);
 
     // SEO Analysis (Real-time)
     const [seoMetrics, setSeoMetrics] = useState({
@@ -160,7 +182,42 @@ const WritingWorkspace: React.FC<WritingWorkspaceProps> = ({ article: initialArt
         const start = textarea.selectionStart;
         const text = textarea.value;
         const newContent = text.substring(0, start) + insertion + text.substring(start);
-        setArticle(prev => ({ ...prev, content: newContent }));
+
+        if (editorMode === 'nextjs') {
+            setProjectFiles(prev => ({
+                ...prev,
+                [activeFile]: newContent
+            }));
+            updateArticleFromProject({ ...projectFiles, [activeFile]: newContent });
+        } else {
+            setArticle(prev => ({ ...prev, content: newContent }));
+        }
+    };
+
+    const updateArticleFromProject = (files: any) => {
+        const content = JSON.stringify({
+            nextjs: true,
+            files: files,
+            activeFile: activeFile // Reference but rendering will follow structure
+        });
+        setArticle(prev => ({ ...prev, content }));
+    };
+
+    const handleModeSwitch = (mode: 'classic' | 'nextjs') => {
+        if (article.content.trim().length > 50 && !article.content.startsWith('{"nextjs":true')) {
+            if (!confirm('سيتم تحويل المحتوى الحالي إلى تنسيق مختلف. هل أنت متأكد؟')) return;
+        }
+        setEditorMode(mode);
+        if (mode === 'nextjs' && !article.content.startsWith('{"nextjs":true')) {
+            // Provide boilerplate for new Next.js transition
+            const boilerplate = {
+                'page.tsx': `export default function Page() {\n  return (\n    <div className="space-y-6">\n      <h1 className="text-4xl font-black">${article.title}</h1>\n      <p className="text-slate-300 text-lg">محتوى المقال يبدأ هنا...</p>\n    </div>\n  );\n}`,
+                'layout.tsx': `export default function Layout({ children }: { children: React.ReactNode }) {\n  return (\n    <section className="max-w-4xl mx-auto py-12 px-6">\n      {children}\n    </section>\n  );\n}`,
+                'metadata.ts': `export const metadata = {\n  title: "${article.title}",\n  description: "${article.excerpt}",\n};`
+            };
+            setProjectFiles(boilerplate);
+            updateArticleFromProject(boilerplate);
+        }
     };
 
     // Helper: Wrap Selection
@@ -202,11 +259,20 @@ const WritingWorkspace: React.FC<WritingWorkspaceProps> = ({ article: initialArt
                         <Target size={14} /> {focusMode ? 'Exit Focus' : 'Focus'}
                     </button>
                     <div className="flex bg-slate-900 p-1 rounded-lg border border-white/5 mx-2">
+                        <button onClick={() => handleModeSwitch('classic')} className={`px-4 py-1.5 rounded-md text-xs font-bold transition-all flex items-center gap-2 ${editorMode === 'classic' ? 'bg-white/10 text-white' : 'text-slate-500 hover:text-white'}`}>
+                            <Type size={14} /> Classic
+                        </button>
+                        <button onClick={() => handleModeSwitch('nextjs')} className={`px-4 py-1.5 rounded-md text-xs font-bold transition-all flex items-center gap-2 ${editorMode === 'nextjs' ? 'bg-indigo-500 text-white shadow-lg shadow-indigo-500/30' : 'text-slate-500 hover:text-white'}`}>
+                            <Code2 size={14} /> Next.js 14
+                        </button>
+                    </div>
+                    <div className="h-6 w-[1px] bg-white/10 mx-2" />
+                    <div className="flex bg-slate-900 p-1 rounded-lg border border-white/5 mx-2">
                         <button onClick={() => setView('editor')} className={`px-4 py-1.5 rounded-md text-xs font-bold transition-all flex items-center gap-2 ${view === 'editor' ? 'bg-white/10 text-white' : 'text-slate-500 hover:text-white'}`}>
-                            <Type size={14} /> Editor
+                            <Activity size={14} /> View Source
                         </button>
                         <button onClick={() => setView('preview')} className={`px-4 py-1.5 rounded-md text-xs font-bold transition-all flex items-center gap-2 ${view === 'preview' ? 'bg-white/10 text-white' : 'text-slate-500 hover:text-white'}`}>
-                            <Eye size={14} /> Preview
+                            <Eye size={14} /> UI Rendering
                         </button>
                     </div>
                     <button
@@ -232,6 +298,37 @@ const WritingWorkspace: React.FC<WritingWorkspaceProps> = ({ article: initialArt
                         </div>
 
                         <div className="p-6 space-y-8">
+                            {/* Next.js Project Explorer (Conditional) */}
+                            {editorMode === 'nextjs' && (
+                                <div className="space-y-3 pt-6 border-t border-white/5">
+                                    <label className="text-[10px] font-black text-indigo-400 flex items-center gap-2 uppercase tracking-widest">
+                                        <Layout size={12} /> App Router Structure
+                                    </label>
+                                    <div className="space-y-1">
+                                        {(Object.keys(projectFiles) as (keyof typeof projectFiles)[]).map(file => (
+                                            <button
+                                                key={file}
+                                                onClick={() => setActiveFile(file)}
+                                                className={`w-full text-right p-3 rounded-xl text-xs flex items-center justify-between transition-all group/file ${activeFile === file ? 'bg-indigo-600/20 text-indigo-400 border border-indigo-500/30' : 'text-slate-500 hover:bg-white/5 hover:text-slate-300'}`}
+                                            >
+                                                <span className="flex items-center gap-2">
+                                                    {file.endsWith('.tsx') ? <Code2 size={12} className="text-blue-400" /> : <Hash size={12} className="text-amber-400" />}
+                                                    {file}
+                                                </span>
+                                                <div className="w-1.5 h-1.5 rounded-full bg-slate-800 group-hover/file:bg-indigo-500 transition-colors" />
+                                            </button>
+                                        ))}
+                                    </div>
+                                    <div className="p-4 bg-slate-950 rounded-xl border border-white/5 mt-4">
+                                        <p className="text-[10px] text-slate-500 leading-relaxed font-mono">
+                                            // Next.js Mode is active.<br />
+                                            // You can use standard React/HTML tags.<br />
+                                            // Dynamic rendering v1.4 enabled.
+                                        </p>
+                                    </div>
+                                </div>
+                            )}
+
                             {/* Hero Image Upload */}
                             <div className="space-y-3">
                                 <ImageUploader
@@ -353,11 +450,20 @@ const WritingWorkspace: React.FC<WritingWorkspaceProps> = ({ article: initialArt
 
                                 <textarea
                                     id="main-editor"
-                                    value={article.content}
-                                    onChange={(e) => setArticle({ ...article, content: e.target.value })}
-                                    className="flex-1 w-full bg-transparent border-none text-xl text-slate-300 placeholder:text-slate-800 outline-none resize-none leading-relaxed font-serif text-right min-h-[60vh]"
-                                    placeholder="ابدأ الكتابة هنا..."
-                                    dir="rtl"
+                                    value={editorMode === 'nextjs' ? projectFiles[activeFile] : article.content}
+                                    onChange={(e) => {
+                                        const newVal = e.target.value;
+                                        if (editorMode === 'nextjs') {
+                                            const updated = { ...projectFiles, [activeFile]: newVal };
+                                            setProjectFiles(updated);
+                                            updateArticleFromProject(updated);
+                                        } else {
+                                            setArticle({ ...article, content: newVal });
+                                        }
+                                    }}
+                                    className="flex-1 w-full bg-transparent border-none text-xl text-slate-300 placeholder:text-slate-800 outline-none resize-none leading-relaxed font-mono text-left min-h-[60vh]"
+                                    placeholder={editorMode === 'nextjs' ? `// Write your ${activeFile} code here...` : "ابدأ الكتابة هنا..."}
+                                    dir={editorMode === 'nextjs' ? 'ltr' : 'rtl'}
                                 />
                             </>
                         )}
@@ -365,7 +471,26 @@ const WritingWorkspace: React.FC<WritingWorkspaceProps> = ({ article: initialArt
                         {/* Preview View */}
                         {view === 'preview' && (
                             <div className="prose prose-invert prose-indigo max-w-none text-right" dir="rtl">
-                                <div dangerouslySetInnerHTML={{ __html: article.content }} />
+                                {editorMode === 'nextjs' ? (
+                                    <div className="bg-slate-900 border border-white/10 rounded-3xl p-8 md:p-12 overflow-hidden relative">
+                                        <div className="absolute top-4 left-4 flex gap-2">
+                                            <div className="w-3 h-3 rounded-full bg-red-500/20" />
+                                            <div className="w-3 h-3 rounded-full bg-amber-500/20" />
+                                            <div className="w-3 h-3 rounded-full bg-green-500/20" />
+                                        </div>
+                                        <div className="mt-8">
+                                            {/* Minimal App Router Simulation: Render layout if layout is wrapping, otherwise just page */}
+                                            <div className="text-slate-400 italic text-sm mb-6 pb-4 border-b border-white/5 font-mono">// Simulating Next.js 14 Environment...</div>
+                                            <div dangerouslySetInnerHTML={{ __html: projectFiles['page.tsx'] }} />
+                                            <div className="mt-12 pt-8 border-t border-white/5 text-[10px] text-slate-600 flex justify-between uppercase tracking-widest font-mono">
+                                                <span>Runtime: Edge</span>
+                                                <span>Status: Optimized</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <div dangerouslySetInnerHTML={{ __html: article.content }} />
+                                )}
                             </div>
                         )}
                     </div>

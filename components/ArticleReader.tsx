@@ -289,8 +289,20 @@ const ArticleReader: React.FC<ArticleReaderProps> = ({ article, onClose }) => {
                             viewport={{ once: true }}
                             className="prose prose-invert prose-indigo max-w-none text-right"
                             dir="rtl"
-                            dangerouslySetInnerHTML={{ __html: article.content }}
-                        />
+                        >
+                            {article.content.startsWith('{"nextjs":true') ? (
+                                (() => {
+                                    try {
+                                        const project = JSON.parse(article.content);
+                                        return <div dangerouslySetInnerHTML={{ __html: project.files['page.tsx'] }} />;
+                                    } catch (e) {
+                                        return <div dangerouslySetInnerHTML={{ __html: article.content }} />;
+                                    }
+                                })()
+                            ) : (
+                                <div dangerouslySetInnerHTML={{ __html: article.content }} />
+                            )}
+                        </motion.div>
 
                         {/* Tags Architecture */}
                         <div className="mt-16 pt-8 border-t border-white/10" dir="rtl">

@@ -1,18 +1,18 @@
 export interface ArticleTemplate {
-    id: string;
-    title: string;
-    description: string;
-    icon: string;
-    structure: string;
+  id: string;
+  title: string;
+  description: string;
+  icon: string;
+  structure: string;
 }
 
 export const SOVEREIGN_TEMPLATES: ArticleTemplate[] = [
-    {
-        id: 'comprehensive-strategy',
-        title: 'المنهجية الشاملة (The Sovereign Strategy)',
-        description: 'قالب احترافي متكامل من 6 أجزاء يشمل الجداول، التحليل، والمخططات. مثالي للكتب الرقمية أو الأدلة المرجعية.',
-        icon: 'Layout',
-        structure: `
+  {
+    id: 'comprehensive-strategy',
+    title: 'المنهجية الشاملة (The Sovereign Strategy)',
+    description: 'قالب احترافي متكامل من 6 أجزاء يشمل الجداول، التحليل، والمخططات. مثالي للكتب الرقمية أو الأدلة المرجعية.',
+    icon: 'Layout',
+    structure: `
 <header class="mb-10 text-right" dir="rtl">
     <h1 class="text-4xl font-bold leading-tight text-white mb-6">
       المنهجية الشاملة لإدارة المشاريع الرقمية وإنشاء متجر إلكتروني ناجح من الصفر
@@ -257,13 +257,13 @@ export const SOVEREIGN_TEMPLATES: ArticleTemplate[] = [
   </p>
 </footer>
         `
-    },
-    {
-        id: 'case-study',
-        title: 'دراسة حالة (Case Study)',
-        description: 'تحليل معمق لمشروع ناجح مع إبراز الأرقام والنتائج الاستراتيجية.',
-        icon: 'Target',
-        structure: `
+  },
+  {
+    id: 'case-study',
+    title: 'دراسة حالة (Case Study)',
+    description: 'تحليل معمق لمشروع ناجح مع إبراز الأرقام والنتائج الاستراتيجية.',
+    icon: 'Target',
+    structure: `
 <div class="text-right" dir="rtl">
     <h2 class="text-indigo-400 text-2xl font-bold mb-4">ملخص التحدي (The Challenge)</h2>
     <p class="text-slate-300 mb-6">هنا نقوم بوصف المشكلة الأساسية التي كان يواجهها العميل قبل تدخلنا الاستراتيجي. ركز على نقاط الألم والتأثير الاقتصادي.</p>
@@ -291,13 +291,13 @@ export const SOVEREIGN_TEMPLATES: ArticleTemplate[] = [
     </blockquote>
 </div>
         `
-    },
-    {
-        id: 'technical-breakdown',
-        title: 'تحليل تقني (Technical Breakdown)',
-        description: 'شرح معمق لهندسة معينة أو تقنية حديثة وطريقة تطبيقها.',
-        icon: 'Code2',
-        structure: `
+  },
+  {
+    id: 'technical-breakdown',
+    title: 'تحليل تقني (Technical Breakdown)',
+    description: 'شرح معمق لهندسة معينة أو تقنية حديثة وطريقة تطبيقها.',
+    icon: 'Code2',
+    structure: `
 <div class="text-right" dir="rtl">
     <h2 class="text-purple-400 text-2xl font-bold mb-4">الهندسة العميقة (Deep Architecture)</h2>
     <p class="text-slate-300 mb-8">شرح للطبقات التقنية التي يتكون منها النظام. لماذا اخترنا هذه الأدوات بالتحديد؟</p>
@@ -329,13 +329,13 @@ const systemConfig = {
     <p class="text-slate-300">التوصيات النهائية للمهندسين وصناع القرار التقنيين.</p>
 </div>
         `
-    },
-    {
-        id: 'strategic-insight',
-        title: 'رؤية استراتيجية (Strategic Insight)',
-        description: 'مقال فكري يحلل اتجاهات السوق والمستقبل الرقمي.',
-        icon: 'Sparkles',
-        structure: `
+  },
+  {
+    id: 'strategic-insight',
+    title: 'رؤية استراتيجية (Strategic Insight)',
+    description: 'مقال فكري يحلل اتجاهات السوق والمستقبل الرقمي.',
+    icon: 'Sparkles',
+    structure: `
 <div class="text-right" dir="rtl">
     <h2 class="text-indigo-400 text-2xl font-bold mb-4">تموضع السوق (Market Positioning)</h2>
     <p class="text-slate-300 mb-8">تحليل للواقع الحالي للتحول الرقمي في المنطقة وما هي الفرص الضائعة.</p>
@@ -368,13 +368,13 @@ const systemConfig = {
     <p class="text-slate-300">دعوة للعمل (Call to Action) الموجهة للنخبة من صناع القرار.</p>
 </div>
         `
-    },
-    {
-        id: 'product-launch',
-        title: 'إطلاق منتج (Product Launch)',
-        description: 'قالب تسويقي عالي التأثير لإعلان عن منتج أو ميزة جديدة.',
-        icon: 'Rocket',
-        structure: `
+  },
+  {
+    id: 'product-launch',
+    title: 'إطلاق منتج (Product Launch)',
+    description: 'قالب تسويقي عالي التأثير لإعلان عن منتج أو ميزة جديدة.',
+    icon: 'Rocket',
+    structure: `
 <div class="text-right" dir="rtl">
     <header class="mb-10 text-center">
         <span class="bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider mb-4 inline-block">إعلان جديد</span>
@@ -437,5 +437,38 @@ const systemConfig = {
     </section>
 </div>
         `
-    }
+  },
+  {
+    id: 'nextjs-saas-launch',
+    title: 'إطلاق SaaS (Next.js 14)',
+    description: 'قالب برمجى كامل لإطلاق تطبيق ساس باستخدام بنية Next.js App Router.',
+    icon: 'Cpu',
+    structure: `
+{
+  "nextjs": true,
+  "files": {
+    "page.tsx": "<div class='space-y-16' dir='rtl'>\\n  <header class='text-center py-20 bg-gradient-to-b from-indigo-900/20 to-transparent rounded-3xl border border-white/5'>\\n    <h1 class='text-5xl md:text-7xl font-black text-white mb-6 uppercase tracking-tighter'>Sovereign SaaS Engine</h1>\\n    <p class='text-xl text-slate-400 max-w-2xl mx-auto'>أول نظام سحابي لإدارة السيادة الرقمية بأتمتة كاملة.</p>\\n  </header>\\n\\n  <section class='grid grid-cols-1 md:grid-cols-3 gap-8'>\\n    <div class='p-8 bg-slate-900 rounded-3xl border border-white/5 hover:border-indigo-500 transition-all'>\\n      <h3 class='text-white font-bold text-xl mb-4'>سريع كالبرق</h3>\\n      <p class='text-slate-400 text-sm'>تم تحسين أداء الفرونت إند ليصل إلى 100/100 في Lighthouse.</p>\\n    </div>\\n    <div class='p-8 bg-slate-900 rounded-3xl border border-white/5 hover:border-indigo-500 transition-all'>\\n      <h3 class='text-white font-bold text-xl mb-4'>أمان سيادي</h3>\\n      <p class='text-slate-400 text-sm'>تشفير البيانات بمستويات عسكرية لضمان خصوصيتك الكاملة.</p>\\n    </div>\\n    <div class='p-8 bg-slate-900 rounded-3xl border border-white/5 hover:border-indigo-500 transition-all'>\\n      <h3 class='text-white font-bold text-xl mb-4'>ذكاء مدمج</h3>\\n      <p class='text-slate-400 text-sm'>استخدم محركات الذكاء الاصطناعي لتحليل البيانات فورياً.</p>\\n    </div>\\n  </section>\\n\\n  <footer class='bg-indigo-600 p-12 rounded-[3rem] text-center'>\\n    <h2 class='text-3xl font-black text-white mb-6'>ابدأ تجربتك المجانية اليوم</h2>\\n    <button class='px-10 py-4 bg-white text-slate-950 font-black rounded-2xl hover:scale-105 transition-all'>ابدأ الآن</button>\\n  </footer>\\n</div>",
+    "layout.tsx": "export default function Layout({ children }) { return <div className='p-4'>{children}</div> }",
+    "metadata.ts": "export const metadata = { title: 'SaaS Launch' }"
+  }
+}
+        `
+  },
+  {
+    id: 'nextjs-tech-doc',
+    title: 'توثيق تقني (App Router)',
+    description: 'قالب لإنشاء صفحات توثيق برمجية أو دروس تعليمية متقدمة.',
+    icon: 'BookOpen',
+    structure: `
+{
+  "nextjs": true,
+  "files": {
+    "page.tsx": "<div class='prose prose-invert max-w-none text-right' dir='rtl'>\\n  <h1 class='text-indigo-400'>دليل هندسة النظم الموزعة</h1>\\n  <p>في هذا الدرس سنتعلم كيف تبني نظاماً يتحمل الضغط العالي باستخدام Next.js و Go.</p>\\n\\n  <div class='my-10 p-6 bg-slate-950 border-r-4 border-emerald-500 rounded-l-xl'>\\n    <h4 class='text-white mb-2'>مفهوم السيادة البرمجية:</h4>\\n    <p class='text-slate-400'>هو أن تمتلك البنية التحتية بالكامل دون الاعتماد على طرف ثالث.</p>\\n  </div>\\n\\n  <h2>كود الإعداد الأولي</h2>\\n  <pre class='bg-black p-6 rounded-xl font-mono text-sm text-indigo-300'>\\n    // main.go\\n    func main() {\\n      fmt.Println(\"Starting Sovereign Engine...\")\\n    }\\n  </pre>\\n\\n  <h2>الخلاصة الاستراتيجية</h2>\\n  <p>البناء للمستقبل يتطلب الدقة في اختيار التكنولوجيا منذ اليوم الأول.</p>\\n</div>",
+    "layout.tsx": "export default function Layout({ children }) { return <main>{children}</main> }",
+    "metadata.ts": "export const metadata = { title: 'Tech Doc' }"
+  }
+}
+        `
+  }
 ];
+
