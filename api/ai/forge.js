@@ -69,11 +69,21 @@ export default async function handler(req) {
             return new Response(JSON.stringify({ error: "Invalid stage" }), { status: 400 });
         }
 
+        if (stage === 'list-models') {
+            const listResp = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${finalKey}`);
+            const listData = await listResp.json();
+            return new Response(JSON.stringify({ result: listData }), { status: listResp.status });
+        }
+
         const modelsToTry = [
             "https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent",
             "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent",
+            "https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash-latest:generateContent",
+            "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent",
             "https://generativelanguage.googleapis.com/v1/models/gemini-1.5-pro:generateContent",
             "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent",
+            "https://generativelanguage.googleapis.com/v1/models/gemini-1.5-pro-latest:generateContent",
+            "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro-latest:generateContent",
             "https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent"
         ];
 
@@ -96,6 +106,7 @@ export default async function handler(req) {
 
                 if (response.ok) {
                     finalResponse = await response.json();
+                    console.log(`Success with: ${baseUrl}`);
                     break;
                 } else {
                     const errData = await response.json().catch(() => ({}));
@@ -110,18 +121,22 @@ export default async function handler(req) {
 
         if (!finalResponse) {
             return new Response(JSON.stringify({
-                error: `All models failed: ${lastErrorMsg}. Verify your API Key permits these models.`
+                error: `All models failed: ${lastErrorMsg}. Please verify your API Key permissions.`
             }), { status: 500 });
         }
 
         const content = finalResponse.candidates?.[0]?.content?.parts?.[0]?.text || "";
 
-        // If architect stage, try to extract JSON even if there is markdown wrapper
+        // Extraction Logic
         let result = content;
         if (stage === 'architect') {
             const jsonMatch = content.match(/\{[\s\S]*\}/);
             if (jsonMatch) {
-                result = JSON.parse(jsonMatch[0]);
+                try {
+                    result = JSON.parse(jsonMatch[0]);
+                } catch (e) {
+                    result = content;
+                }
             }
         }
 

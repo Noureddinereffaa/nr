@@ -18,6 +18,8 @@ const APISettings: React.FC = () => {
 
     const [isSaving, setIsSaving] = useState(false);
     const [saveSuccess, setSaveSuccess] = useState(false);
+    const [availableModels, setAvailableModels] = useState<any[]>([]);
+    const [isListingModels, setIsListingModels] = useState(false);
     const [testStatus, setTestStatus] = useState<{ [key: string]: 'idle' | 'testing' | 'success' | 'error' }>({
         gemini: 'idle',
         unsplash: 'idle',
@@ -57,6 +59,25 @@ const APISettings: React.FC = () => {
             setTestStatus(prev => ({ ...prev, [service]: 'error' }));
         }
         setTimeout(() => setTestStatus(prev => ({ ...prev, [service]: 'idle' })), 3000);
+    };
+
+    const fetchAvailableModels = async () => {
+        setIsListingModels(true);
+        try {
+            const resp = await fetch('/api/ai/forge', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ stage: 'list-models', apiKey: aiKeys.apiKey })
+            });
+            const data = await resp.json();
+            if (data.result && data.result.models) {
+                setAvailableModels(data.result.models);
+            }
+        } catch (error) {
+            console.error("Failed to fetch models", error);
+        } finally {
+            setIsListingModels(false);
+        }
     };
 
     const handleSaveAIKeys = async () => {
@@ -129,8 +150,8 @@ const APISettings: React.FC = () => {
                             <button
                                 onClick={() => handleTestConnection('gemini')}
                                 className={`text-[9px] font-black uppercase tracking-tighter px-2 py-1 rounded-md border transition-all ${testStatus.gemini === 'success' ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' :
-                                        testStatus.gemini === 'error' ? 'bg-red-500/10 text-red-500 border-red-500/20' :
-                                            'bg-white/5 text-slate-500 border-white/5 hover:text-white hover:bg-white/10'
+                                    testStatus.gemini === 'error' ? 'bg-red-500/10 text-red-500 border-red-500/20' :
+                                        'bg-white/5 text-slate-500 border-white/5 hover:text-white hover:bg-white/10'
                                     }`}
                             >
                                 {testStatus.gemini === 'testing' ? 'Testing...' :
@@ -156,8 +177,8 @@ const APISettings: React.FC = () => {
                             <button
                                 onClick={() => handleTestConnection('unsplash')}
                                 className={`text-[9px] font-black uppercase tracking-tighter px-2 py-1 rounded-md border transition-all ${testStatus.unsplash === 'success' ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' :
-                                        testStatus.unsplash === 'error' ? 'bg-red-500/10 text-red-500 border-red-500/20' :
-                                            'bg-white/5 text-slate-500 border-white/5 hover:text-white hover:bg-white/10'
+                                    testStatus.unsplash === 'error' ? 'bg-red-500/10 text-red-500 border-red-500/20' :
+                                        'bg-white/5 text-slate-500 border-white/5 hover:text-white hover:bg-white/10'
                                     }`}
                             >
                                 {testStatus.unsplash === 'testing' ? 'Testing...' :
@@ -192,6 +213,34 @@ const APISettings: React.FC = () => {
                 <p className="mt-6 text-[10px] text-slate-500 italic leading-relaxed">
                     * يتم استخدام هذه المفاتيح داخلياً لتشغيل محرك Forge وتوليد الصور والمحتوى الاستراتيجي. يتم تشفيرها وحفظها في قاعدة بياناتك الخاصة.
                 </p>
+
+                {/* Model Discovery Section */}
+                <div className="mt-8 pt-6 border-t border-white/5">
+                    <div className="flex items-center justify-between mb-4">
+                        <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest px-1">
+                            نماذج Gemini المرخصة لمفتاحك (Authorized Models)
+                        </label>
+                        <button
+                            onClick={fetchAvailableModels}
+                            disabled={isListingModels || !aiKeys.apiKey}
+                            className="text-[9px] font-black text-indigo-400 hover:text-white transition-colors"
+                        >
+                            {isListingModels ? 'جاري الفحص...' : 'فحص النماذج المتاحة'}
+                        </button>
+                    </div>
+
+                    {availableModels.length > 0 ? (
+                        <div className="flex flex-wrap gap-2">
+                            {availableModels.filter(m => m.supportedGenerationMethods.includes('generateContent')).map((model, i) => (
+                                <div key={i} className="px-3 py-1 bg-white/5 border border-white/5 rounded-lg text-[9px] font-mono text-slate-400">
+                                    {model.name.replace('models/', '')}
+                                </div>
+                            ))}
+                        </div>
+                    ) : (
+                        <div className="text-[9px] text-slate-600 italic">اضغط على "فحص النماذج" لرؤية ما يدعمه حسابك في Google.</div>
+                    )}
+                </div>
             </div>
 
             {/* 2. API ACCESS (EXTERNAL ACCESS) */}
