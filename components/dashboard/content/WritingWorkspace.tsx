@@ -62,6 +62,10 @@ const WritingWorkspace: React.FC<WritingWorkspaceProps> = ({ article: initialArt
         }
     }, []);
 
+    // Revisions (Session-based)
+    const [revisions, setRevisions] = useState<{ timestamp: string; article: Article }[]>([]);
+    const [lastRevisionTime, setLastRevisionTime] = useState(Date.now());
+
     // SEO Analysis (Real-time)
     const [seoMetrics, setSeoMetrics] = useState({
         wordCount: 0,
@@ -70,7 +74,8 @@ const WritingWorkspace: React.FC<WritingWorkspaceProps> = ({ article: initialArt
         readabilityScore: 0,
         metaLength: 0,
         hasH1: false,
-        h2Count: 0
+        h2Count: 0,
+        audit: [] as string[]
     });
 
     useEffect(() => {
@@ -91,6 +96,15 @@ const WritingWorkspace: React.FC<WritingWorkspaceProps> = ({ article: initialArt
         const hasH1 = /<h1/i.test(contentForAnalysis);
         const h2Count = (contentForAnalysis.match(/<h2/gi) || []).length;
 
+        // NEW: Audit Logic
+        const auditNodes: string[] = [];
+        if (wordCount < 300) auditNodes.push("المحتوى قصير جداً (أقل من 300 كلمة)");
+        if (!article.image) auditNodes.push("المقال يفتقر لصورة بارزة (Featured Image)");
+        if (!article.keywords || article.keywords.length === 0) auditNodes.push("لم يتم تحديد كلمات مفتاحية استراتيجية");
+        if (keyword && !contentForAnalysis.toLowerCase().includes(keyword.toLowerCase())) auditNodes.push(`الكلمة المفتاحية "${keyword}" غير موجودة في المحتوى`);
+        if (h2Count < 2) auditNodes.push("المقال يحتاج إلى ترويسات H2 أكثر للتنظيم");
+        if (metaLength < 50) auditNodes.push("المقتطف (Excerpt) قصير جداً للأرشفة");
+
         setSeoMetrics({
             wordCount,
             readingTime,
@@ -98,9 +112,16 @@ const WritingWorkspace: React.FC<WritingWorkspaceProps> = ({ article: initialArt
             readabilityScore: Math.round(readabilityScore),
             metaLength,
             hasH1,
-            h2Count
+            h2Count,
+            audit: auditNodes
         });
-    }, [article.content, article.excerpt, article.keywords, editorMode, projectFiles]);
+
+        // Capture Revision every 10 mins or major shift
+        if (Date.now() - lastRevisionTime > 600000 && hasChanges) {
+            setRevisions(prev => [{ timestamp: new Date().toLocaleTimeString(), article: { ...article } }, ...prev.slice(0, 9)]);
+            setLastRevisionTime(Date.now());
+        }
+    }, [article.content, article.excerpt, article.keywords, editorMode, projectFiles, hasChanges]);
 
     // Autosave Logic
     const isMounted = React.useRef(false);
@@ -469,11 +490,15 @@ const WritingWorkspace: React.FC<WritingWorkspaceProps> = ({ article: initialArt
 
                     {/* Authority Analytics Section */}
                     <div className="space-y-6 pt-8 border-t border-white/5">
-                        <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest px-2">Authority Score</label>
+                        <div className="flex items-center justify-between px-2">
+                            <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Authority Analytics</label>
+                            <span className="px-2 py-0.5 bg-indigo-500 text-white text-[8px] font-black rounded-full shadow-lg shadow-indigo-500/20">AI AUDIT LIVE</span>
+                        </div>
+
                         <div className="grid grid-cols-2 gap-3">
                             <div className="p-4 bg-slate-900 rounded-2xl border border-white/5 text-center">
                                 <p className="text-[9px] text-slate-500 font-black uppercase mb-1">Words</p>
-                                <p className="text-xl font-black text-white">{seoMetrics.wordCount}</p>
+                                <p className={`text-xl font-black ${seoMetrics.wordCount < 300 ? 'text-amber-500' : 'text-white'}`}>{seoMetrics.wordCount}</p>
                             </div>
                             <div className="p-4 bg-slate-900 rounded-2xl border border-white/5 text-center">
                                 <p className="text-[9px] text-slate-500 font-black uppercase mb-1">Read Time</p>
@@ -481,7 +506,7 @@ const WritingWorkspace: React.FC<WritingWorkspaceProps> = ({ article: initialArt
                             </div>
                             <div className="col-span-2 p-5 bg-gradient-to-br from-indigo-600/10 to-transparent rounded-3xl border border-indigo-500/20">
                                 <div className="flex justify-between items-center mb-4">
-                                    <span className="text-[10px] font-black text-white uppercase tracking-widest">SEO Intelligence</span>
+                                    <span className="text-[10px] font-black text-white uppercase tracking-widest">Authority Score</span>
                                     <span className="text-xl font-black text-indigo-400">{seoMetrics.readabilityScore}%</span>
                                 </div>
                                 <div className="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden">
@@ -492,6 +517,62 @@ const WritingWorkspace: React.FC<WritingWorkspaceProps> = ({ article: initialArt
                                     />
                                 </div>
                             </div>
+                        </div>
+
+                        {/* Deep Audit Checklist - NEW */}
+                        <div className="bg-slate-900/40 rounded-[1.5rem] border border-white/5 p-6 space-y-4">
+                            <h4 className="text-[9px] font-black text-slate-500 uppercase tracking-[0.2em] mb-4 flex items-center gap-2">
+                                <Zap size={10} className="text-amber-500" /> SEO Optimization Audit
+                            </h4>
+                            {seoMetrics.audit.length === 0 ? (
+                                <div className="flex items-center gap-3 text-emerald-400 text-[10px] font-bold">
+                                    <CheckCircle size={14} /> المقال محسن بالكامل وفق معايير السيادة.
+                                </div>
+                            ) : (
+                                <div className="space-y-3">
+                                    {seoMetrics.audit.map((node, i) => (
+                                        <div key={i} className="flex items-start gap-3 group">
+                                            <div className="w-1 h-1 rounded-full bg-amber-500 mt-1.5 shrink-0 group-hover:scale-150 transition-transform" />
+                                            <p className="text-slate-400 text-[10px] font-bold leading-relaxed transition-colors group-hover:text-white" dir="rtl">{node}</p>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                    </div>
+
+                    {/* Session Revisions - NEW */}
+                    <div className="space-y-4 pt-8 border-t border-white/5">
+                        <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest px-2 flex items-center justify-between w-full">
+                            Session History
+                            <span className="text-indigo-400 tracking-tighter">{revisions.length} Snapshots</span>
+                        </label>
+                        <div className="space-y-2">
+                            {revisions.length === 0 ? (
+                                <p className="text-[9px] text-slate-700 italic px-2">لا توجد نسخ سابقة في هذه الجلسة بعد...</p>
+                            ) : (
+                                revisions.map((rev, idx) => (
+                                    <button
+                                        key={idx}
+                                        onClick={() => {
+                                            if (confirm(`هل تريد استعادة النسخة المحفوظة في ${rev.timestamp}؟`)) {
+                                                setArticle(rev.article);
+                                                if (rev.article.content.startsWith('{"nextjs":true')) {
+                                                    const parsed = JSON.parse(rev.article.content);
+                                                    setProjectFiles(parsed.files);
+                                                    setEditorMode('nextjs');
+                                                } else {
+                                                    setEditorMode('classic');
+                                                }
+                                            }
+                                        }}
+                                        className="w-full flex items-center justify-between p-3 rounded-xl bg-slate-900 hover:bg-slate-800 border border-white/5 transition-all group"
+                                    >
+                                        <span className="text-[10px] font-mono text-slate-500 group-hover:text-indigo-400">{rev.timestamp}</span>
+                                        <span className="text-[8px] font-black text-slate-700 group-hover:text-white uppercase">Restore</span>
+                                    </button>
+                                ))
+                            )}
                         </div>
                     </div>
 
