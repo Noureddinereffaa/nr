@@ -3,7 +3,7 @@ import {
     X, Save, Eye, Layout, Type, Target,
     Zap, CheckCircle, ArrowRight, Image as ImageIcon,
     Code2, Activity, Users, Globe, Smartphone, Download, Hash,
-    Settings, ChevronRight
+    Settings, ChevronRight, Sparkles
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Article, AIConfig } from '../../../types';
@@ -46,6 +46,14 @@ const WritingWorkspace: React.FC<WritingWorkspaceProps> = ({ article: initialArt
         'layout.tsx': '',
         'metadata.ts': ''
     });
+
+    // AI Forge State
+    const [isForging, setIsForging] = useState(false);
+    const [forgeStep, setForgeStep] = useState<'idle' | 'architect' | 'forge' | 'completed'>('idle');
+    const [forgeProgress, setForgeProgress] = useState(0);
+    const [forgeStatus, setForgeStatus] = useState('');
+    const [aiTopic, setAiTopic] = useState('');
+    const [aiOutline, setAiOutline] = useState<any>(null);
 
     const editorRef = useRef<HTMLTextAreaElement>(null);
 
@@ -122,6 +130,119 @@ const WritingWorkspace: React.FC<WritingWorkspaceProps> = ({ article: initialArt
             setLastRevisionTime(Date.now());
         }
     }, [article.content, article.excerpt, article.keywords, editorMode, projectFiles, hasChanges]);
+
+    // AI Forge Engine
+    const startForge = async () => {
+        if (!aiTopic) return alert("الرجاء إدخال موضوع المقال أولاً.");
+
+        setIsForging(true);
+        setForgeStep('architect');
+        setForgeStatus('جاري هندسة هيكلية المقال الاستراتيجية...');
+        setForgeProgress(10);
+
+        try {
+            // Stage 1: Architecting
+            const archResp = await fetch('/api/ai/forge', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    stage: 'architect',
+                    apiKey: initialArticle.author === 'system' ? undefined : (window as any).GEMINI_API_KEY, // Dynamic fallback
+                    payload: {
+                        topic: aiTopic,
+                        templateTitle: SOVEREIGN_TEMPLATES.find(t => t.id === article.category)?.title || 'General'
+                    }
+                })
+            });
+
+            const archData = await archResp.json();
+            if (!archResp.ok) throw new Error(archData.error);
+
+            const outline = archData.result;
+            setAiOutline(outline);
+            setArticle(prev => ({
+                ...prev,
+                title: outline.title,
+                excerpt: outline.excerpt,
+                keywords: outline.keywords
+            }));
+
+            // Stage 2: Section-by-Section Forging
+            setForgeStep('forge');
+            setForgeProgress(20);
+
+            let fullContent = "";
+            let currentContext = outline.excerpt;
+
+            for (let i = 0; i < outline.sections.length; i++) {
+                const section = outline.sections[i];
+                setForgeStatus(`جاري كتابة الجزء ${i + 1} من ${outline.sections.length}: ${section.title}...`);
+
+                const forgeResp = await fetch('/api/ai/forge', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        stage: 'forge',
+                        payload: {
+                            topic: aiTopic,
+                            section: section,
+                            context: currentContext
+                        }
+                    })
+                });
+
+                const forgeData = await forgeResp.json();
+                if (!forgeResp.ok) throw new Error(forgeData.error);
+
+                let sectionContent = forgeData.result;
+
+                // NEW: Visual Assets Parsing (Phase 45.4)
+                const imageRegex = /\[IMAGE_PROMPT:\s*([^\]]+)\]/gi;
+                sectionContent = sectionContent.replace(imageRegex, (match: string, prompt: string) => {
+                    const encodedPrompt = encodeURIComponent(prompt.trim());
+                    return `
+                    <div class="my-12 relative group overflow-hidden rounded-[2rem] border border-white/10 shadow-2xl">
+                        <img 
+                            src="https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&q=80&w=1200" 
+                            alt="${prompt}" 
+                            class="w-full h-[400px] object-cover transition-transform duration-700 group-hover:scale-110"
+                            onerror="this.src='https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&q=80&w=1200'"
+                        />
+                        <div class="absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent to-transparent opacity-60"></div>
+                        <div class="absolute bottom-6 left-8 right-8">
+                            <p class="text-[10px] font-black uppercase tracking-[0.3em] text-indigo-400 mb-2">Visual Visualization</p>
+                            <p class="text-xs text-white/70 font-bold italic">${prompt}</p>
+                        </div>
+                    </div>`;
+                });
+
+                fullContent += `\n<!-- SECTION: ${section.id} -->\n<section class="mb-16">\n<h2 class="text-3xl font-black text-white mb-8">${section.title}</h2>\n${sectionContent}\n</section>\n`;
+
+                // Update workspace in real-time
+                setArticle(prev => ({ ...prev, content: fullContent }));
+
+                // Update progress
+                const progressIncrement = 80 / outline.sections.length;
+                setForgeProgress(prev => Math.min(95, prev + progressIncrement));
+
+                // Update context for next section
+                currentContext = sectionContent.substring(0, 300); // Send snippet of last section as context
+            }
+
+            setForgeProgress(100);
+            setForgeStatus('اكتمل صب المقال بنجاح!');
+            setForgeStep('completed');
+            setTimeout(() => {
+                setIsForging(false);
+                setForgeStep('idle');
+            }, 3000);
+
+        } catch (error: any) {
+            console.error("Forge Failure:", error);
+            setForgeStatus(`خطأ في الصب: ${error.message}`);
+            setTimeout(() => setIsForging(false), 5000);
+        }
+    };
 
     // Autosave Logic
     const isMounted = React.useRef(false);
@@ -419,6 +540,57 @@ const WritingWorkspace: React.FC<WritingWorkspaceProps> = ({ article: initialArt
                     <div className="p-1.5 bg-slate-900 rounded-2xl border border-white/5 flex gap-1">
                         <button onClick={() => handleModeSwitch('classic')} className={`flex-1 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${editorMode === 'classic' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/20' : 'text-slate-500 hover:text-white hover:bg-white/5'}`}>Classic</button>
                         <button onClick={() => handleModeSwitch('nextjs')} className={`flex-1 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${editorMode === 'nextjs' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/20' : 'text-slate-500 hover:text-white hover:bg-white/5'}`}>Next.js</button>
+                    </div>
+
+                    {/* AI Sovereign Forge - NEW */}
+                    <div className="space-y-6 pt-4 border-t border-white/5">
+                        <div className="flex items-center justify-between px-2">
+                            <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest">AI Sovereign Forge</label>
+                            <Sparkles size={14} className="text-amber-500" />
+                        </div>
+
+                        <div className="p-6 bg-slate-900/50 rounded-[2rem] border border-white/5 space-y-4">
+                            {!isForging ? (
+                                <>
+                                    <p className="text-[10px] text-slate-400 leading-relaxed font-bold">صب محتوى استراتيجي متكامل (2500+ كلمة) مبني على سياق ذكي وهيكلية سيادية.</p>
+                                    <div className="space-y-3">
+                                        <input
+                                            type="text"
+                                            value={aiTopic}
+                                            onChange={(e) => setAiTopic(e.target.value)}
+                                            placeholder="موضوع المقال أو الفكرة الرئيسية..."
+                                            className="w-full bg-slate-950 border border-white/10 text-white text-xs p-4 rounded-2xl outline-none focus:border-indigo-500 transition-all font-bold text-right"
+                                            dir="rtl"
+                                        />
+                                        <button
+                                            onClick={startForge}
+                                            disabled={!aiTopic}
+                                            className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed text-white py-4 rounded-2xl text-[11px] font-black uppercase tracking-widest flex items-center justify-center gap-3 transition-all active:scale-95 shadow-lg shadow-indigo-600/20"
+                                        >
+                                            <Zap size={14} className="fill-current" /> Forge Sovereignty
+                                        </button>
+                                    </div>
+                                </>
+                            ) : (
+                                <div className="space-y-6 py-4">
+                                    <div className="flex justify-between items-center text-[10px] font-black uppercase tracking-widest">
+                                        <span className="text-indigo-400 animate-pulse">{forgeStep === 'architect' ? 'Architecting' : 'Forging'}</span>
+                                        <span className="text-white">{Math.round(forgeProgress)}%</span>
+                                    </div>
+                                    <div className="w-full h-1.5 bg-slate-800 rounded-full overflow-hidden">
+                                        <motion.div
+                                            initial={{ width: 0 }}
+                                            animate={{ width: `${forgeProgress}%` }}
+                                            className="h-full bg-gradient-to-r from-indigo-500 to-purple-500 shadow-[0_0_15px_rgba(99,102,241,0.5)]"
+                                        />
+                                    </div>
+                                    <p className="text-[10px] text-slate-400 text-center font-bold italic leading-relaxed">{forgeStatus}</p>
+                                    <div className="flex justify-center">
+                                        <div className="w-8 h-8 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
                     </div>
 
                     {/* Next.js File Navigator if mode active */}
