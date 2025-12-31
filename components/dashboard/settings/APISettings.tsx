@@ -18,6 +18,11 @@ const APISettings: React.FC = () => {
 
     const [isSaving, setIsSaving] = useState(false);
     const [saveSuccess, setSaveSuccess] = useState(false);
+    const [testStatus, setTestStatus] = useState<{ [key: string]: 'idle' | 'testing' | 'success' | 'error' }>({
+        gemini: 'idle',
+        unsplash: 'idle',
+        openai: 'idle'
+    });
 
     const displaySovereignKey = "sk_sovereign_" + "x8d9f2m4k5n7j2p1q3r (Use env var SOVEREIGN_API_KEY)";
 
@@ -25,6 +30,33 @@ const APISettings: React.FC = () => {
         navigator.clipboard.writeText(text);
         setCopied(true);
         setTimeout(() => setCopied(false), 2000);
+    };
+
+    const handleTestConnection = async (service: 'gemini' | 'unsplash' | 'openai') => {
+        setTestStatus(prev => ({ ...prev, [service]: 'testing' }));
+        try {
+            let success = false;
+            if (service === 'gemini') {
+                const resp = await fetch('/api/ai/forge', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ stage: 'test', apiKey: aiKeys.apiKey })
+                });
+                success = resp.ok;
+            } else if (service === 'unsplash') {
+                const resp = await fetch('/api/ai/images', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ query: 'luxury office', apiKey: aiKeys.unsplashKey })
+                });
+                success = resp.ok;
+            }
+
+            setTestStatus(prev => ({ ...prev, [service]: success ? 'success' : 'error' }));
+        } catch (error) {
+            setTestStatus(prev => ({ ...prev, [service]: 'error' }));
+        }
+        setTimeout(() => setTestStatus(prev => ({ ...prev, [service]: 'idle' })), 3000);
     };
 
     const handleSaveAIKeys = async () => {
@@ -90,9 +122,22 @@ const APISettings: React.FC = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {/* Gemini Key */}
                     <div className="space-y-3">
-                        <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest px-1 flex items-center gap-2">
-                            <Zap size={12} className="text-amber-500" /> Google Gemini API Key
-                        </label>
+                        <div className="flex items-center justify-between px-1">
+                            <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest flex items-center gap-2">
+                                <Zap size={12} className="text-amber-500" /> Google Gemini API Key
+                            </label>
+                            <button
+                                onClick={() => handleTestConnection('gemini')}
+                                className={`text-[9px] font-black uppercase tracking-tighter px-2 py-1 rounded-md border transition-all ${testStatus.gemini === 'success' ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' :
+                                        testStatus.gemini === 'error' ? 'bg-red-500/10 text-red-500 border-red-500/20' :
+                                            'bg-white/5 text-slate-500 border-white/5 hover:text-white hover:bg-white/10'
+                                    }`}
+                            >
+                                {testStatus.gemini === 'testing' ? 'Testing...' :
+                                    testStatus.gemini === 'success' ? 'Valid' :
+                                        testStatus.gemini === 'error' ? 'Invalid' : 'Test Connection'}
+                            </button>
+                        </div>
                         <input
                             type="password"
                             value={aiKeys.apiKey}
@@ -104,9 +149,22 @@ const APISettings: React.FC = () => {
 
                     {/* Unsplash Key */}
                     <div className="space-y-3">
-                        <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest px-1 flex items-center gap-2">
-                            <ImageIcon size={12} className="text-blue-500" /> Unsplash Access Key
-                        </label>
+                        <div className="flex items-center justify-between px-1">
+                            <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest flex items-center gap-2">
+                                <ImageIcon size={12} className="text-blue-500" /> Unsplash Access Key
+                            </label>
+                            <button
+                                onClick={() => handleTestConnection('unsplash')}
+                                className={`text-[9px] font-black uppercase tracking-tighter px-2 py-1 rounded-md border transition-all ${testStatus.unsplash === 'success' ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' :
+                                        testStatus.unsplash === 'error' ? 'bg-red-500/10 text-red-500 border-red-500/20' :
+                                            'bg-white/5 text-slate-500 border-white/5 hover:text-white hover:bg-white/10'
+                                    }`}
+                            >
+                                {testStatus.unsplash === 'testing' ? 'Testing...' :
+                                    testStatus.unsplash === 'success' ? 'Valid' :
+                                        testStatus.unsplash === 'error' ? 'Invalid' : 'Test Connection'}
+                            </button>
+                        </div>
                         <input
                             type="password"
                             value={aiKeys.unsplashKey}

@@ -11,12 +11,12 @@ export default async function handler(req) {
         const { stage, payload, apiKey } = await req.json();
 
         // Use provided key or environment variable
-        const finalKey = apiKey || process.env.GEMINI_API_KEY;
+        const finalKey = apiKey || process.env.AI_FORGE_GEMINI_KEY || process.env.GEMINI_API_KEY;
         if (!finalKey) {
             return new Response(JSON.stringify({ error: "No API Key provided" }), { status: 401 });
         }
 
-        const GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent";
+        const GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1/models/gemini-1.5-pro:generateContent";
 
         let prompt = "";
         if (stage === 'architect') {
@@ -45,6 +45,8 @@ export default async function handler(req) {
               ]
             }
             `;
+        } else if (stage === 'test') {
+            prompt = "Say 'SUCCESS'.";
         } else if (stage === 'forge') {
             prompt = `
             You are the Sovereign Writer AI. Write a high-authority, detailed section for a strategic article in Arabic.

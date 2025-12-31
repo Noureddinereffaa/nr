@@ -199,25 +199,45 @@ const WritingWorkspace: React.FC<WritingWorkspaceProps> = ({ article: initialArt
 
                 let sectionContent = forgeData.result;
 
-                // NEW: Visual Assets Parsing (Phase 45.4)
+                // NEW: Visual Assets Real-Time Fetching (Phase 46)
                 const imageRegex = /\[IMAGE_PROMPT:\s*([^\]]+)\]/gi;
-                sectionContent = sectionContent.replace(imageRegex, (match: string, prompt: string) => {
-                    const encodedPrompt = encodeURIComponent(prompt.trim());
-                    return `
-                    <div class="my-12 relative group overflow-hidden rounded-[2rem] border border-white/10 shadow-2xl">
-                        <img 
-                            src="https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&q=80&w=1200" 
-                            alt="${prompt}" 
-                            class="w-full h-[400px] object-cover transition-transform duration-700 group-hover:scale-110"
-                            onerror="this.src='https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&q=80&w=1200'"
-                        />
-                        <div class="absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent to-transparent opacity-60"></div>
-                        <div class="absolute bottom-6 left-8 right-8">
-                            <p class="text-[10px] font-black uppercase tracking-[0.3em] text-indigo-400 mb-2">Visual Visualization</p>
-                            <p class="text-xs text-white/70 font-bold italic">${prompt}</p>
-                        </div>
-                    </div>`;
-                });
+                const matches = Array.from(sectionContent.matchAll(imageRegex));
+
+                for (const match of matches) {
+                    const fullMatch = match[0];
+                    const prompt = match[1].trim();
+
+                    try {
+                        const imgResp = await fetch('/api/ai/images', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                query: prompt,
+                                apiKey: siteData.aiConfig.unsplashKey
+                            })
+                        });
+                        const imgData = await imgResp.json();
+
+                        if (imgResp.ok && imgData.imageUrl) {
+                            const replacement = `
+                            <div class="my-12 relative group overflow-hidden rounded-[2rem] border border-white/10 shadow-2xl">
+                                <img 
+                                    src="${imgData.imageUrl}" 
+                                    alt="${prompt}" 
+                                    class="w-full h-[400px] object-cover transition-transform duration-700 group-hover:scale-110"
+                                />
+                                <div class="absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent to-transparent opacity-60"></div>
+                                <div class="absolute bottom-6 left-8 right-8">
+                                    <p class="text-[10px] font-black uppercase tracking-[0.3em] text-indigo-400 mb-2">Sovereign Visual Engine</p>
+                                    <p class="text-xs text-white/70 font-bold italic">${prompt}</p>
+                                </div>
+                            </div>`;
+                            sectionContent = sectionContent.replace(fullMatch, replacement);
+                        }
+                    } catch (imgError) {
+                        console.error("Failed to fetch Unsplash image:", imgError);
+                    }
+                }
 
                 fullContent += `\n<!-- SECTION: ${section.id} -->\n<section class="mb-16">\n<h2 class="text-3xl font-black text-white mb-8">${section.title}</h2>\n${sectionContent}\n</section>\n`;
 
