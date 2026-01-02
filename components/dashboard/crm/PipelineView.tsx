@@ -1,5 +1,6 @@
 import React, { useMemo } from 'react';
 import { useData } from '../../../context/DataContext';
+import { useUI } from '../../../context/UIContext';
 import { Client } from '../../../types';
 import { MoreHorizontal, Phone, Mail, Calendar, DollarSign, User } from 'lucide-react';
 
@@ -13,6 +14,7 @@ const COLUMNS = [
 
 const PipelineView: React.FC<{ onEdit: (client: Client) => void }> = ({ onEdit }) => {
     const { siteData, updateClient } = useData();
+    const { isShieldMode } = useUI();
     const clients = siteData.clients || [];
 
     // Group clients by status
@@ -81,10 +83,12 @@ const PipelineView: React.FC<{ onEdit: (client: Client) => void }> = ({ onEdit }
                                 className="bg-slate-800 border border-white/5 p-3 rounded-lg shadow-sm hover:border-indigo-500/50 hover:shadow-md cursor-grab active:cursor-grabbing transition-all group"
                             >
                                 <div className="flex justify-between items-start mb-2">
-                                    <h4 className="font-bold text-white text-sm line-clamp-1">{client.name}</h4>
+                                    <h4 className="font-bold text-white text-sm line-clamp-1">
+                                        {isShieldMode ? 'SOVEREIGN_ENTITY' : client.name}
+                                    </h4>
                                     {client.value > 0 && (
-                                        <span className="text-[10px] font-mono text-emerald-400 bg-emerald-400/10 px-1 py-0.5 rounded">
-                                            {formatCurrency(client.value)}
+                                        <span className={`text-[10px] font-mono px-1 py-0.5 rounded ${isShieldMode ? 'bg-slate-700 text-slate-500 italic' : 'text-emerald-400 bg-emerald-400/10'}`}>
+                                            {isShieldMode ? 'HIDDEN' : formatCurrency(client.value)}
                                         </span>
                                     )}
                                 </div>
@@ -99,7 +103,7 @@ const PipelineView: React.FC<{ onEdit: (client: Client) => void }> = ({ onEdit }
                                 <div className="grid grid-cols-2 gap-2 text-[10px] text-slate-500">
                                     <div className="flex items-center gap-1">
                                         <Phone size={10} />
-                                        <span className="truncate">{client.phone}</span>
+                                        <span className="truncate">{isShieldMode ? '+213 ** ** ** **' : client.phone}</span>
                                     </div>
                                     <div className="flex items-center gap-1">
                                         <Calendar size={10} />

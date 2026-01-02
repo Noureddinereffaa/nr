@@ -14,7 +14,7 @@ import ClientForm from '../components/dashboard/forms/ClientForm';
 import InvoiceForm from '../components/dashboard/forms/InvoiceForm';
 import ProjectForm from '../components/dashboard/forms/ProjectForm';
 import ArticleModal from '../components/dashboard/modals/ArticleModal';
-import CommandBar from '../components/ui/CommandBar';
+import UnifiedCommand from '../components/dashboard/shared/UnifiedCommand';
 // import ServiceRequestForm from '../components/dashboard/forms/ServiceRequestForm'; // Checking if this exists
 
 // Lazy Load Content Components
@@ -32,13 +32,12 @@ const DashboardPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState('overview');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [showDebug, setShowDebug] = useState(false);
-  const [isCommandBarOpen, setIsCommandBarOpen] = useState(false);
   const { siteData, updateSiteData, addClient, addInvoice, addProject, addArticle } = useData();
   const {
     isClientModalOpen, closeClientModal,
     isInvoiceModalOpen, closeInvoiceModal,
     isProjectModalOpen, closeProjectModal,
-    // isRequestModalOpen, closeRequestModal 
+    openCommandPalette, toggleCommandPalette
   } = useUI();
 
   const handleTabClick = (id: string) => {
@@ -50,7 +49,7 @@ const DashboardPage: React.FC = () => {
     const handleGlobalK = (e: KeyboardEvent) => {
       if (e.key === 'k' && (e.ctrlKey || e.metaKey)) {
         e.preventDefault();
-        setIsCommandBarOpen(prev => !prev);
+        toggleCommandPalette();
       }
     };
     window.addEventListener('keydown', handleGlobalK);
@@ -141,12 +140,7 @@ const DashboardPage: React.FC = () => {
           onClose={closeProjectModal}
         />
         <ArticleModal />
-
-        <CommandBar
-          isOpen={isCommandBarOpen}
-          onClose={() => setIsCommandBarOpen(false)}
-          onNavigate={handleTabClick}
-        />
+        <UnifiedCommand />
 
         {/* Debug Overlay */}
         {showDebug && (

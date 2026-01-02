@@ -1,6 +1,7 @@
 import React from 'react';
 import { Client } from '../../../types';
 import { Phone, Mail, DollarSign, Calendar, Clock } from 'lucide-react';
+import { useUI } from '../../../context/UIContext';
 
 interface ClientCardProps {
     client: Client;
@@ -9,6 +10,7 @@ interface ClientCardProps {
 }
 
 const ClientCard: React.FC<ClientCardProps> = ({ client, onEdit, onMove }) => {
+    const { isShieldMode } = useUI();
     const statusColors = {
         lead: 'bg-blue-500/10 border-blue-500/20 text-blue-400',
         negotiation: 'bg-amber-500/10 border-amber-500/20 text-amber-400',
@@ -24,13 +26,17 @@ const ClientCard: React.FC<ClientCardProps> = ({ client, onEdit, onMove }) => {
         >
             <div className="flex justify-between items-start mb-3">
                 <div>
-                    <h5 className="font-bold text-white text-sm">{client.name}</h5>
-                    <span className="text-xs text-slate-500">{client.company}</span>
+                    <h5 className="font-bold text-white text-sm">
+                        {isShieldMode ? 'SOVEREIGN_ENTITY' : client.name}
+                    </h5>
+                    <span className="text-xs text-slate-500">
+                        {isShieldMode ? 'COMPANY_PROTECTED' : client.company}
+                    </span>
                 </div>
                 {client.value > 0 && (
-                    <div className="px-2 py-1 rounded bg-green-900/20 text-green-400 text-xs font-bold border border-green-500/10 flex items-center gap-1">
+                    <div className={`px-2 py-1 rounded text-xs font-bold border flex items-center gap-1 ${isShieldMode ? 'bg-slate-800 text-slate-500 border-white/5 italic' : 'bg-green-900/20 text-green-400 border-green-500/10'}`}>
                         <DollarSign size={10} />
-                        {client.value.toLocaleString()}
+                        {isShieldMode ? 'HIDDEN' : client.value.toLocaleString()}
                     </div>
                 )}
             </div>
@@ -38,11 +44,11 @@ const ClientCard: React.FC<ClientCardProps> = ({ client, onEdit, onMove }) => {
             <div className="space-y-1 mb-3">
                 <div className="flex items-center gap-2 text-xs text-slate-400">
                     <Mail size={12} />
-                    <span className="truncate max-w-[150px]">{client.email}</span>
+                    <span className="truncate max-w-[150px]">{isShieldMode ? '****@****.***' : client.email}</span>
                 </div>
                 <div className="flex items-center gap-2 text-xs text-slate-400">
                     <Phone size={12} />
-                    <span>{client.phone}</span>
+                    <span>{isShieldMode ? '+213 ** ** ** **' : client.phone}</span>
                 </div>
                 <div className="flex items-center gap-2 text-xs text-slate-500 mt-2 pt-2 border-t border-white/5">
                     <Clock size={12} />

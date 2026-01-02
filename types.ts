@@ -148,6 +148,15 @@ export interface ProjectActivity {
   user?: string;
 }
 
+export interface SystemActivity {
+  id: string;
+  date: string;
+  label: string;
+  type: 'ai_forge' | 'sync' | 'crm' | 'finance' | 'system' | 'project' | 'content';
+  status: 'success' | 'info' | 'error' | 'warning';
+  metadata?: any;
+}
+
 export interface Project {
   id: string;
   title: string;
@@ -327,6 +336,7 @@ export interface SiteData {
   integrations?: SocialIntegration[];
   contentPlan?: ContentPlanItem[];
   autopilot?: AutopilotConfig;
+  activityLog?: SystemActivity[];
   // UI/Legacy compatibility
   profile?: any;
   faqs?: any;

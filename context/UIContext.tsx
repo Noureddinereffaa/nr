@@ -35,6 +35,14 @@ interface UIContextType {
     openArticleModal: () => void;
     closeArticleModal: () => void;
 
+    isCommandPaletteOpen: boolean;
+    openCommandPalette: () => void;
+    closeCommandPalette: () => void;
+    toggleCommandPalette: () => void;
+
+    isShieldMode: boolean;
+    toggleShieldMode: () => void;
+
     // Toast System
     toasts: Toast[];
     addToast: (message: string, type?: 'success' | 'error' | 'info') => void;
@@ -62,6 +70,8 @@ export const UIProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     const [isRequestModalOpen, setIsRequestModalOpen] = useState(false);
     const [isArticleModalOpen, setIsArticleModalOpen] = useState(false);
     const [isChatOpen, setIsChatOpen] = useState(false);
+    const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false);
+    const [isShieldMode, setIsShieldMode] = useState(() => localStorage.getItem('nr_shield_mode') === 'true');
 
     // Toast State
     const [toasts, setToasts] = useState<Toast[]>([]);
@@ -137,6 +147,14 @@ export const UIProvider: React.FC<{ children: React.ReactNode }> = ({ children }
         setThemeConfig(prev => ({ ...prev, ...newConfig }));
     };
 
+    const toggleShieldMode = () => {
+        setIsShieldMode(prev => {
+            const next = !prev;
+            localStorage.setItem('nr_shield_mode', String(next));
+            return next;
+        });
+    };
+
     const toggleHighContrast = () => {
         setIsHighContrast(prev => {
             const next = !prev;
@@ -183,6 +201,14 @@ export const UIProvider: React.FC<{ children: React.ReactNode }> = ({ children }
             openChat: () => setIsChatOpen(true),
             closeChat: () => setIsChatOpen(false),
             toggleChat: () => setIsChatOpen(prev => !prev),
+
+            isCommandPaletteOpen,
+            openCommandPalette: () => setIsCommandPaletteOpen(true),
+            closeCommandPalette: () => setIsCommandPaletteOpen(false),
+            toggleCommandPalette: () => setIsCommandPaletteOpen(prev => !prev),
+
+            isShieldMode,
+            toggleShieldMode,
 
             toasts,
             addToast,

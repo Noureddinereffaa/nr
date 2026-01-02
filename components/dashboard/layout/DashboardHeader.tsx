@@ -14,7 +14,7 @@ interface DashboardHeaderProps {
 
 const DashboardHeader: React.FC<DashboardHeaderProps> = ({ onMenuToggle, isMenuOpen }) => {
     const { user, signOut } = useAuth();
-    const { isHighContrast, toggleHighContrast } = useUI();
+    const { isHighContrast, toggleHighContrast, isShieldMode, toggleShieldMode, openCommandPalette } = useUI();
     const { siteData } = useData();
     const navigate = useNavigate();
     const [showNotifications, setShowNotifications] = useState(false);
@@ -113,21 +113,20 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({ onMenuToggle, isMenuO
                     <Search size={20} />
                 </button>
 
-                {/* Global Command Bar */}
-                <div className="hidden lg:flex items-center gap-3 bg-slate-950/50 border border-white/10 rounded-[var(--border-radius-elite)] px-4 py-2 w-96 focus-within:border-[var(--accent-indigo)] transition-all group">
-                    <Search size={16} className="text-slate-500 group-focus-within:text-[var(--accent-indigo)]" />
-                    <input
-                        type="text"
-                        placeholder="ابحث عن أمر أو عميل (Ctrl + K)..."
-                        className="bg-transparent border-none outline-none text-xs text-white placeholder:text-slate-600 w-full text-right"
-                        dir="rtl"
-                    />
+                {/* Global Command Bar Trigger */}
+                <button
+                    onClick={openCommandPalette}
+                    className="hidden lg:flex items-center gap-3 bg-slate-950/50 border border-white/10 rounded-[var(--border-radius-elite)] px-4 py-2 w-96 hover:border-[var(--accent-indigo)] transition-all group text-right"
+                    dir="rtl"
+                >
+                    <Search size={16} className="text-slate-500 group-hover:text-[var(--accent-indigo)]" />
+                    <span className="text-xs text-slate-500 flex-1">ابحث عن أمر أو عميل (Ctrl + K)...</span>
                     <div className="flex items-center gap-1 text-[8px] font-black text-slate-600 border border-white/5 px-1.5 py-0.5 rounded-md">
                         <span>K</span>
                         <span>+</span>
                         <span>Ctrl</span>
                     </div>
-                </div>
+                </button>
             </div>
 
             <div className="flex items-center gap-2 md:gap-4">
@@ -186,6 +185,14 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({ onMenuToggle, isMenuO
                         <span className="absolute -top-1 -right-1 w-2 h-2 bg-[var(--accent-indigo)] rounded-full border-2 border-slate-900"></span>
                     </button>
                     {showNotifications && <NotificationDropdown onClose={() => setShowNotifications(false)} />}
+
+                    <button
+                        onClick={toggleShieldMode}
+                        className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all ${isShieldMode ? 'bg-amber-500 text-slate-950 shadow-[0_0_15px_rgba(245,158,11,0.4)]' : 'bg-white/5 text-slate-500 hover:text-white'}`}
+                        title={isShieldMode ? "تعطيل درع الحماية" : "تفعيل درع الحماية (إخفاء البيانات الحساسة)"}
+                    >
+                        <Shield size={16} className={isShieldMode ? "animate-pulse" : ""} />
+                    </button>
 
                     <button
                         onClick={toggleHighContrast}

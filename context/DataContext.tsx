@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { NOUREDDINE_DATA, SERVICES, PROJECTS, TESTIMONIALS, FAQS, WORK_PROCESS, DEFAULT_STATS, ARTICLES } from '../constants';
-import { SiteData, Client, Project, Invoice, Service, Article, ServiceRequest, Expense, SocialPost, SocialIntegration, ContentPlanItem } from '../types';
+import { SiteData, Client, Project, Invoice, Service, Article, ServiceRequest, Expense, SocialPost, SocialIntegration, ContentPlanItem, SystemActivity } from '../types';
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
 import Logger from '../lib/logger';
 
@@ -12,18 +12,18 @@ interface DataContextType {
   updateAIConfig: (newAI: any) => void;
 
   // Client CRUD
-  addClient: (client: Omit<Client, 'id'>) => Promise<void>;
-  updateClient: (id: string, data: Partial<Client>) => Promise<void>;
+  addClient: (client: Partial<Client>) => void;
+  updateClient: (id: string, updates: Partial<Client>) => void;
   deleteClient: (id: string) => Promise<void>;
 
   // Project CRUD
-  addProject: (project: Omit<Project, 'id'>) => Promise<void>;
+  addProject: (project: Partial<Project>) => Promise<void>;
   updateProject: (id: string, data: Partial<Project>) => Promise<void>;
   deleteProject: (id: string) => Promise<void>;
 
   // Invoice CRUD
-  addInvoice: (invoice: Omit<Invoice, 'id'>) => Promise<void>;
-  updateInvoice: (id: string, data: Partial<Invoice>) => Promise<void>;
+  addInvoice: (invoice: Partial<Invoice>) => Promise<void>;
+  updateInvoice: (id: string, updates: Partial<Invoice>) => Promise<void>;
   deleteInvoice: (id: string) => Promise<void>;
 
   // Service CRUD
@@ -51,6 +51,7 @@ interface DataContextType {
   deleteSocialPost: (id: string) => Promise<void>;
   updateIntegration: (id: string, data: Partial<SocialIntegration>) => Promise<void>;
 
+  logActivity: (label: string, type: SystemActivity['type'], status?: SystemActivity['status'], metadata?: any) => void;
   resetToDefault: () => void;
 }
 
@@ -131,7 +132,8 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         platforms: ['linkedin', 'twitter'],
         strategyFocus: 'growth'
       },
-      contentPlan: []
+      contentPlan: [],
+      activityLog: []
     };
 
     const saved = localStorage.getItem('nr_full_platform_data');
@@ -146,7 +148,8 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
           projects: (parsed.projects && parsed.projects.length > 0) ? parsed.projects : defaultData.projects,
           services: (parsed.services && parsed.services.length > 0) ? parsed.services : defaultData.services,
           testimonials: (parsed.testimonials && parsed.testimonials.length > 0) ? parsed.testimonials : defaultData.testimonials,
-          features: { ...defaultData.features, ...(parsed.features || {}) }
+          features: { ...defaultData.features, ...(parsed.features || {}) },
+          activityLog: parsed.activityLog || []
         };
       } catch (e) {
         console.error("Failed to parse saved data", e);
@@ -195,7 +198,8 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
           expensesRes,
           socialPostsRes,
           integrationsRes,
-          contentPlanRes
+          contentPlanRes,
+          activityLogRes
         ] = await Promise.all([
           supabase.from('site_settings').select('*').eq('id', 'main').maybeSingle(),
           supabase.from('clients').select('*'),
@@ -207,7 +211,8 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
           supabase.from('expenses').select('*'),
           supabase.from('social_posts').select('*'),
           supabase.from('integrations').select('*'),
-          supabase.from('content_plan').select('*')
+          supabase.from('content_plan').select('*'),
+          supabase.from('activity_log').select('*').order('date', { ascending: false }).limit(50)
         ]);
 
         if (clientsRes.error && clientsRes.error.code === '42P01') {
@@ -227,6 +232,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
           const cloudSocialPosts = extractJsonbData<SocialPost>(socialPostsRes.data);
           const cloudIntegrations = extractJsonbData<SocialIntegration>(integrationsRes.data);
           const cloudContentPlan = extractJsonbData<ContentPlanItem>(contentPlanRes.data);
+          const cloudActivityLog = extractJsonbData<SystemActivity>(activityLogRes.data);
 
           const newClients = cloudClients.length > 0 ? cloudClients : prev.clients;
           const newProjects = cloudProjects.length > 0 ? cloudProjects : prev.projects;
@@ -238,6 +244,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
           const newSocialPosts = cloudSocialPosts.length > 0 ? cloudSocialPosts : prev.socialPosts || [];
           const newIntegrations = cloudIntegrations.length > 0 ? cloudIntegrations : prev.integrations || [];
           const newContentPlan = cloudContentPlan.length > 0 ? cloudContentPlan : prev.contentPlan || [];
+          const newActivityLog = cloudActivityLog.length > 0 ? cloudActivityLog : prev.activityLog || [];
 
           let newBrand = prev.brand;
           let newContactInfo = prev.contactInfo;
@@ -284,7 +291,8 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
             expenses: newExpenses as Expense[],
             socialPosts: newSocialPosts as SocialPost[],
             integrations: newIntegrations as SocialIntegration[],
-            contentPlan: newContentPlan as ContentPlanItem[]
+            contentPlan: newContentPlan as ContentPlanItem[],
+            activityLog: newActivityLog as SystemActivity[]
           };
         });
 
@@ -317,6 +325,33 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  const logActivity = async (label: string, type: SystemActivity['type'], status: SystemActivity['status'] = 'info', metadata?: any) => {
+    const newActivity: SystemActivity = {
+      id: Math.random().toString(36).substr(2, 9),
+      date: new Date().toISOString(),
+      label,
+      type,
+      status,
+      metadata
+    };
+
+    setSiteData(prev => {
+      const currentLog = prev.activityLog || [];
+      return {
+        ...prev,
+        activityLog: [newActivity, ...currentLog].slice(0, 50)
+      };
+    });
+
+    if (isSupabaseConfigured() && supabase) {
+      try {
+        await supabase.from('activity_log').insert([{ id: newActivity.id, data: newActivity }]);
+      } catch (e) {
+        Logger.error('Supabase Log Activity Failed', e);
+      }
+    }
+  };
+
   const updateSiteData = async (newData: Partial<SiteData>) => {
     setSiteData((prev) => {
       const updated = { ...prev, ...newData };
@@ -341,65 +376,84 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     });
   };
 
-  const addClient = async (client: Omit<Client, 'id'>): Promise<void> => {
-    const newClient: Client = { ...client, id: 'c-' + Date.now() };
+  const addClient = async (client: Partial<Client>) => {
+    const newClient = { ...client, id: 'c-' + Date.now() } as Client;
     setSiteData(prev => ({ ...prev, clients: [...(prev.clients || []), newClient] }));
+    logActivity(`عميل جديد: ${newClient.name}`, 'crm', 'success');
     if (isSupabaseConfigured() && supabase) {
-      await supabase.from('clients').insert([{ id: newClient.id, data: newClient }]);
+      const { error } = await supabase.from('clients').insert([{ id: newClient.id, data: newClient }]);
+      if (error) Logger.error('Supabase Add Client Failed', error);
     }
   };
 
-  const updateClient = async (id: string, data: Partial<Client>): Promise<void> => {
-    setSiteData(prev => ({ ...prev, clients: prev.clients.map(c => c.id === id ? { ...c, ...data } : c) }));
+  const updateClient = async (id: string, updates: Partial<Client>) => {
+    setSiteData(prev => ({ ...prev, clients: prev.clients.map(c => c.id === id ? { ...c, ...updates } : c) }));
+    logActivity(`تم تحديث العميل ${updates.name || id}`, 'crm', 'info');
     if (isSupabaseConfigured() && supabase) {
       const currentClient = siteData.clients.find(c => c.id === id);
-      await supabase.from('clients').upsert({ id, data: { ...currentClient, ...data } });
+      const { error } = await supabase.from('clients').upsert({ id, data: { ...currentClient, ...updates } });
+      if (error) Logger.error('Supabase Update Client Failed', error);
     }
   };
 
   const deleteClient = async (id: string): Promise<void> => {
     setSiteData(prev => ({ ...prev, clients: prev.clients.filter(c => c.id !== id) }));
+    logActivity(`تم حذف العميل ${id}`, 'crm', 'warning');
     if (isSupabaseConfigured() && supabase) {
       await supabase.from('clients').delete().eq('id', id);
     }
   };
 
-  const addProject = async (project: Omit<Project, 'id'>): Promise<void> => {
-    const newProject: Project = { ...project, id: 'p-' + Date.now() };
+  const addProject = async (project: Partial<Project>) => {
+    const newProject = { ...project, id: 'p-' + Date.now() } as Project;
     setSiteData(prev => ({ ...prev, projects: [...(prev.projects || []), newProject] }));
+    const projectName = (project as any).title || (project as any).name || newProject.id;
+    logActivity(`مشروع جديد: ${projectName}`, 'project', 'success');
     if (isSupabaseConfigured() && supabase) {
-      await supabase.from('projects').insert([{ id: newProject.id, data: newProject }]);
+      const { error } = await supabase.from('projects').insert([{ id: newProject.id, data: newProject }]);
+      if (error) Logger.error('Supabase Add Project Failed', error);
     }
   };
 
-  const updateProject = async (id: string, data: Partial<Project>): Promise<void> => {
-    setSiteData(prev => ({ ...prev, projects: prev.projects.map(p => p.id === id ? { ...p, ...data } : p) }));
+  const updateProject = async (id: string, updates: Partial<Project>) => {
+    setSiteData(prev => ({ ...prev, projects: prev.projects.map(p => p.id === id ? { ...p, ...updates } : p) }));
+    const projectName = (updates as any).title || (updates as any).name || id;
+    logActivity(`تم تحديث المشروع ${projectName}`, 'project', 'info');
     if (isSupabaseConfigured() && supabase) {
       const oldProject = siteData.projects.find(p => p.id === id);
-      await supabase.from('projects').upsert({ id, data: { ...oldProject, ...data } });
+      const { error } = await supabase.from('projects').upsert({ id, data: { ...oldProject, ...updates } });
+      if (error) Logger.error('Supabase Update Project Failed', error);
     }
   };
 
   const deleteProject = async (id: string): Promise<void> => {
     setSiteData(prev => ({ ...prev, projects: prev.projects.filter(p => p.id !== id) }));
+    logActivity(`تم حذف المشروع ${id}`, 'project', 'warning');
     if (isSupabaseConfigured() && supabase) {
       await supabase.from('projects').delete().eq('id', id);
     }
   };
 
-  const addInvoice = async (invoice: Omit<Invoice, 'id'>): Promise<void> => {
-    const newInvoice: Invoice = { ...invoice, id: 'inv-' + Date.now() };
+  const addInvoice = async (invoice: Partial<Invoice>) => {
+    const newInvoice: Invoice = { ...invoice, id: 'inv-' + Date.now() } as Invoice;
     setSiteData(prev => ({ ...prev, invoices: [...(prev.invoices || []), newInvoice] }));
+    logActivity(`فاتورة جديدة: ${newInvoice.id}`, 'finance', 'success');
     if (isSupabaseConfigured() && supabase) {
-      await supabase.from('invoices').insert([{ id: newInvoice.id, data: newInvoice }]);
+      const { error } = await supabase.from('invoices').insert([{ id: newInvoice.id, data: newInvoice }]);
+      if (error) Logger.error('Supabase Add Invoice Failed', error);
     }
   };
 
-  const updateInvoice = async (id: string, data: Partial<Invoice>): Promise<void> => {
-    setSiteData(prev => ({ ...prev, invoices: prev.invoices.map(i => i.id === id ? { ...i, ...data } : i) }));
+  const updateInvoice = async (id: string, updates: Partial<Invoice>) => {
+    setSiteData(prev => ({
+      ...prev,
+      invoices: (prev.invoices || []).map(i => i.id === id ? { ...i, ...updates } : i)
+    }));
+    logActivity(`تم تحديث الفاتورة ${id}`, 'finance', 'info');
     if (isSupabaseConfigured() && supabase) {
       const currentInvoice = siteData.invoices.find(i => i.id === id);
-      await supabase.from('invoices').upsert({ id, data: { ...currentInvoice, ...data } });
+      const { error } = await supabase.from('invoices').upsert({ id, data: { ...currentInvoice, ...updates } });
+      if (error) Logger.error('Supabase Update Invoice Failed', error);
     }
   };
 
