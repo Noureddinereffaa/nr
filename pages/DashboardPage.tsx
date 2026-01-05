@@ -27,6 +27,7 @@ const CRM = React.lazy(() => import('../components/dashboard/modules/crm-intelli
 const Requests = React.lazy(() => import('../components/dashboard/modules/crm-intelligence/Requests'));
 const Billing = React.lazy(() => import('../components/dashboard/modules/financial-intelligence/Billing'));
 const FinancialHub = React.lazy(() => import('../components/dashboard/modules/financial-intelligence/FinancialHub'));
+const DecisionPages = React.lazy(() => import('../components/dashboard/modules/decision-pages/DecisionPages'));
 
 const DashboardPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState('overview');
@@ -116,6 +117,7 @@ const DashboardPage: React.FC = () => {
                   {activeTab === 'requests' && <Requests />}
                   {activeTab === 'financial-hub' && <FinancialHub />}
                   {activeTab === 'billing' && <Billing />}
+                  {activeTab === 'decision-pages' && <DecisionPages />}
                 </Suspense>
               </motion.div>
             </AnimatePresence>

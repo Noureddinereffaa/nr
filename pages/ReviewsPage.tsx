@@ -36,9 +36,13 @@ import {
     ArrowUpRight,
     Quote
 } from 'lucide-react';
+import { useData } from '../context/DataContext';
 
 const ReviewsPage: React.FC = () => {
     const [activeCategory, setActiveCategory] = useState('all');
+
+    const { siteData } = useData();
+    const reviews = siteData.decisionPages || [];
 
     // Animation variants
     const fadeInUp = {
@@ -137,61 +141,6 @@ const ReviewsPage: React.FC = () => {
         }
     ];
 
-    // Featured reviews with detailed data
-    const featuredReviews = [
-        {
-            id: 'gohighlevel',
-            title: "GoHighLevel",
-            subtitle: "The All-in-One Marketing & CRM Platform",
-            rating: 4.8,
-            category: 'crm',
-            badge: "Editor's Choice",
-            badgeColor: "from-amber-500 to-orange-500",
-            description: "A complete marketing automation platform that replaces 10+ tools. Perfect for coaches and agencies who want everything in one place.",
-            pros: ["All-in-one solution", "White-label capability", "Unlimited contacts"],
-            cons: ["Learning curve", "Premium pricing"],
-            pricing: "From $97/month",
-            bestFor: "Coaches & Agencies",
-            verdict: "Best overall value for growing businesses",
-            href: "/en/reviews/gohighlevel",
-            image: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=600&q=80"
-        },
-        {
-            id: 'zapier',
-            title: "Zapier",
-            subtitle: "Connect Everything, Automate Anything",
-            rating: 4.6,
-            category: 'automation',
-            badge: "Most Popular",
-            badgeColor: "from-blue-500 to-cyan-500",
-            description: "The industry standard for app integrations. Connect 6,000+ apps without writing a single line of code.",
-            pros: ["Huge app library", "Easy to use", "Reliable"],
-            cons: ["Task-based pricing", "Can get expensive"],
-            pricing: "From $19.99/month",
-            bestFor: "All Businesses",
-            verdict: "Essential automation for every tech stack",
-            href: "/en/reviews/zapier",
-            image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=600&q=80"
-        },
-        {
-            id: 'chatgpt',
-            title: "ChatGPT Plus",
-            subtitle: "Your AI-Powered Business Assistant",
-            rating: 4.7,
-            category: 'ai',
-            badge: "Best AI",
-            badgeColor: "from-green-500 to-emerald-500",
-            description: "The most capable AI assistant for content creation, customer support, and business automation.",
-            pros: ["Incredible capabilities", "Always improving", "Plugin ecosystem"],
-            cons: ["Monthly subscription", "Occasional hallucinations"],
-            pricing: "$20/month",
-            bestFor: "Content Creators",
-            verdict: "Must-have AI tool for any modern business",
-            href: "/en/reviews/chatgpt",
-            image: "https://images.unsplash.com/photo-1677442136019-21780ecad995?w=600&q=80"
-        }
-    ];
-
     // Testimonials
     const testimonials = [
         {
@@ -216,18 +165,18 @@ const ReviewsPage: React.FC = () => {
 
     // Stats
     const stats = [
-        { value: "50+", label: "Tools Reviewed", icon: Layers },
+        { value: `${Math.max(50, reviews.length)}+`, label: "Tools Reviewed", icon: Layers },
         { value: "10,000+", label: "Hours of Testing", icon: Timer },
         { value: "98%", label: "Accuracy Rate", icon: Target },
         { value: "$2M+", label: "Saved for Readers", icon: CircleDollarSign }
     ];
 
     const filteredReviews = activeCategory === 'all'
-        ? featuredReviews
-        : featuredReviews.filter(r => r.category === activeCategory);
+        ? reviews.filter(r => r.status === 'published')
+        : reviews.filter(r => r.category === activeCategory && r.status === 'published');
 
     return (
-        <div className="min-h-screen bg-slate-950 selection:bg-indigo-500/30 overflow-x-hidden relative">
+        <div dir="ltr" className="min-h-screen bg-slate-950 selection:bg-indigo-500/30 overflow-x-hidden relative font-sans">
             {/* Advanced Background System */}
             <div className="fixed inset-0 pointer-events-none z-0">
                 <div className="absolute inset-0 mesh-gradient opacity-50"></div>
@@ -650,8 +599,8 @@ const ReviewsPage: React.FC = () => {
                                     key={cat.id}
                                     onClick={() => setActiveCategory(cat.id)}
                                     className={`flex items-center gap-2 px-5 py-2.5 rounded-full font-bold text-sm transition-all ${activeCategory === cat.id
-                                            ? 'bg-white text-slate-950 shadow-lg'
-                                            : 'bg-white/5 text-slate-400 hover:bg-white/10 hover:text-white border border-white/10'
+                                        ? 'bg-white text-slate-950 shadow-lg'
+                                        : 'bg-white/5 text-slate-400 hover:bg-white/10 hover:text-white border border-white/10'
                                         }`}
                                 >
                                     <cat.icon size={16} />
@@ -668,12 +617,12 @@ const ReviewsPage: React.FC = () => {
                                 animate={{ opacity: 1, y: 0 }}
                                 exit={{ opacity: 0, y: -20 }}
                                 transition={{ duration: 0.3 }}
-                                className="grid lg:grid-cols-3 gap-8"
+                                className="grid md:grid-cols-2 lg:grid-cols-3 gap-8"
                             >
                                 {filteredReviews.map((review, index) => (
                                     <motion.a
                                         key={review.id}
-                                        href={review.href}
+                                        href={`/en/reviews/${review.slug}`}
                                         initial={{ opacity: 0, y: 30 }}
                                         whileInView={{ opacity: 1, y: 0 }}
                                         viewport={{ once: true }}

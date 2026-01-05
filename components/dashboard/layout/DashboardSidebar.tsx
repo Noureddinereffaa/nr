@@ -141,6 +141,13 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
                             isActive={activeTab === 'requests'}
                             onClick={onTabClick}
                         />
+                        <TabButton
+                            id="decision-pages"
+                            label="صفحات القرار"
+                            icon={BrainCircuit}
+                            isActive={activeTab === 'decision-pages'}
+                            onClick={onTabClick}
+                        />
                     </div>
                 </motion.div>
 

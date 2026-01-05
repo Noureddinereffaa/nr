@@ -302,6 +302,76 @@ export interface ContentPlanItem {
   status: 'planned' | 'published' | 'cancelled';
 }
 
+export interface DecisionPage {
+  id: string;
+  slug: string;
+  title: string;
+  subtitle: string;
+  category: 'crm' | 'marketing' | 'automation' | 'ai' | 'other';
+  image: string;
+  rating: number;
+  badge?: string;
+  badgeColor?: string;
+  description: string;
+  pros: string[];
+  cons: string[];
+  pricing: string;
+  bestFor: string;
+  verdict: string;
+  affiliateUrl: string;
+  status: 'draft' | 'published' | 'archived';
+  date: string;
+  views?: number;
+  clicks?: number;
+
+  // Advanced Info / Metadata
+  seo?: {
+    title: string;
+    description: string;
+    keywords: string[];
+  };
+  dates?: {
+    published: string; // ISO String
+    updated: string;   // ISO String
+  };
+  author?: {
+    name: string;
+    role: string;
+    image: string;
+  };
+
+  // Metrics & Ratings
+  metrics?: {
+    timeSaved: string;      // e.g. "20h/week"
+    tasksAutomated: string; // e.g. "50+"
+    roiMultiplier: string;  // e.g. "3x"
+  };
+
+  // Rich Content
+  faq?: {
+    question: string;
+    answer: string;
+  }[];
+
+  // Assets
+  media?: {
+    videoUrl?: string; // YouTube/Vimeo embed URL
+    gallery: string[]; // Array of image URLs
+    pdfUrl?: string;   // Downloadable summary/cheatsheet
+  };
+
+  // Comparison
+  competitorIds?: string[]; // IDs of other tools to compare against
+
+  // Social Proof
+  testimonials?: {
+    text: string;
+    author: string;
+    role: string;
+    avatar?: string;
+  }[];
+}
+
 export interface AutopilotConfig {
   enabled: boolean;
   frequency: 'daily' | 'weekly';
@@ -335,6 +405,7 @@ export interface SiteData {
   socialPosts?: SocialPost[];
   integrations?: SocialIntegration[];
   contentPlan?: ContentPlanItem[];
+  decisionPages?: DecisionPage[];
   autopilot?: AutopilotConfig;
   activityLog?: SystemActivity[];
   // UI/Legacy compatibility

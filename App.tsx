@@ -17,6 +17,7 @@ const ContactPage = React.lazy(() => import('./pages/ContactPage'));
 const ResetData = React.lazy(() => import('./pages/ResetData'));
 const BlogPage = React.lazy(() => import('./pages/BlogPage'));
 const ReviewsPage = React.lazy(() => import('./pages/ReviewsPage'));
+const ReviewDetailsPage = React.lazy(() => import('./pages/ReviewDetailsPage'));
 
 const App: React.FC = () => {
   return (
@@ -27,6 +28,7 @@ const App: React.FC = () => {
             <Routes>
               <Route path="/" element={<HomePage />} />
               <Route path="/en/reviews" element={<ReviewsPage />} />
+              <Route path="/en/reviews/:slug" element={<ReviewDetailsPage />} />
               <Route path="/dashboard" element={
                 <ProtectedRoute>
                   <Dashboard />

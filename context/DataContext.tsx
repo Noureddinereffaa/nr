@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { NOUREDDINE_DATA, SERVICES, PROJECTS, TESTIMONIALS, FAQS, WORK_PROCESS, DEFAULT_STATS, ARTICLES } from '../constants';
-import { SiteData, Client, Project, Invoice, Service, Article, ServiceRequest, Expense, SocialPost, SocialIntegration, ContentPlanItem, SystemActivity } from '../types';
+import { SiteData, Client, Project, Invoice, Service, Article, ServiceRequest, Expense, SocialPost, SocialIntegration, ContentPlanItem, SystemActivity, DecisionPage } from '../types';
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
 import Logger from '../lib/logger';
 
@@ -50,6 +50,11 @@ interface DataContextType {
   addSocialPost: (post: Omit<SocialPost, 'id' | 'status'>) => Promise<void>;
   deleteSocialPost: (id: string) => Promise<void>;
   updateIntegration: (id: string, data: Partial<SocialIntegration>) => Promise<void>;
+
+  // Decision Pages CRUD
+  addDecisionPage: (page: Omit<DecisionPage, 'id' | 'date'>) => Promise<void>;
+  updateDecisionPage: (id: string, data: Partial<DecisionPage>) => Promise<void>;
+  deleteDecisionPage: (id: string) => Promise<void>;
 
   logActivity: (label: string, type: SystemActivity['type'], status?: SystemActivity['status'], metadata?: any) => void;
   resetToDefault: () => void;
@@ -133,6 +138,92 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         strategyFocus: 'growth'
       },
       contentPlan: [],
+      decisionPages: [
+        {
+          id: 'demo-ghl',
+          slug: 'gohighlevel-review-2024',
+          title: 'GoHighLevel Review 2026: Is It Worth It for Agencies?',
+          subtitle: 'We migrated 50+ clients to GoHighLevel. Here is the data-backed truth about ROI, automation, and if it really replaces 15 tools.',
+          image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&q=80',
+          category: 'crm',
+          rating: 4.8,
+          date: '2025-01-05',
+          dates: {
+            published: '2024-03-15',
+            updated: '2026-01-05'
+          },
+          author: {
+            name: 'Noureddine Reffaa',
+            role: 'Agency Founder',
+            image: '/logo.png'
+          },
+          description: `## The Chaos Before GHL
+Running a digital agency usually feels like duct-taping chaos. We used to pay for:
+-   **ActiveCampaign** ($250/mo) for emails
+-   **ClickFunnels** ($297/mo) for landing pages
+-   **Calendly** ($60/mo) for bookings
+-   **Zapier** ($100/mo) to glue it all together.
+
+That's **$700+/month** just on basic infrastructure. And the integrations broke constantly.
+
+## The "Operating System" Shift
+GoHighLevel isn't just a CRM; it's an operating system. It combines all the above into one dashboard.
+
+### Core Features We Actually Use
+1.  **Unified Inbox**: Every SMS, Email, DM, and WhatsApp message in one stream. No more "check your DM" anxiety.
+2.  **Snapshot Automation**: We built a "Perfect Restoration System" for our clients. New client? One click, and their entire account, websites, and automations are live.
+3.  **SaaS Mode**: We white-labeled GHL as "GrowthEngine" and sell it to local businesses for $297/mo. It covers our own cost 10x over.
+
+> **Pro Tip**: Don't try to use everything at once. Start with the "Missed Call Text Back" feature. It saves 2-3 leads per week instantly.
+
+## The Real ROI Data
+We tracked our efficiency before and after the switch:
+-   **Onboarding Time**: Reduced from 5 days to 4 hours.
+-   **Client Retention**: Increased by 40% (sticky software = sticky clients).
+-   **Monthly Savings**: Saved $1,200/month in software fees.
+
+## Who Is It NOT For?
+If you run a pure e-commerce store (Shopify), stick to Klaviyo. GHL is built for *service businesses* and *lead generation*.`,
+          verdict: 'GoHighLevel is the closest thing to a "Business in a Box" we have ever found. It is not just software; it is a profit multiplier for any agency.',
+          pros: ['Replaces $1,000+ of other software', 'White-label capabilities (Sell it as your own SaaS)', 'Unbeatable automation builder', 'Native 2-way SMS & Calling'],
+          cons: ['Steep learning curve (allow 2 weeks)', 'Mobile app is good but not great', 'Email designer is function-over-form'],
+          affiliateUrl: 'https://www.gohighlevel.com/?fp_ref=demo',
+          pricing: '$97/mo',
+          bestFor: 'Agencies & Coaches',
+          status: 'published',
+          badge: 'Editor\'s Choice',
+          seo: {
+            title: 'GoHighLevel Review 2026 - Honest Agency Owner Perspective',
+            description: 'Is GoHighLevel worth the hype? We break down the pros, cons, and ROI after 6 months of heavy usage.',
+            keywords: ['GoHighLevel', 'CRM', 'Marketing Automation', 'Agency Tools']
+          },
+          media: {
+            videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ', // Placeholder
+            gallery: [
+              'https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&q=80',
+              'https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&q=80',
+              'https://images.unsplash.com/photo-1542744173-8e7e53415bb0?auto=format&fit=crop&q=80',
+              'https://images.unsplash.com/photo-1553877607-498c84d4ae80?auto=format&fit=crop&q=80'
+            ],
+            pdfUrl: 'https://example.com/ghl-cheat-sheet.pdf'
+          },
+          metrics: {
+            timeSaved: '20h/week',
+            tasksAutomated: '1,500+',
+            roiMultiplier: '10x'
+          },
+          faq: [
+            { question: 'Does it replace ClickFunnels?', answer: 'Yes, completely. The funnel builder is 95% similar but faster.' },
+            { question: 'Can I use my own domain?', answer: 'Yes, unlimited domains and subdomains.' },
+            { question: 'Is the support good?', answer: 'They have 24/7 Zoom support, which is unheard of in this industry.' }
+          ],
+          testimonials: [
+            { text: "We cancelled ActiveCampaign and Calendly the same day we signed up. It just works.", author: "Sarah Jenkins", role: "Agency CEO" },
+            { text: "I resell the software to my dental clients for $497/mo. It pays for my car.", author: "Mike Ross", role: "Local Consultant" },
+            { text: "The automation workflows are the most powerful I have seen since Infusionsoft.", author: "Ahmed K.", role: "Tech Lead" }
+          ]
+        }
+      ],
       activityLog: []
     };
 
@@ -148,6 +239,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
           projects: (parsed.projects && parsed.projects.length > 0) ? parsed.projects : defaultData.projects,
           services: (parsed.services && parsed.services.length > 0) ? parsed.services : defaultData.services,
           testimonials: (parsed.testimonials && parsed.testimonials.length > 0) ? parsed.testimonials : defaultData.testimonials,
+          decisionPages: (parsed.decisionPages && parsed.decisionPages.length > 0) ? parsed.decisionPages : defaultData.decisionPages,
           features: { ...defaultData.features, ...(parsed.features || {}) },
           activityLog: parsed.activityLog || []
         };
@@ -199,6 +291,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
           socialPostsRes,
           integrationsRes,
           contentPlanRes,
+          decisionPagesRes,
           activityLogRes
         ] = await Promise.all([
           supabase.from('site_settings').select('*').eq('id', 'main').maybeSingle(),
@@ -212,6 +305,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
           supabase.from('social_posts').select('*'),
           supabase.from('integrations').select('*'),
           supabase.from('content_plan').select('*'),
+          supabase.from('decision_pages').select('*'),
           supabase.from('activity_log').select('*').order('date', { ascending: false }).limit(50)
         ]);
 
@@ -232,6 +326,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
           const cloudSocialPosts = extractJsonbData<SocialPost>(socialPostsRes.data);
           const cloudIntegrations = extractJsonbData<SocialIntegration>(integrationsRes.data);
           const cloudContentPlan = extractJsonbData<ContentPlanItem>(contentPlanRes.data);
+          const cloudDecisionPages = extractJsonbData<DecisionPage>(decisionPagesRes.data);
           const cloudActivityLog = extractJsonbData<SystemActivity>(activityLogRes.data);
 
           const newClients = cloudClients.length > 0 ? cloudClients : prev.clients;
@@ -244,6 +339,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
           const newSocialPosts = cloudSocialPosts.length > 0 ? cloudSocialPosts : prev.socialPosts || [];
           const newIntegrations = cloudIntegrations.length > 0 ? cloudIntegrations : prev.integrations || [];
           const newContentPlan = cloudContentPlan.length > 0 ? cloudContentPlan : prev.contentPlan || [];
+          const newDecisionPages = cloudDecisionPages.length > 0 ? cloudDecisionPages : prev.decisionPages || [];
           const newActivityLog = cloudActivityLog.length > 0 ? cloudActivityLog : prev.activityLog || [];
 
           let newBrand = prev.brand;
@@ -292,6 +388,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
             socialPosts: newSocialPosts as SocialPost[],
             integrations: newIntegrations as SocialIntegration[],
             contentPlan: newContentPlan as ContentPlanItem[],
+            decisionPages: newDecisionPages as DecisionPage[],
             activityLog: newActivityLog as SystemActivity[]
           };
         });
@@ -631,6 +728,33 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  const addDecisionPage = async (page: Omit<DecisionPage, 'id' | 'date'>): Promise<void> => {
+    const newPage: DecisionPage = {
+      ...page,
+      id: 'dp-' + Date.now(),
+      date: new Date().toISOString()
+    } as DecisionPage;
+    setSiteData(prev => ({ ...prev, decisionPages: [newPage, ...(prev.decisionPages || [])] }));
+    if (isSupabaseConfigured() && supabase) {
+      await supabase.from('decision_pages').insert([{ id: newPage.id, data: newPage }]);
+    }
+  };
+
+  const updateDecisionPage = async (id: string, data: Partial<DecisionPage>): Promise<void> => {
+    setSiteData(prev => ({ ...prev, decisionPages: (prev.decisionPages || []).map(p => p.id === id ? { ...p, ...data } : p) }));
+    if (isSupabaseConfigured() && supabase) {
+      const current = siteData.decisionPages?.find(p => p.id === id);
+      await supabase.from('decision_pages').upsert({ id, data: { ...current, ...data } });
+    }
+  };
+
+  const deleteDecisionPage = async (id: string): Promise<void> => {
+    setSiteData(prev => ({ ...prev, decisionPages: (prev.decisionPages || []).filter(p => p.id !== id) }));
+    if (isSupabaseConfigured() && supabase) {
+      await supabase.from('decision_pages').delete().eq('id', id);
+    }
+  };
+
   const resetToDefault = () => {
     if (window.confirm('سيتم حذف كافة البيانات والعودة للقالب الأصلي. هل أنت متأكد؟')) {
       localStorage.removeItem('nr_full_platform_data');
@@ -649,6 +773,8 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       addRequest, updateRequest, deleteRequest,
       addExpense, updateExpense, deleteExpense,
       addSocialPost, deleteSocialPost, updateIntegration,
+      addDecisionPage, updateDecisionPage, deleteDecisionPage,
+      logActivity,
       resetToDefault
     }}>
       {children}
