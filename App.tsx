@@ -16,6 +16,7 @@ const FaqPage = React.lazy(() => import('./pages/FaqPage'));
 const ContactPage = React.lazy(() => import('./pages/ContactPage'));
 const ResetData = React.lazy(() => import('./pages/ResetData'));
 const BlogPage = React.lazy(() => import('./pages/BlogPage'));
+const ReviewsPage = React.lazy(() => import('./pages/ReviewsPage'));
 
 const App: React.FC = () => {
   return (
@@ -25,6 +26,7 @@ const App: React.FC = () => {
           <Suspense fallback={<div className="h-screen w-full flex items-center justify-center bg-slate-950"><LoadingSpinner /></div>}>
             <Routes>
               <Route path="/" element={<HomePage />} />
+              <Route path="/en/reviews" element={<ReviewsPage />} />
               <Route path="/dashboard" element={
                 <ProtectedRoute>
                   <Dashboard />
