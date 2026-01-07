@@ -361,7 +361,11 @@ export interface DecisionPage {
   };
 
   // Comparison
-  competitorIds?: string[]; // IDs of other tools to compare against
+  comparison?: {
+    feature: string;
+    us: string;
+    other: string;
+  }[];
 
   // Social Proof
   testimonials?: {

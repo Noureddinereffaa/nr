@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
     X, Save, Plus, Trash2, Image as ImageIcon, Link as LinkIcon,
     Layout, FileText, BarChart3, Search, Settings, Video, File, User, MessageSquare,
-    Bold, Italic, List, Heading2, Quote
+    Bold, Italic, List, Heading2, Quote, ArrowRight, Eye, Layers, Scale, Check, Menu
 } from 'lucide-react';
 import { DecisionPage } from '../../../types';
 
@@ -14,10 +14,11 @@ interface DecisionPageFormProps {
     initialData?: DecisionPage | null;
 }
 
-type TabType = 'essentials' | 'content' | 'analysis' | 'media' | 'seo' | 'testimonials';
+type TabType = 'essentials' | 'content' | 'analysis' | 'comparison' | 'media' | 'seo' | 'testimonials';
 
 const DecisionPageForm: React.FC<DecisionPageFormProps> = ({ isOpen, onClose, onSave, initialData }) => {
     const [activeTab, setActiveTab] = useState<TabType>('essentials');
+    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [formData, setFormData] = useState<Partial<DecisionPage>>({});
 
     useEffect(() => {
@@ -43,7 +44,9 @@ const DecisionPageForm: React.FC<DecisionPageFormProps> = ({ isOpen, onClose, on
                 metrics: { timeSaved: '', tasksAutomated: '', roiMultiplier: '' },
                 author: { name: '', role: '', image: '' },
                 faq: [],
-                media: { gallery: [], videoUrl: '', pdfUrl: '' }
+                media: { gallery: [], videoUrl: '', pdfUrl: '' },
+                comparison: [],
+                testimonials: []
             });
             setActiveTab('essentials');
         }
@@ -99,19 +102,44 @@ const DecisionPageForm: React.FC<DecisionPageFormProps> = ({ isOpen, onClose, on
         setFormData(prev => ({ ...prev, faq: newFaq }));
     };
 
-    // Gallery Handler
-    const handleGalleryChange = (value: string) => {
-        // Simple comma-separated string to array for MVP
-        const urls = value.split(',').map(s => s.trim()).filter(s => s);
+    // Comparison Builder
+    const addComparisonRow = () => {
         setFormData(prev => ({
             ...prev,
-            media: { ...(prev.media || { gallery: [], videoUrl: '', pdfUrl: '' }), gallery: urls }
+            comparison: [...(prev.comparison || []), { feature: '', us: '', other: '' }]
         }));
     };
 
+    const updateComparisonRow = (index: number, field: 'feature' | 'us' | 'other', value: string) => {
+        const newRows = [...(formData.comparison || [])];
+        newRows[index] = { ...newRows[index], [field]: value };
+        setFormData(prev => ({ ...prev, comparison: newRows }));
+    };
 
+    const removeComparisonRow = (index: number) => {
+        const newRows = [...(formData.comparison || [])];
+        newRows.splice(index, 1);
+        setFormData(prev => ({ ...prev, comparison: newRows }));
+    };
 
-    // Testimonial Handlers
+    // Gallery & Testimonials
+    const handleGalleryListChange = (index: number, value: string) => {
+        const newGallery = [...(formData.media?.gallery || [])];
+        newGallery[index] = value;
+        setFormData(prev => ({ ...prev, media: { ...prev.media, gallery: newGallery } }));
+    };
+
+    const addGalleryImage = () => {
+        setFormData(prev => ({ ...prev, media: { ...prev.media, gallery: [...(prev.media?.gallery || []), ''] } }));
+    };
+
+    const removeGalleryImage = (index: number) => {
+        const newGallery = [...(formData.media?.gallery || [])];
+        newGallery.splice(index, 1);
+        setFormData(prev => ({ ...prev, media: { ...prev.media, gallery: newGallery } }));
+    };
+
+    // Testimonials
     const addTestimonial = () => {
         setFormData(prev => ({
             ...prev,
@@ -131,6 +159,7 @@ const DecisionPageForm: React.FC<DecisionPageFormProps> = ({ isOpen, onClose, on
         setFormData(prev => ({ ...prev, testimonials: newTestimonials }));
     };
 
+    // Editor Helpers
     const insertTemplate = () => {
         const template = `## The Problem: Agency Chaos
 [Describe the pain point here...]
@@ -172,7 +201,7 @@ const DecisionPageForm: React.FC<DecisionPageFormProps> = ({ isOpen, onClose, on
         switch (format) {
             case 'bold':
                 newText = `${before}**${selection || 'bold text'}**${after}`;
-                cursorOffset = selection ? 4 : 2; // Move inside or after
+                cursorOffset = selection ? 4 : 2;
                 break;
             case 'italic':
                 newText = `${before}_${selection || 'italic text'}_${after}`;
@@ -193,18 +222,28 @@ const DecisionPageForm: React.FC<DecisionPageFormProps> = ({ isOpen, onClose, on
         }
 
         setFormData(prev => ({ ...prev, description: newText }));
-
-        // Restore focus (timeout needed for React re-render)
         setTimeout(() => {
             textarea.focus();
             textarea.setSelectionRange(start + cursorOffset, start + cursorOffset + (selection ? 0 : format === 'list' ? 9 : format.length + 5));
         }, 0);
     };
 
+    // Governance Checks
+    const isSeoComplete = !!(formData.seo?.title && formData.seo?.description);
+    const hasCta = !!formData.affiliateUrl;
+    const hasComparison = (formData.comparison?.length || 0) > 0;
+    const isGovernanceComplete = isSeoComplete && hasCta && hasComparison;
+    const isPublishBlocked = formData.status === 'published' && !isGovernanceComplete;
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+
+        if (isPublishBlocked) {
+            alert("Governance Check Failed: You cannot publish until all required items are completed.");
+            return;
+        }
+
         try {
-            // Ensure proper structure before saving
             const finalData = {
                 ...formData,
                 seo: formData.seo || { title: formData.title, description: formData.subtitle, keywords: [] },
@@ -221,11 +260,12 @@ const DecisionPageForm: React.FC<DecisionPageFormProps> = ({ isOpen, onClose, on
     if (!isOpen) return null;
 
     const tabs: { id: TabType, label: string, icon: any }[] = [
-        { id: 'essentials', label: 'Essentials', icon: Layout },
-        { id: 'analysis', label: 'Analysis', icon: BarChart3 },
+        { id: 'essentials', label: 'Overview', icon: Layout },
         { id: 'content', label: 'Content', icon: FileText },
+        { id: 'analysis', label: 'Analysis', icon: BarChart3 },
+        { id: 'comparison', label: 'Comparison', icon: Scale },
         { id: 'media', label: 'Media', icon: ImageIcon },
-        { id: 'seo', label: 'SEO & Meta', icon: Search },
+        { id: 'seo', label: 'SEO', icon: Search },
         { id: 'testimonials', label: 'Social Proof', icon: MessageSquare },
     ];
 
@@ -237,295 +277,516 @@ const DecisionPageForm: React.FC<DecisionPageFormProps> = ({ isOpen, onClose, on
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
                     onClick={onClose}
-                    className="absolute inset-0 bg-slate-950/80 backdrop-blur-sm"
+                    className="absolute inset-0 bg-slate-950/80 backdrop-blur-md"
                 />
 
                 <motion.div
                     initial={{ opacity: 0, scale: 0.95, y: 20 }}
                     animate={{ opacity: 1, scale: 1, y: 0 }}
                     exit={{ opacity: 0, scale: 0.95, y: 20 }}
-                    className="relative w-full max-w-5xl max-h-[90vh] bg-slate-900 border border-white/10 rounded-2xl shadow-2xl flex flex-col overflow-hidden"
+                    className="relative w-full max-w-[90rem] h-full sm:h-[90vh] bg-slate-900 border border-white/10 sm:rounded-2xl shadow-2xl flex overflow-hidden flex-col lg:flex-row"
                 >
-                    {/* Header */}
-                    <div className="flex items-center justify-between p-6 border-b border-white/5 bg-slate-900/50 backdrop-blur-xl z-10">
-                        <h2 className="text-xl font-bold text-white">
-                            {initialData ? 'Edit Decision Page' : 'New Decision Page'}
-                        </h2>
-                        <div className="flex space-x-1 bg-slate-800/50 p-1 rounded-lg">
+                    {/* Mobile Header */}
+                    <div className="lg:hidden h-16 border-b border-white/5 flex items-center justify-between px-4 bg-slate-950 shrink-0">
+                        <div className="flex items-center gap-3">
+                            <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="p-2 text-slate-400 hover:text-white">
+                                <Menu size={24} />
+                            </button>
+                            <span className="font-bold text-white">Page Editor</span>
+                        </div>
+                        <button onClick={onClose} className="p-2 text-slate-400 hover:text-white"><X size={24} /></button>
+                    </div>
+
+                    {/* Sidebar Tabs */}
+                    <div className={`
+                        fixed inset-0 z-20 bg-slate-950 lg:relative lg:w-64 lg:bg-slate-950 lg:border-r lg:border-white/5 lg:flex lg:flex-col lg:transform-none transition-transform duration-300
+                        ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+                    `}>
+                        <div className="p-6 border-b border-white/5 flex justify-between items-center">
+                            <div>
+                                <h2 className="text-lg font-bold text-white flex items-center gap-2">
+                                    <Settings className="text-indigo-500" />
+                                    Page Editor
+                                </h2>
+                                <p className="text-xs text-slate-500 mt-1">{initialData ? 'Editing: ' + initialData.title : 'Creating New Page'}</p>
+                            </div>
+                            <button onClick={() => setIsMobileMenuOpen(false)} className="lg:hidden text-slate-400 hover:text-white"><X size={20} /></button>
+                        </div>
+                        <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
                             {tabs.map(tab => (
                                 <button
                                     key={tab.id}
-                                    onClick={() => setActiveTab(tab.id)}
-                                    className={`px-4 py-2 rounded-md text-sm font-medium transition-all flex items-center gap-2 ${activeTab === tab.id ? 'bg-indigo-600 text-white shadow-lg' : 'text-slate-400 hover:text-white hover:bg-white/5'}`}
+                                    onClick={() => { setActiveTab(tab.id); setIsMobileMenuOpen(false); }}
+                                    className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all ${activeTab === tab.id
+                                        ? 'bg-indigo-600/10 text-indigo-400 border border-indigo-600/20'
+                                        : 'text-slate-400 hover:text-white hover:bg-white/5'
+                                        }`}
                                 >
-                                    <tab.icon size={14} /> {tab.label}
+                                    <tab.icon size={18} />
+                                    {tab.label}
                                 </button>
                             ))}
+                        </nav>
+
+                        {/* Content Governance Checklist */}
+                        <div className="p-4 border-t border-white/5 space-y-3">
+                            <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider">Content Governance</h3>
+                            <div className="space-y-2">
+                                <GovernanceItem label="SEO Completed" isComplete={isSeoComplete} />
+                                <GovernanceItem label="CTA Exists" isComplete={hasCta} />
+                                <GovernanceItem label="Comparison Filled" isComplete={hasComparison} />
+                            </div>
                         </div>
-                        <button onClick={onClose} className="p-2 hover:bg-white/5 rounded-lg text-slate-400 hover:text-white transition-colors">
-                            <X size={20} />
-                        </button>
+
+                        <div className="p-4 border-t border-white/5 space-y-3">
+                            {/* Preview Button */}
+                            {formData.slug && (
+                                <button
+                                    onClick={() => window.open(`/reviews/${formData.slug}?preview=true`, '_blank')}
+                                    className="w-full py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl font-bold transition-all flex items-center justify-center gap-2 mb-2"
+                                >
+                                    <Eye size={18} /> Preview Page
+                                </button>
+                            )}
+
+                            <button
+                                onClick={handleSubmit}
+                                disabled={isPublishBlocked}
+                                title={isPublishBlocked ? "Complete Governance items to Publish" : "Save Changes"}
+                                className={`w-full py-3 rounded-xl font-bold transition-all shadow-lg flex items-center justify-center gap-2 ${isPublishBlocked
+                                    ? 'bg-slate-800 text-slate-500 cursor-not-allowed border border-white/5'
+                                    : 'bg-indigo-600 hover:bg-indigo-500 text-white shadow-indigo-600/20'
+                                    }`}
+                            >
+                                <Save size={18} /> {isPublishBlocked ? 'Blocked' : 'Save Changes'}
+                            </button>
+                            {isPublishBlocked && <div className="text-[10px] text-rose-400 text-center mt-2 font-medium">Action Disabled: Governance incomplete</div>}
+                        </div>
                     </div>
 
-                    {/* Scrollable Content */}
-                    <div className="flex-1 overflow-y-auto p-6 custom-scrollbar">
-                        <form id="decision-form" onSubmit={handleSubmit} className="space-y-8">
+                    {/* Main Content Area */}
+                    <div className="flex-1 flex flex-col bg-slate-900 h-full overflow-hidden">
+                        {/* Desktop Header Toolbar */}
+                        <div className="hidden lg:flex h-16 border-b border-white/5 items-center justify-between px-8 bg-slate-900/50 backdrop-blur z-10 w-full">
+                            <div className="flex items-center gap-4 text-sm text-slate-400">
+                                <span className="flex items-center gap-2"><div className={`w-2 h-2 rounded-full ${formData.status === 'published' ? 'bg-green-500' : 'bg-yellow-500'}`}></div> {formData.status === 'published' ? 'Live' : 'Draft'}</span>
+                                <span className="w-px h-4 bg-white/10"></span>
+                                <span>slug: /{formData.slug}</span>
+                            </div>
+                            <button onClick={onClose} className="p-2 hover:bg-white/5 rounded-lg text-slate-400 hover:text-white transition-colors">
+                                <X size={20} />
+                            </button>
+                        </div>
 
-                            {activeTab === 'essentials' && (
-                                <div className="space-y-6">
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                        <div className="space-y-2">
-                                            <label className="text-xs font-bold text-slate-400">Title</label>
-                                            <input type="text" value={formData.title} onChange={(e) => handleChange('title', e.target.value)} className="w-full input-primary" placeholder="Page Title" required />
+                        {/* Scrollable Form Area */}
+                        <div className="flex-1 overflow-y-auto p-8 custom-scrollbar">
+                            <div className="max-w-5xl mx-auto">
+                                <h1 className="text-2xl font-bold text-white mb-6 flex items-center gap-3">
+                                    {tabs.find(t => t.id === activeTab)?.icon && React.createElement(tabs.find(t => t.id === activeTab)?.icon, { size: 28, className: "text-indigo-400" })}
+                                    {tabs.find(t => t.id === activeTab)?.label}
+                                </h1>
+
+                                {activeTab === 'essentials' && (
+                                    <div className="grid grid-cols-12 gap-6">
+                                        <div className="col-span-8 space-y-6">
+                                            <div className="space-y-2">
+                                                <label className="label-text">Page Verified Title</label>
+                                                <input type="text" value={formData.title} onChange={(e) => handleChange('title', e.target.value)} className="input-primary text-lg font-bold" placeholder="e.g. GoHighLevel Review 2026" />
+                                            </div>
+                                            <div className="space-y-2">
+                                                <label className="label-text">Compelling Subtitle</label>
+                                                <textarea rows={2} value={formData.subtitle} onChange={(e) => handleChange('subtitle', e.target.value)} className="input-primary text-base" placeholder="Hook the reader immediately..." />
+                                            </div>
+                                            <div className="grid grid-cols-2 gap-4">
+                                                <div className="space-y-2">
+                                                    <label className="label-text">Affiliate / Target URL</label>
+                                                    <div className="relative">
+                                                        <LinkIcon size={16} className="absolute left-3 top-3 text-slate-500" />
+                                                        <input type="text" value={formData.affiliateUrl} onChange={(e) => handleChange('affiliateUrl', e.target.value)} className="input-primary pl-10" placeholder="https://..." />
+                                                    </div>
+                                                </div>
+                                                <div className="space-y-2">
+                                                    <label className="label-text">Page Slug</label>
+                                                    <input type="text" value={formData.slug} onChange={(e) => handleChange('slug', e.target.value)} className="input-primary font-mono text-sm" placeholder="url-slug" />
+                                                </div>
+                                            </div>
                                         </div>
-                                        <div className="space-y-2">
-                                            <label className="text-xs font-bold text-slate-400">Slug</label>
-                                            <input type="text" value={formData.slug} onChange={(e) => handleChange('slug', e.target.value)} className="w-full input-primary" placeholder="url-slug" required />
-                                        </div>
-                                        <div className="col-span-full space-y-2">
-                                            <label className="text-xs font-bold text-slate-400">Subtitle</label>
-                                            <input type="text" value={formData.subtitle} onChange={(e) => handleChange('subtitle', e.target.value)} className="w-full input-primary" placeholder="Catchy subtitle" />
+                                        <div className="col-span-4 space-y-6">
+                                            <div className="bg-white/5 p-4 rounded-2xl border border-white/5 space-y-4">
+                                                <label className="label-text text-indigo-400">Publishing Status</label>
+                                                <select value={formData.status} onChange={(e) => handleChange('status', e.target.value)} className="input-primary appearance-none">
+                                                    <option value="draft">Draft</option>
+                                                    <option value="published">Published</option>
+                                                    <option value="archived">Archived</option>
+                                                </select>
+                                                <div className="h-px bg-white/10"></div>
+                                                <div className="space-y-2">
+                                                    <label className="label-text">Category</label>
+                                                    <select value={formData.category} onChange={(e) => handleChange('category', e.target.value)} className="input-primary appearance-none">
+                                                        <option value="crm">CRM & Sales</option>
+                                                        <option value="marketing">Marketing</option>
+                                                        <option value="automation">Automation</option>
+                                                        <option value="ai">AI Assistants</option>
+                                                        <option value="other">Other</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div className="bg-white/5 p-4 rounded-2xl border border-white/5 space-y-4">
+                                                <label className="label-text text-indigo-400">Badge Config</label>
+                                                <input type="text" value={formData.badge} onChange={(e) => handleChange('badge', e.target.value)} className="input-primary" placeholder="Badge Text (Optional)" />
+                                                <input type="text" value={formData.badgeColor} onChange={(e) => handleChange('badgeColor', e.target.value)} className="input-primary text-xs" placeholder="Gradient Classes" />
+                                            </div>
                                         </div>
                                     </div>
+                                )}
 
-                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                        <div className="space-y-2">
-                                            <label className="text-xs font-bold text-slate-400">Category</label>
-                                            <select value={formData.category} onChange={(e) => handleChange('category', e.target.value)} className="w-full input-primary appearance-none">
-                                                <option value="crm">CRM & Sales</option>
-                                                <option value="marketing">Marketing</option>
-                                                <option value="automation">Automation</option>
-                                                <option value="ai">AI Assistants</option>
-                                                <option value="other">Other</option>
-                                            </select>
+                                {activeTab === 'analysis' && (
+                                    <div className="space-y-8">
+                                        <div className="grid grid-cols-3 gap-6">
+                                            <div className="bg-slate-950 p-6 rounded-2xl border border-white/5 space-y-4">
+                                                <h3 className="text-white font-bold flex items-center gap-2"><StarIcon /> Rating</h3>
+                                                <input type="number" step="0.1" max="5" value={formData.rating} onChange={(e) => handleChange('rating', parseFloat(e.target.value))} className="input-primary text-3xl font-bold text-center" />
+                                                <p className="text-center text-xs text-slate-500">Out of 5.0</p>
+                                            </div>
+                                            <div className="bg-slate-950 p-6 rounded-2xl border border-white/5 space-y-4">
+                                                <h3 className="text-white font-bold flex items-center gap-2"><DollarIcon /> Pricing Label</h3>
+                                                <input type="text" value={formData.pricing} onChange={(e) => handleChange('pricing', e.target.value)} className="input-primary text-xl font-bold text-center" placeholder="$97/mo" />
+                                                <p className="text-center text-xs text-slate-500">Display Price</p>
+                                            </div>
+                                            <div className="bg-slate-950 p-6 rounded-2xl border border-white/5 space-y-4">
+                                                <h3 className="text-white font-bold flex items-center gap-2"><TargetIcon /> Best For</h3>
+                                                <input type="text" value={formData.bestFor} onChange={(e) => handleChange('bestFor', e.target.value)} className="input-primary text-xl font-bold text-center" placeholder="Agencies" />
+                                                <p className="text-center text-xs text-slate-500">Target Audience</p>
+                                            </div>
                                         </div>
-                                        <div className="space-y-2">
-                                            <label className="text-xs font-bold text-slate-400">Status</label>
-                                            <select value={formData.status} onChange={(e) => handleChange('status', e.target.value)} className="w-full input-primary appearance-none">
-                                                <option value="draft">Draft</option>
-                                                <option value="published">Published</option>
-                                                <option value="archived">Archived</option>
-                                            </select>
+
+                                        <div className="space-y-3">
+                                            <label className="label-text text-lg">Detailed Verdict</label>
+                                            <textarea rows={4} value={formData.verdict} onChange={(e) => handleChange('verdict', e.target.value)} className="input-primary text-base leading-relaxed" placeholder="Write your professional conclusion..." />
                                         </div>
-                                        <div className="space-y-2">
-                                            <label className="text-xs font-bold text-slate-400">Affiliate URL</label>
-                                            <input type="text" value={formData.affiliateUrl} onChange={(e) => handleChange('affiliateUrl', e.target.value)} className="w-full input-primary" placeholder="https://..." />
+
+                                        <div className="grid grid-cols-2 gap-8">
+                                            <div className="space-y-4">
+                                                <h3 className="text-green-400 font-bold uppercase text-sm tracking-wider flex items-center gap-2"><Check size={16} /> Pros List</h3>
+                                                <div className="space-y-2">
+                                                    {formData.pros?.map((item, index) => (
+                                                        <div key={index} className="flex gap-2">
+                                                            <input type="text" value={item} onChange={(e) => handleListChange('pros', index, e.target.value)} className="flex-1 input-primary" />
+                                                            <button type="button" onClick={() => removeListItem('pros', index)} className="p-2 text-slate-500 hover:text-rose-400 hover:bg-rose-500/10 rounded-lg"><Trash2 size={16} /></button>
+                                                        </div>
+                                                    ))}
+                                                    <button type="button" onClick={() => addListItem('pros')} className="w-full py-2 border border-dashed border-white/10 rounded-lg text-slate-400 hover:text-green-400 hover:border-green-400/30 transition-all text-sm font-medium">+ Add Pro</button>
+                                                </div>
+                                            </div>
+                                            <div className="space-y-4">
+                                                <h3 className="text-rose-400 font-bold uppercase text-sm tracking-wider flex items-center gap-2"><X size={16} /> Cons List</h3>
+                                                <div className="space-y-2">
+                                                    {formData.cons?.map((item, index) => (
+                                                        <div key={index} className="flex gap-2">
+                                                            <input type="text" value={item} onChange={(e) => handleListChange('cons', index, e.target.value)} className="flex-1 input-primary" />
+                                                            <button type="button" onClick={() => removeListItem('cons', index)} className="p-2 text-slate-500 hover:text-rose-400 hover:bg-rose-500/10 rounded-lg"><Trash2 size={16} /></button>
+                                                        </div>
+                                                    ))}
+                                                    <button type="button" onClick={() => addListItem('cons')} className="w-full py-2 border border-dashed border-white/10 rounded-lg text-slate-400 hover:text-rose-400 hover:border-rose-400/30 transition-all text-sm font-medium">+ Add Con</button>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div className="border-t border-white/5 pt-8">
+                                            <h3 className="text-lg font-bold text-white mb-4">Performance Data Icons</h3>
+                                            <div className="grid grid-cols-3 gap-6">
+                                                <div className="space-y-2">
+                                                    <label className="label-text">Time Saved</label>
+                                                    <input type="text" value={formData.metrics?.timeSaved || ''} onChange={(e) => handleNestedChange('metrics', 'timeSaved', e.target.value)} className="input-primary" placeholder="e.g. 10hrs/week" />
+                                                </div>
+                                                <div className="space-y-2">
+                                                    <label className="label-text">Tasks Automated</label>
+                                                    <input type="text" value={formData.metrics?.tasksAutomated || ''} onChange={(e) => handleNestedChange('metrics', 'tasksAutomated', e.target.value)} className="input-primary" placeholder="e.g. 50+" />
+                                                </div>
+                                                <div className="space-y-2">
+                                                    <label className="label-text">ROI Multiplier</label>
+                                                    <input type="text" value={formData.metrics?.roiMultiplier || ''} onChange={(e) => handleNestedChange('metrics', 'roiMultiplier', e.target.value)} className="input-primary" placeholder="e.g. 5x" />
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
+                                )}
 
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                        <div className="space-y-2">
-                                            <label className="text-xs font-bold text-slate-400">Badge Label</label>
-                                            <input type="text" value={formData.badge} onChange={(e) => handleChange('badge', e.target.value)} className="w-full input-primary" placeholder="e.g. Editor's Choice" />
+                                {activeTab === 'comparison' && (
+                                    <div className="space-y-6">
+                                        <div className="bg-indigo-500/10 border border-indigo-500/20 p-4 rounded-xl flex items-start gap-3">
+                                            <div className="p-2 bg-indigo-500/20 rounded-lg"><Scale size={20} className="text-indigo-400" /></div>
+                                            <div>
+                                                <h4 className="text-white font-bold text-sm">Comparison Builder</h4>
+                                                <p className="text-slate-400 text-xs mt-1">Add features to compare {formData.title || 'this tool'} against competitors. The first column is the feature name, 'Us' is this tool's value, and 'Others' represents the industry standard or main competitor.</p>
+                                            </div>
                                         </div>
-                                        <div className="space-y-2">
-                                            <label className="text-xs font-bold text-slate-400">Badge Gradient</label>
-                                            <input type="text" value={formData.badgeColor} onChange={(e) => handleChange('badgeColor', e.target.value)} className="w-full input-primary" placeholder="from-x to-y" />
-                                        </div>
-                                    </div>
-                                </div>
-                            )}
 
-                            {activeTab === 'analysis' && (
-                                <div className="space-y-6">
-                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                        <div className="space-y-2">
-                                            <label className="text-xs font-bold text-slate-400">Rating (0-5)</label>
-                                            <input type="number" step="0.1" max="5" value={formData.rating} onChange={(e) => handleChange('rating', parseFloat(e.target.value))} className="w-full input-primary" />
-                                        </div>
-                                        <div className="space-y-2">
-                                            <label className="text-xs font-bold text-slate-400">Pricing Label</label>
-                                            <input type="text" value={formData.pricing} onChange={(e) => handleChange('pricing', e.target.value)} className="w-full input-primary" placeholder="e.g. From $97/mo" />
-                                        </div>
-                                        <div className="space-y-2">
-                                            <label className="text-xs font-bold text-slate-400">Best For</label>
-                                            <input type="text" value={formData.bestFor} onChange={(e) => handleChange('bestFor', e.target.value)} className="w-full input-primary" placeholder="e.g. Agencies" />
-                                        </div>
-                                    </div>
+                                        <div className="space-y-3">
+                                            <div className="grid grid-cols-12 gap-4 px-2">
+                                                <div className="col-span-4 text-xs font-bold text-slate-500 uppercase">Feature Name</div>
+                                                <div className="col-span-3 text-xs font-bold text-green-500 uppercase">Us (Winner)</div>
+                                                <div className="col-span-4 text-xs font-bold text-slate-500 uppercase">Others / Competitors</div>
+                                                <div className="col-span-1"></div>
+                                            </div>
 
-                                    <div className="space-y-2">
-                                        <label className="text-xs font-bold text-slate-400">Our Verdict</label>
-                                        <textarea rows={3} value={formData.verdict} onChange={(e) => handleChange('verdict', e.target.value)} className="w-full input-primary py-3" placeholder="Summary of our opinion..." />
-                                    </div>
-
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                        <div className="space-y-2">
-                                            <label className="text-xs font-bold text-green-400">Pros</label>
-                                            {formData.pros?.map((item, index) => (
-                                                <div key={index} className="flex gap-2">
-                                                    <input type="text" value={item} onChange={(e) => handleListChange('pros', index, e.target.value)} className="flex-1 input-primary" />
-                                                    <button type="button" onClick={() => removeListItem('pros', index)} className="p-2 text-rose-400 hover:bg-rose-500/10 rounded-lg"><Trash2 size={16} /></button>
+                                            {formData.comparison?.map((row, index) => (
+                                                <div key={index} className="grid grid-cols-12 gap-4 items-center bg-white/5 p-3 rounded-lg border border-white/5 hover:border-white/10 transition-colors">
+                                                    <div className="col-span-4">
+                                                        <input type="text" value={row.feature} onChange={(e) => updateComparisonRow(index, 'feature', e.target.value)} className="input-ghost w-full font-medium text-white" placeholder="e.g. Email Automation" />
+                                                    </div>
+                                                    <div className="col-span-3">
+                                                        <input type="text" value={row.us} onChange={(e) => updateComparisonRow(index, 'us', e.target.value)} className="input-ghost w-full text-green-400 font-bold" placeholder="Unlimited" />
+                                                    </div>
+                                                    <div className="col-span-4">
+                                                        <input type="text" value={row.other} onChange={(e) => updateComparisonRow(index, 'other', e.target.value)} className="input-ghost w-full text-slate-400" placeholder="Limited / Paid" />
+                                                    </div>
+                                                    <div className="col-span-1 text-right">
+                                                        <button type="button" onClick={() => removeComparisonRow(index)} className="p-2 text-slate-600 hover:text-rose-400 rounded-lg transition-colors"><Trash2 size={16} /></button>
+                                                    </div>
                                                 </div>
                                             ))}
-                                            <button type="button" onClick={() => addListItem('pros')} className="text-xs text-indigo-400 font-bold flex items-center gap-1"><Plus size={14} /> Add Pro</button>
                                         </div>
-                                        <div className="space-y-2">
-                                            <label className="text-xs font-bold text-rose-400">Cons</label>
-                                            {formData.cons?.map((item, index) => (
-                                                <div key={index} className="flex gap-2">
-                                                    <input type="text" value={item} onChange={(e) => handleListChange('cons', index, e.target.value)} className="flex-1 input-primary" />
-                                                    <button type="button" onClick={() => removeListItem('cons', index)} className="p-2 text-rose-400 hover:bg-rose-500/10 rounded-lg"><Trash2 size={16} /></button>
-                                                </div>
-                                            ))}
-                                            <button type="button" onClick={() => addListItem('cons')} className="text-xs text-indigo-400 font-bold flex items-center gap-1"><Plus size={14} /> Add Con</button>
-                                        </div>
-                                    </div>
 
-                                    <div className="border-t border-white/5 pt-6">
-                                        <h3 className="text-sm font-bold text-indigo-400 uppercase mb-4">Performance Metrics</h3>
-                                        <div className="grid grid-cols-3 gap-4">
-                                            <div className="space-y-2">
-                                                <label className="text-xs font-bold text-slate-400">Time Saved</label>
-                                                <input type="text" value={formData.metrics?.timeSaved || ''} onChange={(e) => handleNestedChange('metrics', 'timeSaved', e.target.value)} className="w-full input-primary" placeholder="e.g. 10hrs/week" />
-                                            </div>
-                                            <div className="space-y-2">
-                                                <label className="text-xs font-bold text-slate-400">Tasks Automated</label>
-                                                <input type="text" value={formData.metrics?.tasksAutomated || ''} onChange={(e) => handleNestedChange('metrics', 'tasksAutomated', e.target.value)} className="w-full input-primary" placeholder="e.g. 50+" />
-                                            </div>
-                                            <div className="space-y-2">
-                                                <label className="text-xs font-bold text-slate-400">ROI Multiplier</label>
-                                                <input type="text" value={formData.metrics?.roiMultiplier || ''} onChange={(e) => handleNestedChange('metrics', 'roiMultiplier', e.target.value)} className="w-full input-primary" placeholder="e.g. 5x" />
-                                            </div>
-                                        </div>
+                                        <button type="button" onClick={addComparisonRow} className="w-full py-3 border border-dashed border-white/10 rounded-xl text-slate-400 hover:text-indigo-400 hover:border-indigo-400/30 hover:bg-white/5 transition-all font-medium flex items-center justify-center gap-2">
+                                            <Plus size={18} /> Add Comparison Row
+                                        </button>
                                     </div>
-                                </div>
-                            )}
+                                )}
 
-                            {activeTab === 'content' && (
-                                <div className="space-y-6">
-                                    <div className="space-y-3">
-                                        <div className="flex justify-between items-center">
-                                            <div className="flex items-center gap-1 bg-white/5 p-1 rounded-lg border border-white/5">
-                                                <button type="button" onClick={() => insertFormat('bold')} className="p-2 text-slate-400 hover:text-white hover:bg-white/10 rounded transition-colors" title="Bold"><Bold size={16} /></button>
-                                                <button type="button" onClick={() => insertFormat('italic')} className="p-2 text-slate-400 hover:text-white hover:bg-white/10 rounded transition-colors" title="Italic"><Italic size={16} /></button>
-                                                <div className="w-px h-4 bg-white/10 mx-1"></div>
-                                                <button type="button" onClick={() => insertFormat('h2')} className="p-2 text-slate-400 hover:text-white hover:bg-white/10 rounded transition-colors" title="Heading 2"><Heading2 size={16} /></button>
-                                                <button type="button" onClick={() => insertFormat('quote')} className="p-2 text-slate-400 hover:text-white hover:bg-white/10 rounded transition-colors" title="Quote"><Quote size={16} /></button>
-                                                <div className="w-px h-4 bg-white/10 mx-1"></div>
-                                                <button type="button" onClick={() => insertFormat('list')} className="p-2 text-slate-400 hover:text-white hover:bg-white/10 rounded transition-colors" title="Bullet List"><List size={16} /></button>
+                                {activeTab === 'content' && (
+                                    <div className="space-y-8">
+                                        <div className="flex flex-col h-[600px] border border-white/10 rounded-xl overflow-hidden bg-black/20">
+                                            <div className="flex items-center gap-1 bg-slate-900 p-2 border-b border-white/10 overflow-x-auto">
+                                                <EditorButton onClick={() => insertFormat('bold')} icon={Bold} title="Bold" />
+                                                <EditorButton onClick={() => insertFormat('italic')} icon={Italic} title="Italic" />
+                                                <div className="w-px h-5 bg-white/10 mx-1"></div>
+                                                <EditorButton onClick={() => insertFormat('h2')} icon={Heading2} title="Heading 2" />
+                                                <EditorButton onClick={() => insertFormat('quote')} icon={Quote} title="Quote" />
+                                                <EditorButton onClick={() => insertFormat('list')} icon={List} title="List" />
+                                                <div className="flex-1"></div>
+                                                <button type="button" onClick={insertTemplate} className="text-xs bg-indigo-600/10 hover:bg-indigo-600/20 text-indigo-400 px-3 py-1.5 rounded-lg border border-indigo-600/20 transition-colors font-bold whitespace-nowrap">
+                                                    Insert Template
+                                                </button>
                                             </div>
-                                            <label className="text-xs font-bold text-slate-500 uppercase">Markdown Editor</label>
-                                            <button type="button" onClick={insertTemplate} className="text-xs bg-indigo-600/20 hover:bg-indigo-600/30 text-indigo-400 px-3 py-1.5 rounded-lg border border-indigo-600/30 transition-colors font-bold flex items-center gap-2">
-                                                <Layout size={14} /> Insert Template
-                                            </button>
+                                            <textarea
+                                                id="description-editor"
+                                                value={formData.description}
+                                                onChange={(e) => handleChange('description', e.target.value)}
+                                                className="flex-1 bg-transparent p-6 text-slate-300 font-mono text-sm leading-relaxed resize-none focus:outline-none"
+                                                placeholder="# Start writing your in-depth review..."
+                                            />
                                         </div>
-                                        <textarea
-                                            id="description-editor"
-                                            rows={15}
-                                            value={formData.description}
-                                            onChange={(e) => handleChange('description', e.target.value)}
-                                            className="w-full input-primary py-4 px-4 font-mono text-sm leading-relaxed"
-                                            placeholder="# Detailed Review..."
-                                        />
-                                        <p className="text-xs text-slate-500">* Supports full Markdown formatting</p>
-                                    </div>
 
-                                    <div className="border-t border-white/5 pt-6">
-                                        <div className="flex justify-between items-center mb-4">
-                                            <h3 className="text-sm font-bold text-indigo-400 uppercase">Frequently Asked Questions</h3>
-                                            <button type="button" onClick={addFaq} className="text-xs bg-indigo-600 px-3 py-1 rounded-full text-white font-bold">Add FAQ</button>
-                                        </div>
                                         <div className="space-y-4">
-                                            {formData.faq?.map((item, index) => (
-                                                <div key={index} className="bg-white/5 p-4 rounded-xl space-y-3 relative group">
-                                                    <button type="button" onClick={() => removeFaq(index)} className="absolute top-2 right-2 text-rose-400 opacity-0 group-hover:opacity-100 transition-opacity"><X size={16} /></button>
-                                                    <input type="text" value={item.question} onChange={(e) => updateFaq(index, 'question', e.target.value)} className="w-full input-primary bg-black/20" placeholder="Question?" />
-                                                    <textarea rows={2} value={item.answer} onChange={(e) => updateFaq(index, 'answer', e.target.value)} className="w-full input-primary bg-black/20" placeholder="Answer..." />
+                                            <div className="flex justify-between items-center">
+                                                <h3 className="text-lg font-bold text-white">Frequently Asked Questions</h3>
+                                                <button type="button" onClick={addFaq} className="text-xs bg-indigo-600 px-4 py-2 rounded-lg text-white font-bold hover:bg-indigo-500 transition-colors">Add FAQ Item</button>
+                                            </div>
+                                            <div className="space-y-4">
+                                                {formData.faq?.map((item, index) => (
+                                                    <div key={index} className="bg-white/5 p-4 rounded-xl border border-white/5 space-y-3 relative group">
+                                                        <button type="button" onClick={() => removeFaq(index)} className="absolute top-4 right-4 text-slate-600 hover:text-rose-400 transition-colors"><X size={16} /></button>
+                                                        <input type="text" value={item.question} onChange={(e) => updateFaq(index, 'question', e.target.value)} className="w-full bg-transparent border-b border-white/10 pb-2 text-white font-bold focus:outline-none focus:border-indigo-500 transition-colors" placeholder="Question?" />
+                                                        <textarea rows={2} value={item.answer} onChange={(e) => updateFaq(index, 'answer', e.target.value)} className="w-full bg-transparent text-slate-400 focus:outline-none text-sm resize-none" placeholder="Answer..." />
+                                                    </div>
+                                                ))}
+                                                {(!formData.faq || formData.faq.length === 0) && (
+                                                    <div className="text-center text-slate-500 py-6 border border-dashed border-white/10 rounded-xl">No FAQs added yet</div>
+                                                )}
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+
+                                {activeTab === 'media' && (
+                                    <div className="space-y-8">
+                                        <div className="grid grid-cols-2 gap-6">
+                                            <div className="space-y-2">
+                                                <label className="label-text">Main Feature Image</label>
+                                                <div className="flex gap-2">
+                                                    <div className="bg-white/5 p-3 rounded-lg border border-white/10"><ImageIcon size={20} className="text-slate-400" /></div>
+                                                    <input type="text" value={formData.image} onChange={(e) => handleChange('image', e.target.value)} className="w-full input-primary" placeholder="https://..." />
+                                                </div>
+                                            </div>
+                                            <div className="space-y-2">
+                                                <label className="label-text">PDF Lead Magnet URL</label>
+                                                <div className="flex gap-2">
+                                                    <div className="bg-white/5 p-3 rounded-lg border border-white/10"><File size={20} className="text-slate-400" /></div>
+                                                    <input type="text" value={formData.media?.pdfUrl || ''} onChange={(e) => handleNestedChange('media', 'pdfUrl', e.target.value)} className="w-full input-primary" placeholder="https://..." />
+                                                </div>
+                                            </div>
+                                            <div className="col-span-2 space-y-2">
+                                                <label className="label-text">YouTube Embed URL</label>
+                                                <div className="flex gap-2">
+                                                    <div className="bg-white/5 p-3 rounded-lg border border-white/10"><Video size={20} className="text-slate-400" /></div>
+                                                    <input type="text" value={formData.media?.videoUrl || ''} onChange={(e) => handleNestedChange('media', 'videoUrl', e.target.value)} className="w-full input-primary" placeholder="https://www.youtube.com/embed/..." />
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div className="space-y-4">
+                                            <div className="flex justify-between items-center">
+                                                <label className="label-text text-lg">Screenshot Gallery</label>
+                                                <button type="button" onClick={addGalleryImage} className="text-xs bg-white/10 hover:bg-white/20 px-3 py-1.5 rounded-lg text-white font-medium transition-colors">+ Add Image</button>
+                                            </div>
+                                            <div className="grid grid-cols-1 gap-3">
+                                                {formData.media?.gallery?.map((url, index) => (
+                                                    <div key={index} className="flex gap-3 items-center">
+                                                        <div className="w-16 h-12 bg-white/5 rounded-lg overflow-hidden border border-white/10 flex-shrink-0">
+                                                            {url ? <img src={url} alt="" className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center text-slate-600"><ImageIcon size={16} /></div>}
+                                                        </div>
+                                                        <input type="text" value={url} onChange={(e) => handleGalleryListChange(index, e.target.value)} className="flex-1 input-primary" placeholder="https://image-url.com/..." />
+                                                        <button type="button" onClick={() => removeGalleryImage(index)} className="p-2 text-slate-500 hover:text-rose-400"><Trash2 size={16} /></button>
+                                                    </div>
+                                                ))}
+                                                {(!formData.media?.gallery || formData.media.gallery.length === 0) && (
+                                                    <div className="text-center text-slate-500 py-4 border border-dashed border-white/10 rounded-xl">No gallery images added</div>
+                                                )}
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+
+                                {activeTab === 'seo' && (
+                                    <div className="space-y-6">
+                                        <div className="bg-white/5 p-6 rounded-2xl border border-white/5 space-y-4">
+                                            <h3 className="text-white font-bold border-b border-white/10 pb-4 mb-4">Search Engine Optimization</h3>
+                                            <div className="space-y-2">
+                                                <label className="label-text">SEO Title Tag</label>
+                                                <input type="text" value={formData.seo?.title || ''} onChange={(e) => handleNestedChange('seo', 'title', e.target.value)} className="input-primary" placeholder="Primary Keyword | Brand Name" />
+                                            </div>
+                                            <div className="space-y-2">
+                                                <label className="label-text">Meta Description</label>
+                                                <textarea rows={3} value={formData.seo?.description || ''} onChange={(e) => handleNestedChange('seo', 'description', e.target.value)} className="input-primary" placeholder="Click-worthy summary..." />
+                                            </div>
+                                            <div className="p-4 bg-black/30 rounded-xl border border-white/5 mt-4">
+                                                <div className="text-xs text-slate-400 mb-2">Search Preview</div>
+                                                <div className="text-indigo-400 text-lg font-medium hover:underline cursor-pointer truncate">{formData.seo?.title || formData.title || 'Page Title'}</div>
+                                                <div className="text-green-500 text-xs mb-1">https://noureddine.reffaa.com/reviews/{formData.slug}</div>
+                                                <div className="text-slate-400 text-sm line-clamp-2">{formData.seo?.description || formData.subtitle || 'Page description will appear here...'}</div>
+                                            </div>
+                                        </div>
+
+                                        <div className="bg-white/5 p-6 rounded-2xl border border-white/5 space-y-4">
+                                            <h3 className="text-white font-bold border-b border-white/10 pb-4 mb-4">Author Attribution</h3>
+                                            <div className="grid grid-cols-2 gap-4">
+                                                <div className="space-y-2">
+                                                    <label className="label-text">Author Name</label>
+                                                    <input type="text" value={formData.author?.name || ''} onChange={(e) => handleNestedChange('author', 'name', e.target.value)} className="input-primary" />
+                                                </div>
+                                                <div className="space-y-2">
+                                                    <label className="label-text">Role</label>
+                                                    <input type="text" value={formData.author?.role || ''} onChange={(e) => handleNestedChange('author', 'role', e.target.value)} className="input-primary" />
+                                                </div>
+                                                <div className="col-span-2 space-y-2">
+                                                    <label className="label-text">Avatar URL</label>
+                                                    <input type="text" value={formData.author?.image || ''} onChange={(e) => handleNestedChange('author', 'image', e.target.value)} className="input-primary" />
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+
+                                {activeTab === 'testimonials' && (
+                                    <div className="space-y-6">
+                                        <div className="flex justify-between items-center">
+                                            <div>
+                                                <h3 className="text-lg font-bold text-white">Social Proof</h3>
+                                                <p className="text-sm text-slate-400">Add testimonials to increase credibility.</p>
+                                            </div>
+                                            <button type="button" onClick={addTestimonial} className="btn-secondary">+ Add Review</button>
+                                        </div>
+
+                                        <div className="grid grid-cols-1 gap-4">
+                                            {formData.testimonials?.map((t, index) => (
+                                                <div key={index} className="bg-white/5 p-6 rounded-xl border border-white/5 space-y-4 relative group">
+                                                    <button type="button" onClick={() => removeTestimonial(index)} className="absolute top-4 right-4 text-slate-600 hover:text-rose-400"><Trash2 size={16} /></button>
+                                                    <textarea rows={2} value={t.text} onChange={(e) => updateTestimonial(index, 'text', e.target.value)} className="w-full bg-transparent text-white font-medium text-lg italic focus:outline-none resize-none placeholder:text-slate-600" placeholder='"This product changed my life..."' />
+                                                    <div className="flex gap-4">
+                                                        <div className="flex-1 space-y-1">
+                                                            <label className="text-xs text-slate-500 uppercase font-bold">Name</label>
+                                                            <input type="text" value={t.author} onChange={(e) => updateTestimonial(index, 'author', e.target.value)} className="w-full bg-black/20 px-3 py-2 rounded-lg border border-white/10 text-sm text-white focus:border-indigo-500 outline-none" placeholder="John Doe" />
+                                                        </div>
+                                                        <div className="flex-1 space-y-1">
+                                                            <label className="text-xs text-slate-500 uppercase font-bold">Role / Company</label>
+                                                            <input type="text" value={t.role} onChange={(e) => updateTestimonial(index, 'role', e.target.value)} className="w-full bg-black/20 px-3 py-2 rounded-lg border border-white/10 text-sm text-white focus:border-indigo-500 outline-none" placeholder="CEO, TechCorp" />
+                                                        </div>
+                                                    </div>
                                                 </div>
                                             ))}
-                                            {(!formData.faq || formData.faq.length === 0) && (
-                                                <div className="text-center text-slate-500 py-4 italic">No FAQs added yet</div>
+                                            {(!formData.testimonials || formData.testimonials.length === 0) && (
+                                                <div className="text-center py-12 border border-dashed border-white/10 rounded-xl text-slate-500">
+                                                    No testimonials added yet.
+                                                </div>
                                             )}
                                         </div>
                                     </div>
-                                </div>
-                            )}
-
-                            {activeTab === 'media' && (
-                                <div className="space-y-6">
-                                    <div className="space-y-2">
-                                        <label className="text-xs font-bold text-slate-400">Main Image URL</label>
-                                        <div className="flex gap-2">
-                                            <div className="bg-white/5 p-3 rounded-lg"><ImageIcon size={20} className="text-slate-400" /></div>
-                                            <input type="text" value={formData.image} onChange={(e) => handleChange('image', e.target.value)} className="w-full input-primary" placeholder="https://..." />
-                                        </div>
-                                    </div>
-
-                                    <div className="space-y-2">
-                                        <label className="text-xs font-bold text-slate-400">Video Embed URL (YouTube/Vimeo)</label>
-                                        <div className="flex gap-2">
-                                            <div className="bg-white/5 p-3 rounded-lg"><Video size={20} className="text-slate-400" /></div>
-                                            <input type="text" value={formData.media?.videoUrl || ''} onChange={(e) => handleNestedChange('media', 'videoUrl', e.target.value)} className="w-full input-primary" placeholder="https://www.youtube.com/embed/..." />
-                                        </div>
-                                    </div>
-
-                                    <div className="space-y-2">
-                                        <label className="text-xs font-bold text-slate-400">PDF Resource URL</label>
-                                        <div className="flex gap-2">
-                                            <div className="bg-white/5 p-3 rounded-lg"><File size={20} className="text-slate-400" /></div>
-                                            <input type="text" value={formData.media?.pdfUrl || ''} onChange={(e) => handleNestedChange('media', 'pdfUrl', e.target.value)} className="w-full input-primary" placeholder="https://..." />
-                                        </div>
-                                    </div>
-
-                                    <div className="space-y-2">
-                                        <label className="text-xs font-bold text-slate-400">Gallery Images (Comma separated URLs)</label>
-                                        <textarea rows={3} value={formData.media?.gallery?.join(', ') || ''} onChange={(e) => handleGalleryChange(e.target.value)} className="w-full input-primary py-3" placeholder="https://img1.jpg, https://img2.jpg" />
-                                    </div>
-                                </div>
-                            )}
-
-                            {activeTab === 'seo' && (
-                                <div className="space-y-6">
-                                    <div className="space-y-2">
-                                        <label className="text-xs font-bold text-slate-400">SEO Title</label>
-                                        <input type="text" value={formData.seo?.title || ''} onChange={(e) => handleNestedChange('seo', 'title', e.target.value)} className="w-full input-primary" placeholder="Best CRM Tool 2026 - Review" />
-                                    </div>
-                                    <div className="space-y-2">
-                                        <label className="text-xs font-bold text-slate-400">SEO Description</label>
-                                        <textarea rows={2} value={formData.seo?.description || ''} onChange={(e) => handleNestedChange('seo', 'description', e.target.value)} className="w-full input-primary py-3" placeholder="Meta description..." />
-                                    </div>
-
-                                    <div className="border-t border-white/5 pt-6">
-                                        <h3 className="text-sm font-bold text-indigo-400 uppercase mb-4">Author info</h3>
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                            <div className="space-y-2">
-                                                <label className="text-xs font-bold text-slate-400">Author Name</label>
-                                                <input type="text" value={formData.author?.name || ''} onChange={(e) => handleNestedChange('author', 'name', e.target.value)} className="w-full input-primary" />
-                                            </div>
-                                            <div className="space-y-2">
-                                                <label className="text-xs font-bold text-slate-400">Author Role</label>
-                                                <input type="text" value={formData.author?.role || ''} onChange={(e) => handleNestedChange('author', 'role', e.target.value)} className="w-full input-primary" placeholder="e.g. Senior Editor" />
-                                            </div>
-                                            <div className="col-span-full space-y-2">
-                                                <label className="text-xs font-bold text-slate-400">Author Avatar URL</label>
-                                                <input type="text" value={formData.author?.image || ''} onChange={(e) => handleNestedChange('author', 'image', e.target.value)} className="w-full input-primary" placeholder="https://..." />
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            )}
-
-                        </form>
-                    </div>
-
-                    {/* Footer Actions */}
-                    <div className="p-6 border-t border-white/5 bg-slate-900/50 backdrop-blur-xl flex justify-end gap-4 z-10">
-                        <button type="button" onClick={onClose} className="px-6 py-2 rounded-xl text-slate-400 font-bold hover:bg-white/5 transition-colors">Cancel</button>
-                        <button type="submit" form="decision-form" className="px-8 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl font-bold shadow-lg shadow-indigo-600/20 flex items-center gap-2">
-                            <Save size={18} /> Save Page
-                        </button>
+                                )}
+                            </div>
+                        </div>
                     </div>
                 </motion.div>
 
-                {/* Global Styles for Inputs */}
+                {/* Helper Components & Styles */}
                 <style>{`
                     .input-primary {
-                        @apply px-4 py-2 bg-black/20 border border-white/10 rounded-lg text-white focus:outline-none focus:border-indigo-500 transition-colors;
+                        @apply w-full px-4 py-3 bg-black/20 border border-white/10 rounded-xl text-white focus:outline-none focus:border-indigo-500 focus:bg-black/40 transition-all placeholder:text-slate-600;
+                    }
+                    .input-ghost {
+                        @apply bg-transparent border-none focus:outline-none focus:ring-0 px-0;
+                    }
+                    .label-text {
+                        @apply block text-sm font-bold text-slate-400 mb-1;
+                    }
+                    .btn-secondary {
+                        @apply px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg font-bold transition-colors text-sm;
+                    }
+                    /* Custom Scrollbar for specific containers */
+                    .custom-scrollbar::-webkit-scrollbar {
+                        width: 6px;
+                    }
+                    .custom-scrollbar::-webkit-scrollbar-track {
+                        background: rgba(0, 0, 0, 0.1);
+                    }
+                    .custom-scrollbar::-webkit-scrollbar-thumb {
+                        background: rgba(255, 255, 255, 0.1);
+                        border-radius: 3px;
+                    }
+                    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+                        background: rgba(255, 255, 255, 0.2);
                     }
                 `}</style>
             </div>
         </AnimatePresence>
     );
 };
+
+const EditorButton = ({ onClick, icon: Icon, title }: { onClick: () => void, icon: any, title: string }) => (
+    <button type="button" onClick={onClick} className="p-2 text-slate-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors" title={title}>
+        <Icon size={16} />
+    </button>
+);
+
+const StarIcon = () => (
+    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-yellow-400"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg>
+);
+
+const DollarIcon = () => (
+    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-green-400"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+);
+
+const TargetIcon = () => (
+    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-indigo-400"><circle cx="12" cy="12" r="10" /><circle cx="12" cy="12" r="6" /><circle cx="12" cy="12" r="2" /></svg>
+);
+
+const GovernanceItem = ({ label, isComplete }: { label: string, isComplete: boolean }) => (
+    <div className={`flex items-center gap-2 text-sm ${isComplete ? 'text-green-400' : 'text-slate-500'}`}>
+        <div className={`w-4 h-4 rounded-full flex items-center justify-center border ${isComplete ? 'border-green-400 bg-green-400/10' : 'border-slate-600'}`}>
+            <Check size={10} className={isComplete ? 'opacity-100' : 'opacity-0'} />
+        </div>
+        {label}
+    </div>
+);
 
 export default DecisionPageForm;

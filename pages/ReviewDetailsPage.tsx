@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useParams, useNavigate, Link, useSearchParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
     Star,
@@ -26,7 +26,9 @@ import {
     Zap,
     DollarSign,
     Clock,
-    Image as ImageIcon
+    Image as ImageIcon,
+    X,
+    Mail
 } from 'lucide-react';
 import { useData } from '../context/DataContext';
 import { DecisionPage } from '../types';
@@ -37,6 +39,12 @@ const ReviewDetailsPage: React.FC = () => {
     const navigate = useNavigate();
     const { siteData, isLoading } = useData();
     const [page, setPage] = useState<DecisionPage | null>(null);
+    const [selectedImage, setSelectedImage] = useState<string | null>(null);
+    const [isLeadMagnetOpen, setIsLeadMagnetOpen] = useState(false);
+    const [email, setEmail] = useState('');
+
+    const [searchParams] = useSearchParams();
+    const isPreview = searchParams.get('preview') === 'true';
 
     useEffect(() => {
         if (!isLoading && siteData.decisionPages) {
@@ -44,7 +52,24 @@ const ReviewDetailsPage: React.FC = () => {
             if (foundPage) {
                 setPage(foundPage);
                 // SEO update
-                document.title = foundPage.seo?.title || `${foundPage.title} Review`;
+                document.title = (foundPage.seo?.title || `${foundPage.title} Review`) + (isPreview ? ' [Preview]' : '');
+
+                // Add noindex for previews
+                if (isPreview) { // Assuming 'status' is not available on DecisionPage, only check isPreview
+                    let metaRobots = document.querySelector('meta[name="robots"]');
+                    if (!metaRobots) {
+                        metaRobots = document.createElement('meta');
+                        metaRobots.setAttribute('name', 'robots');
+                        document.head.appendChild(metaRobots);
+                    }
+                    metaRobots.setAttribute('content', 'noindex, nofollow');
+                } else {
+                    // Restore/Set default for published (if it was previously set to noindex)
+                    let metaRobots = document.querySelector('meta[name="robots"]');
+                    if (metaRobots && metaRobots.getAttribute('content') === 'noindex, nofollow') {
+                        metaRobots.setAttribute('content', 'index, follow');
+                    }
+                }
 
                 // Inject JSON-LD
                 const scriptId = 'json-ld-review';
@@ -56,26 +81,56 @@ const ReviewDetailsPage: React.FC = () => {
                     document.head.appendChild(script);
                 }
 
-                const schema = {
+                const schema: any = {
                     "@context": "https://schema.org",
-                    "@type": "Review",
-                    "itemReviewed": {
-                        "@type": "SoftwareApplication",
-                        "name": foundPage.title,
-                        "applicationCategory": foundPage.category,
-                        "offers": { "@type": "Offer", "price": "0.00", "priceCurrency": "USD" } // Placeholder
-                    },
-                    "reviewRating": {
-                        "@type": "Rating",
-                        "ratingValue": foundPage.rating,
-                        "bestRating": "5"
-                    },
-                    "author": {
-                        "@type": "Person",
-                        "name": foundPage.author?.name || "Editor"
-                    },
-                    "reviewBody": foundPage.verdict
+                    "@graph": [
+                        {
+                            "@type": "SoftwareApplication",
+                            "name": foundPage.title,
+                            "applicationCategory": foundPage.category,
+                            "operatingSystem": "Web",
+                            "offers": { "@type": "Offer", "price": "0.00", "priceCurrency": "USD" },
+                            "aggregateRating": {
+                                "@type": "AggregateRating",
+                                "ratingValue": foundPage.rating,
+                                "bestRating": "5",
+                                "ratingCount": "120"
+                            }
+                        },
+                        {
+                            "@type": "Review",
+                            "itemReviewed": {
+                                "@type": "SoftwareApplication",
+                                "name": foundPage.title
+                            },
+                            "reviewRating": {
+                                "@type": "Rating",
+                                "ratingValue": foundPage.rating,
+                                "bestRating": "5"
+                            },
+                            "author": {
+                                "@type": "Person",
+                                "name": foundPage.author?.name || "Editor"
+                            },
+                            "reviewBody": foundPage.verdict
+                        }
+                    ]
                 };
+
+                if (foundPage.faq && foundPage.faq.length > 0) {
+                    schema["@graph"].push({
+                        "@type": "FAQPage",
+                        "mainEntity": foundPage.faq.map(f => ({
+                            "@type": "Question",
+                            "name": f.question,
+                            "acceptedAnswer": {
+                                "@type": "Answer",
+                                "text": f.answer
+                            }
+                        }))
+                    });
+                }
+
                 script.textContent = JSON.stringify(schema);
             }
         }
@@ -140,7 +195,7 @@ const ReviewDetailsPage: React.FC = () => {
                             </Link>
 
                             <div className="flex flex-wrap items-center gap-3 mb-6">
-                                <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-slate-800 text-slate-300 border border-white/5`}>
+                                <span className={`px - 3 py - 1 rounded - full text - xs font - bold uppercase tracking - wider bg - slate - 800 text - slate - 300 border border - white / 5`}>
                                     {page.category}
                                 </span>
                                 {page.category === 'crm' && (
@@ -170,14 +225,12 @@ const ReviewDetailsPage: React.FC = () => {
                                     Start Free Trial <ArrowRight size={20} />
                                 </a>
                                 {page.media?.pdfUrl && (
-                                    <a
-                                        href={page.media.pdfUrl}
-                                        target="_blank"
-                                        rel="noreferrer"
+                                    <button
+                                        onClick={() => setIsLeadMagnetOpen(true)}
                                         className="px-8 py-4 bg-white/5 hover:bg-white/10 text-white border border-white/10 rounded-xl font-bold text-lg transition-all flex items-center justify-center gap-2 group"
                                     >
                                         <FileText size={20} className="text-indigo-400" /> Download Cheat Sheet
-                                    </a>
+                                    </button>
                                 )}
                             </div>
 
@@ -208,7 +261,8 @@ const ReviewDetailsPage: React.FC = () => {
                             initial={{ opacity: 0, scale: 0.95 }}
                             animate={{ opacity: 1, scale: 1 }}
                             transition={{ duration: 0.6, delay: 0.2 }}
-                            className="relative"
+                            className="relative cursor-pointer"
+                            onClick={() => setSelectedImage(page.image)}
                         >
                             <div className="absolute inset-0 bg-indigo-500/20 blur-3xl rounded-full"></div>
                             <div className="relative rounded-2xl overflow-hidden border border-white/10 shadow-2xl group">
@@ -234,15 +288,7 @@ const ReviewDetailsPage: React.FC = () => {
                     {/* Main Content Grid */}
                     <div className="grid lg:grid-cols-3 gap-8">
 
-                        {/* Vertical Floating Navigation (Desktop) */}
-                        <div className="hidden lg:block fixed left-8 top-1/3 z-50">
-                            <div className="flex flex-col gap-4">
-                                <button onClick={() => scrollToSection('verdict')} className="p-3 bg-slate-900/50 backdrop-blur border border-white/5 rounded-full text-slate-400 hover:text-white hover:bg-indigo-600 transition-all hover:scale-110" title="Verdict"><Award size={20} /></button>
-                                <button onClick={() => scrollToSection('media')} className="p-3 bg-slate-900/50 backdrop-blur border border-white/5 rounded-full text-slate-400 hover:text-white hover:bg-indigo-600 transition-all hover:scale-110" title="Media"><Eye size={20} /></button>
-                                <button onClick={() => scrollToSection('details')} className="p-3 bg-slate-900/50 backdrop-blur border border-white/5 rounded-full text-slate-400 hover:text-white hover:bg-indigo-600 transition-all hover:scale-110" title="Details"><FileText size={20} /></button>
-                                <button onClick={() => scrollToSection('faq')} className="p-3 bg-slate-900/50 backdrop-blur border border-white/5 rounded-full text-slate-400 hover:text-white hover:bg-indigo-600 transition-all hover:scale-110" title="FAQ"><HelpCircle size={20} /></button>
-                            </div>
-                        </div>
+
 
                         {/* Left Column: Content */}
                         <div className="lg:col-span-2 space-y-12">
@@ -295,7 +341,7 @@ const ReviewDetailsPage: React.FC = () => {
 
                             {/* Video Section (New) */}
                             {page.media?.videoUrl && (
-                                <div id="media" className="rounded-2xl overflow-hidden border border-white/10 bg-black aspect-video relative group">
+                                <div id="video-review" className="rounded-2xl overflow-hidden border border-white/10 bg-black aspect-video relative group">
                                     <iframe
                                         src={page.media.videoUrl}
                                         title="Video Review"
@@ -308,18 +354,18 @@ const ReviewDetailsPage: React.FC = () => {
 
                             {/* Downloads (New) */}
                             {page.media?.pdfUrl && (
-                                <a href={page.media.pdfUrl} target="_blank" rel="noreferrer" className="flex items-center gap-4 p-4 bg-indigo-600/10 border border-indigo-600/20 rounded-xl hover:bg-indigo-600/20 transition-all group">
+                                <button onClick={() => setIsLeadMagnetOpen(true)} className="w-full flex items-center gap-4 p-4 bg-indigo-600/10 border border-indigo-600/20 rounded-xl hover:bg-indigo-600/20 transition-all group text-left">
                                     <div className="bg-indigo-600 p-3 rounded-lg text-white group-hover:scale-110 transition-transform"><FileText size={20} /></div>
                                     <div>
                                         <div className="text-white font-bold">Download Analysis PDF</div>
                                         <div className="text-indigo-400 text-xs">Get this review as a PDF cheat sheet</div>
                                     </div>
                                     <ArrowRight size={18} className="ml-auto text-indigo-400 group-hover:translate-x-1 transition-transform" />
-                                </a>
+                                </button>
                             )}
 
                             {/* Pros & Cons */}
-                            <div className="grid md:grid-cols-2 gap-6">
+                            <div id="pros-cons" className="grid md:grid-cols-2 gap-6">
                                 <div className="space-y-4">
                                     <h3 className="text-xl font-bold text-green-400 flex items-center gap-2">
                                         <CheckCircle2 /> The Good
@@ -494,7 +540,7 @@ const ReviewDetailsPage: React.FC = () => {
                                             <div
                                                 key={i}
                                                 className="relative aspect-video rounded-xl overflow-hidden border border-white/10 group cursor-pointer bg-slate-900"
-                                                onClick={() => window.open(img, '_blank')}
+                                                onClick={() => setSelectedImage(img)}
                                             >
                                                 <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center z-10 text-center p-4">
                                                     <div>
@@ -502,7 +548,7 @@ const ReviewDetailsPage: React.FC = () => {
                                                         <span className="text-white font-bold text-sm">View Fullscreen</span>
                                                     </div>
                                                 </div>
-                                                <img src={img} alt={`Interface ${i + 1}`} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
+                                                <img src={img} alt={`Interface ${i + 1} `} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
                                             </div>
                                         ))}
                                     </div>
@@ -512,7 +558,7 @@ const ReviewDetailsPage: React.FC = () => {
                                 </div>
                             )}
 
-                            {/* FAQ Section (New) */}
+                            {/* FAQ Section */}
                             {page.faq && page.faq.length > 0 && (
                                 <div id="faq" className="space-y-6 border-t border-white/5 pt-12">
                                     <h3 className="text-2xl font-bold text-white">Frequently Asked Questions</h3>
@@ -523,6 +569,14 @@ const ReviewDetailsPage: React.FC = () => {
                                                 <p className="text-slate-400">{item.answer}</p>
                                             </div>
                                         ))}
+                                    </div>
+                                    {/* FAQ CTA */}
+                                    <div className="mt-8 p-8 rounded-2xl bg-gradient-to-br from-indigo-900/50 to-slate-900/50 border border-indigo-500/30 text-center">
+                                        <h4 className="text-xl font-bold text-white mb-2">Still have questions?</h4>
+                                        <p className="text-slate-400 mb-6">See for yourself why 10,000+ agencies made the switch.</p>
+                                        <a href={page.affiliateUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 px-8 py-3 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl font-bold transition-all shadow-lg hover:scale-105">
+                                            Start Your 14-Day Free Trial <ArrowRight size={18} />
+                                        </a>
                                     </div>
                                 </div>
                             )}
@@ -568,6 +622,31 @@ const ReviewDetailsPage: React.FC = () => {
                                         We may earn a commission if you click this link.
                                     </p>
                                 </div>
+
+                                {/* Table of Contents (New) */}
+                                <div className="bg-slate-900 border border-white/10 rounded-3xl p-6 shadow-xl">
+                                    <h3 className="text-white font-bold mb-4 flex items-center gap-2">
+                                        <Menu size={16} className="text-indigo-400" /> On This Page
+                                    </h3>
+                                    <div className="space-y-1">
+                                        {[
+                                            { id: 'verdict', label: 'Verdict' },
+                                            { id: 'pros-cons', label: 'Pros & Cons' },
+                                            { id: 'details', label: 'In-Depth Review' },
+                                            { id: 'video-review', label: 'Video Review' },
+                                            { id: 'media', label: 'Gallery' },
+                                            { id: 'faq', label: 'FAQ' }
+                                        ].map(item => (
+                                            <button
+                                                key={item.id}
+                                                onClick={() => scrollToSection(item.id)}
+                                                className="block w-full text-left py-2 px-3 text-sm text-slate-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors"
+                                            >
+                                                {item.label}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
                             </div>
 
                         </div>
@@ -586,6 +665,64 @@ const ReviewDetailsPage: React.FC = () => {
                     Get Deal <ArrowRight size={16} />
                 </a>
             </div>
+
+            {/* Lightbox Modal */}
+            {selectedImage && (
+                <div className="fixed inset-0 z-[100] bg-black/90 backdrop-blur-md flex items-center justify-center p-4" onClick={() => setSelectedImage(null)}>
+                    <button className="absolute top-4 right-4 text-white/50 hover:text-white transition-colors">
+                        <X size={32} />
+                    </button>
+                    <img src={selectedImage} alt="Fullscreen" className="max-w-full max-h-[90vh] rounded-lg shadow-2xl" onClick={e => e.stopPropagation()} />
+                </div>
+            )}
+
+            {/* Lead Magnet Modal */}
+            {isLeadMagnetOpen && (
+                <div className="fixed inset-0 z-[100] bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+                    <div className="bg-slate-900 border border-white/10 rounded-2xl p-8 max-w-md w-full relative overflow-hidden">
+                        <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-indigo-500 via-purple-500 to-indigo-500"></div>
+                        <button onClick={() => setIsLeadMagnetOpen(false)} className="absolute top-4 right-4 text-slate-500 hover:text-white">
+                            <X size={24} />
+                        </button>
+
+                        <div className="text-center mb-8">
+                            <div className="w-16 h-16 bg-indigo-500/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <FileText size={32} className="text-indigo-400" />
+                            </div>
+                            <h3 className="text-2xl font-bold text-white mb-2">Unlock the Cheat Sheet</h3>
+                            <p className="text-slate-400">Enter your email to get the free GoHighLevel implementation guide and ROI calculator.</p>
+                        </div>
+
+                        <form onSubmit={(e) => {
+                            e.preventDefault();
+                            // Simulate capture
+                            setTimeout(() => {
+                                window.open(page.media?.pdfUrl, '_blank');
+                                setIsLeadMagnetOpen(false);
+                            }, 500);
+                        }} className="space-y-4">
+                            <div>
+                                <label className="block text-slate-400 text-sm font-bold mb-2">Email Address</label>
+                                <div className="relative">
+                                    <Mail className="absolute left-4 top-3.5 text-slate-500" size={18} />
+                                    <input
+                                        type="email"
+                                        required
+                                        value={email}
+                                        onChange={e => setEmail(e.target.value)}
+                                        placeholder="you@agency.com"
+                                        className="w-full bg-slate-800 border border-white/10 rounded-xl py-3 pl-12 pr-4 text-white focus:outline-none focus:border-indigo-500 transition-colors"
+                                    />
+                                </div>
+                            </div>
+                            <button type="submit" className="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3.5 rounded-xl transition-all shadow-lg shadow-indigo-600/25 flex items-center justify-center gap-2">
+                                Send Me the Guide <ArrowRight size={18} />
+                            </button>
+                            <p className="text-xs text-center text-slate-600">We respect your inbox. Unsubscribe anytime.</p>
+                        </form>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };
