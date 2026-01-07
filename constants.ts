@@ -1,5 +1,6 @@
 
 import { Service, Project, Stat, Testimonial, FAQItem, ProcessStep, Article } from './types';
+import { MASTER_ARTICLE_CONTENT } from './data/master-article';
 
 export const NOUREDDINE_DATA = {
   name: "نورالدين رفعة",
@@ -220,6 +221,27 @@ export const FAQS: FAQItem[] = [
 ];
 
 export const ARTICLES: Article[] = [
+  {
+    id: "art-master-01",
+    slug: "comprehensive-project-management-guide",
+    title: "الدليل الشامل لإدارة المشاريع الاحترافية في العالم العربي: من التخطيط إلى التسليم الناجح",
+    content: MASTER_ARTICLE_CONTENT,
+    excerpt: "كيف تتجاوز الأساليب التقليدية وتتبنى منهجية 'الإدارة السيادية' لضمان نجاح مشاريعك بنسبة 100%؟ دليل متكامل للمدراء والقادة.",
+    image: "https://images.unsplash.com/photo-1542744173-8e7e53415bb0?auto=format&fit=crop&q=80&w=2000",
+    category: "Strategic Management",
+    tags: ["Project Management", "Leadership", "Agile", "Digital Transformation"],
+    keywords: ["إدارة مشاريع", "تخطيط استراتيجي", "القيادة الرقمية"],
+    author: "Noureddine Reffaa",
+    date: new Date().toISOString(),
+    status: "published",
+    readTime: "25 دقيقة",
+    featured: true,
+    seo: {
+      title: "الدليل الشامل لإدارة المشاريع 2025 | Reffaa Strategy",
+      description: "اكتشف أسرار الإدارة السيادية للمشاريع وكيفية توظيف الذكاء الاصطناعي لضمان النجاح والنمو المستدام.",
+      focusKeyword: "إدارة مشاريع"
+    }
+  },
   {
     id: "art-1",
     slug: "why-need-digital-system",

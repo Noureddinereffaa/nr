@@ -148,6 +148,30 @@ export interface ProjectActivity {
   user?: string;
 }
 
+export interface Stat {
+  icon: string;
+  label: string;
+  val: string;
+}
+
+export interface Testimonial {
+  name: string;
+  role: string;
+  text: string;
+  avatar: string;
+}
+
+export interface FAQItem {
+  q: string;
+  a: string;
+}
+
+export interface ProcessStep {
+  step: string;
+  title: string;
+  desc: string;
+}
+
 export interface SystemActivity {
   id: string;
   date: string;
@@ -184,6 +208,7 @@ export interface Project {
   milestones?: ProjectMilestone[];
   activity?: ProjectActivity[];
   budget?: number;
+  stats?: string;
 }
 
 export interface AIConfig {
