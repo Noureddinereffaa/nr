@@ -57,6 +57,7 @@ interface DataContextType {
   deleteDecisionPage: (id: string) => Promise<void>;
 
   logActivity: (label: string, type: SystemActivity['type'], status?: SystemActivity['status'], metadata?: any) => void;
+  syncArticlesToCloud: () => Promise<void>;
   resetToDefault: () => void;
 }
 
@@ -316,6 +317,12 @@ If you run a pure e-commerce store (Shopify), stick to Klaviyo. GHL is built for
           const cloudProjects = extractJsonbData<Project>(projectsRes.data);
           const cloudServices = extractJsonbData<Service>(servicesRes.data);
           const cloudArticles = extractJsonbData<Article>(articlesRes.data);
+
+          // Merge Logic: Ensure local master articles are present even if cloud data exists
+          const localMasterIds = ARTICLES.map(a => a.id);
+          const filteredCloudArticles = cloudArticles.filter(a => !localMasterIds.includes(a.id));
+          const mergedArticles = [...ARTICLES, ...filteredCloudArticles];
+
           const cloudInvoices = extractJsonbData<Invoice>(invoicesRes.data);
           const cloudRequests = extractJsonbData<ServiceRequest>(requestsRes.data);
           const cloudExpenses = extractJsonbData<Expense>(expensesRes.data);
@@ -328,7 +335,7 @@ If you run a pure e-commerce store (Shopify), stick to Klaviyo. GHL is built for
           const newClients = cloudClients.length > 0 ? cloudClients : prev.clients;
           const newProjects = cloudProjects.length > 0 ? cloudProjects : prev.projects;
           const newServices = cloudServices.length > 0 ? cloudServices : prev.services;
-          const newArticles = cloudArticles.length > 0 ? cloudArticles : prev.articles;
+          const newArticles = mergedArticles;
           const newInvoices = cloudInvoices.length > 0 ? cloudInvoices : prev.invoices;
           const newRequests = cloudRequests.length > 0 ? cloudRequests : prev.serviceRequests || [];
           const newExpenses = cloudExpenses.length > 0 ? cloudExpenses : prev.expenses || [];
@@ -751,6 +758,26 @@ If you run a pure e-commerce store (Shopify), stick to Klaviyo. GHL is built for
     }
   };
 
+  const syncArticlesToCloud = async () => {
+    if (!isSupabaseConfigured() || !supabase) return;
+    try {
+      await supabase.from('articles').upsert(
+        ARTICLES.map(a => ({
+          id: a.id,
+          slug: a.slug,
+          title: a.title,
+          data: a,
+          status: a.status,
+          date: a.date
+        })),
+        { onConflict: 'id' }
+      );
+      logActivity('تمت مزامنة قوالب المقالات', 'content', 'success');
+    } catch (err: any) {
+      logActivity('فشلت المزامنة', 'content', 'error');
+    }
+  };
+
   const resetToDefault = () => {
     if (window.confirm('سيتم حذف كافة البيانات والعودة للقالب الأصلي. هل أنت متأكد؟')) {
       localStorage.removeItem('nr_full_platform_data');
@@ -771,6 +798,7 @@ If you run a pure e-commerce store (Shopify), stick to Klaviyo. GHL is built for
       addSocialPost, deleteSocialPost, updateIntegration,
       addDecisionPage, updateDecisionPage, deleteDecisionPage,
       logActivity,
+      syncArticlesToCloud,
       resetToDefault
     }}>
       {children}

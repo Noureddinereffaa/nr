@@ -1,6 +1,7 @@
 
 import { Service, Project, Stat, Testimonial, FAQItem, ProcessStep, Article } from './types';
 import { MASTER_ARTICLE_CONTENT } from './data/master-article';
+import { SYSTEM_ARTICLE_CONTENT, AI_ALGERIA_CONTENT, ECOM_AUTO_CONTENT } from './data/article-templates';
 
 export const NOUREDDINE_DATA = {
   name: "نورالدين رفعة",
@@ -246,7 +247,7 @@ export const ARTICLES: Article[] = [
     id: "art-1",
     slug: "why-need-digital-system",
     title: "لماذا يحتاج نشاطك التجاري إلى 'نظام' وليس مجرد موقع إلكتروني؟",
-    content: "المحتوى الكامل للمقال...",
+    content: SYSTEM_ARTICLE_CONTENT,
     excerpt: "في عصر المنافسة الشرسة، الموقع الإلكتروني التقليدي لم يعد كافياً. اكتشف كيف تحول مشروعك إلى آلة بيع أوتوماتيكية.",
     image: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&q=80&w=800",
     category: "Business Strategy",
@@ -255,14 +256,14 @@ export const ARTICLES: Article[] = [
     author: "Noureddine Reffaa",
     date: new Date().toISOString(),
     status: "published",
-    readTime: "5 دقيقة",
-    seo: { title: "", description: "", focusKeyword: "" }
+    readTime: "18 دقيقة",
+    seo: { title: "لماذا تحتاج نظاماً رقمياً | NR Strategy", description: "الموقع الإلكتروني مجرد واجهة، النظام هو المحرك. تعلم كيف تبني نظام مبيعات أوتوماتيكي.", focusKeyword: "نظام رقمي" }
   },
   {
     id: "art-2",
     slug: "ai-in-algerian-market",
     title: "مستقبل الذكاء الاصطناعي في السوق الجزائري: فرص وتحديات 2025",
-    content: "المحتوى الكامل للمقال...",
+    content: AI_ALGERIA_CONTENT,
     excerpt: "كيف يمكن للشركات الجزائرية استغلال ثورة الذكاء الاصطناعي لتقليل التكاليف ومضاعفة الإنتاجية قبل فوات الأوان.",
     image: "https://images.unsplash.com/photo-1677442136019-21780ecad995?auto=format&fit=crop&q=80&w=800",
     category: "AI Trends",
@@ -271,14 +272,14 @@ export const ARTICLES: Article[] = [
     author: "Noureddine Reffaa",
     date: new Date().toISOString(),
     status: "published",
-    readTime: "7 دقيقة",
-    seo: { title: "", description: "", focusKeyword: "" }
+    readTime: "22 دقيقة",
+    seo: { title: "مستقبل الذكاء الاصطناعي في الجزائر 2025 | NR OS", description: "استراتيجيات دمج الذكاء الاصطناعي في الشركات الجزائرية لتحقيق نمو سيادي.", focusKeyword: "الذكاء الاصطناعي في الجزائر" }
   },
   {
     id: "art-3",
     slug: "e-commerce-automation",
     title: "أتمتة التجارة الإلكترونية: كيف تدير متجرك وأنت نائم",
-    content: "المحتوى الكامل للمقال...",
+    content: ECOM_AUTO_CONTENT,
     excerpt: "دليل عملي لأصحاب المتاجر الإلكترونية لربط المخزون، الشحن، وخدمة العملاء في نظام واحد متكامل.",
     image: "https://images.unsplash.com/photo-1556742049-0cfed4f7a07d?auto=format&fit=crop&q=80&w=800",
     category: "E-Commerce",
@@ -287,7 +288,7 @@ export const ARTICLES: Article[] = [
     author: "Noureddine Reffaa",
     date: new Date().toISOString(),
     status: "published",
-    readTime: "6 دقيقة",
-    seo: { title: "", description: "", focusKeyword: "" }
+    readTime: "15 دقيقة",
+    seo: { title: "أتمتة التجارة الإلكترونية | دليل التاجر الناجح", description: "كيف تدير متجرك وأنت نائم عبر أنظمة الأتمتة المتقدمة.", focusKeyword: "أتمتة التجارة الإلكترونية" }
   }
 ];
