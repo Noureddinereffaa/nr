@@ -5,13 +5,13 @@ import {
     FileText, Plus, Trash2, Edit3, CheckCircle,
     ArrowRight, BarChart, Wand2, Search, Filter,
     Eye, Clock, Calendar, Layout, ChevronRight,
-    Sparkles
+    Sparkles, RefreshCw
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import WritingWorkspace from './WritingWorkspace';
 
 const BlogManager: React.FC = () => {
-    const { siteData, updateArticle, deleteArticle, addArticle } = useData();
+    const { siteData, updateArticle, deleteArticle, addArticle, syncArticlesToCloud } = useData();
     const { openArticleModal } = useUI();
     const { articles, aiConfig } = siteData;
 
@@ -137,30 +137,47 @@ const BlogManager: React.FC = () => {
                         </p>
                     </div>
                     <div className="shrink-0">
-                        <button
-                            onClick={async () => {
-                                const newArticle = {
-                                    title: 'رؤية استراتيجية جديدة',
-                                    content: '',
-                                    image: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&q=80',
-                                    category: 'General',
-                                    tags: ['Strategy'],
-                                    seoScore: 0,
-                                    excerpt: '',
-                                    status: 'draft' as 'draft',
-                                    keywords: [],
-                                    author: 'Noureddine Reffaa',
-                                    readTime: '5 min',
-                                    date: new Date().toISOString(),
-                                    seo: { title: 'مقال جديد', description: '', keywords: [], focusKeyword: '' }
-                                };
-                                const newId = await addArticle(newArticle);
-                                setEditingArticle({ ...newArticle, id: newId, views: 0 });
-                            }}
-                            className="bg-white text-slate-950 px-10 py-5 rounded-2xl font-black text-sm uppercase tracking-wider flex items-center gap-3 hover:bg-indigo-50 transition-all hover:scale-105 active:scale-95 shadow-2xl shadow-white/5"
-                        >
-                            <Plus size={24} /> مقال سيادي جديد
-                        </button>
+                        <div className="flex flex-wrap items-center gap-4">
+                            <button
+                                onClick={async () => {
+                                    if (confirm('هل تريد مزامنة المقالات المحلية مع السحابة؟ سيتم رفع القوالب المحلية غير الموجودة في قاعدة البيانات.')) {
+                                        setIsLoading(true);
+                                        await syncArticlesToCloud();
+                                        setIsLoading(false);
+                                    }
+                                }}
+                                className="bg-indigo-600/20 text-indigo-400 border border-indigo-500/30 px-6 py-5 rounded-2xl font-black text-sm uppercase tracking-wider flex items-center gap-3 hover:bg-indigo-600 hover:text-white transition-all hover:scale-105 active:scale-95 shadow-xl"
+                                title="مزامنة القوالب المحلية مع السحابة"
+                            >
+                                <RefreshCw size={20} className={isLoading ? 'animate-spin' : ''} />
+                                مزامنة القوالب
+                            </button>
+
+                            <button
+                                onClick={async () => {
+                                    const newArticle = {
+                                        title: 'رؤية استراتيجية جديدة',
+                                        content: '',
+                                        image: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&q=80',
+                                        category: 'General',
+                                        tags: ['Strategy'],
+                                        seoScore: 0,
+                                        excerpt: '',
+                                        status: 'draft' as 'draft',
+                                        keywords: [],
+                                        author: 'Noureddine Reffaa',
+                                        readTime: '5 min',
+                                        date: new Date().toISOString(),
+                                        seo: { title: 'مقال جديد', description: '', keywords: [], focusKeyword: '' }
+                                    };
+                                    const newId = await addArticle(newArticle);
+                                    setEditingArticle({ ...newArticle, id: newId, views: 0 });
+                                }}
+                                className="bg-white text-slate-950 px-10 py-5 rounded-2xl font-black text-sm uppercase tracking-wider flex items-center gap-3 hover:bg-indigo-50 transition-all hover:scale-105 active:scale-95 shadow-2xl shadow-white/5"
+                            >
+                                <Plus size={24} /> مقال سيادي جديد
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>

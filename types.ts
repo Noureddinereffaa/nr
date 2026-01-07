@@ -176,7 +176,7 @@ export interface SystemActivity {
   id: string;
   date: string;
   label: string;
-  type: 'ai_forge' | 'sync' | 'crm' | 'finance' | 'system' | 'project' | 'content';
+  type: 'ai_forge' | 'sync' | 'crm' | 'finance' | 'system' | 'project' | 'content' | 'security';
   status: 'success' | 'info' | 'error' | 'warning';
   metadata?: any;
 }
@@ -209,6 +209,8 @@ export interface Project {
   activity?: ProjectActivity[];
   budget?: number;
   stats?: string;
+  challenges?: string;
+  solutions?: string;
 }
 
 export interface AIConfig {
@@ -443,6 +445,7 @@ export interface SiteData {
   process?: any;
   stats?: any;
   dashboardLayout?: any[];
+  hiddenIds?: string[];
 }
 
 export interface ChatMessage {

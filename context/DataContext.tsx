@@ -221,7 +221,8 @@ If you run a pure e-commerce store (Shopify), stick to Klaviyo. GHL is built for
           ]
         }
       ],
-      activityLog: []
+      activityLog: [],
+      hiddenIds: []
     };
 
     const saved = localStorage.getItem('nr_full_platform_data');
@@ -312,89 +313,79 @@ If you run a pure e-commerce store (Shopify), stick to Klaviyo. GHL is built for
           return;
         }
 
-        setSiteData(prev => {
-          const cloudClients = extractJsonbData<Client>(clientsRes.data);
-          const cloudProjects = extractJsonbData<Project>(projectsRes.data);
-          const cloudServices = extractJsonbData<Service>(servicesRes.data);
-          const cloudArticles = extractJsonbData<Article>(articlesRes.data);
+        // Initialize new data with previous state as baseline
+        const updates: Partial<SiteData> = {};
 
-          // Merge Logic: Ensure local master articles are present even if cloud data exists
-          const localMasterIds = ARTICLES.map(a => a.id);
-          const filteredCloudArticles = cloudArticles.filter(a => !localMasterIds.includes(a.id));
-          const mergedArticles = [...ARTICLES, ...filteredCloudArticles];
+        // 1. Process standard tables
+        const tableMap: Record<string, keyof SiteData> = {
+          clients: 'clients',
+          projects: 'projects',
+          services: 'services',
+          invoices: 'invoices',
+          service_requests: 'serviceRequests',
+          expenses: 'expenses',
+          social_posts: 'socialPosts',
+          integrations: 'integrations',
+          content_plan: 'contentPlan',
+          decision_pages: 'decisionPages',
+          activity_log: 'activityLog'
+        };
 
-          const cloudInvoices = extractJsonbData<Invoice>(invoicesRes.data);
-          const cloudRequests = extractJsonbData<ServiceRequest>(requestsRes.data);
-          const cloudExpenses = extractJsonbData<Expense>(expensesRes.data);
-          const cloudSocialPosts = extractJsonbData<SocialPost>(socialPostsRes.data);
-          const cloudIntegrations = extractJsonbData<SocialIntegration>(integrationsRes.data);
-          const cloudContentPlan = extractJsonbData<ContentPlanItem>(contentPlanRes.data);
-          const cloudDecisionPages = extractJsonbData<DecisionPage>(decisionPagesRes.data);
-          const cloudActivityLog = extractJsonbData<SystemActivity>(activityLogRes.data);
+        const responses: Record<string, any> = {
+          clients: clientsRes,
+          projects: projectsRes,
+          services: servicesRes,
+          invoices: invoicesRes,
+          service_requests: requestsRes,
+          expenses: expensesRes,
+          social_posts: socialPostsRes,
+          integrations: integrationsRes,
+          content_plan: contentPlanRes,
+          decision_pages: decisionPagesRes,
+          activity_log: activityLogRes
+        };
 
-          const newClients = cloudClients.length > 0 ? cloudClients : prev.clients;
-          const newProjects = cloudProjects.length > 0 ? cloudProjects : prev.projects;
-          const newServices = cloudServices.length > 0 ? cloudServices : prev.services;
-          const newArticles = mergedArticles;
-          const newInvoices = cloudInvoices.length > 0 ? cloudInvoices : prev.invoices;
-          const newRequests = cloudRequests.length > 0 ? cloudRequests : prev.serviceRequests || [];
-          const newExpenses = cloudExpenses.length > 0 ? cloudExpenses : prev.expenses || [];
-          const newSocialPosts = cloudSocialPosts.length > 0 ? cloudSocialPosts : prev.socialPosts || [];
-          const newIntegrations = cloudIntegrations.length > 0 ? cloudIntegrations : prev.integrations || [];
-          const newContentPlan = cloudContentPlan.length > 0 ? cloudContentPlan : prev.contentPlan || [];
-          const newDecisionPages = cloudDecisionPages.length > 0 ? cloudDecisionPages : prev.decisionPages || [];
-          const newActivityLog = cloudActivityLog.length > 0 ? cloudActivityLog : prev.activityLog || [];
-
-          let newBrand = prev.brand;
-          let newContactInfo = prev.contactInfo;
-          let newAiConfig = prev.aiConfig;
-          let newFeatures = prev.features;
-          let newFaqs = prev.faqs;
-          let newTestimonials = prev.testimonials;
-          let newProcess = prev.process;
-          let newStats = prev.stats;
-          let newProfile = prev.profile;
-          let newAutopilot = prev.autopilot;
-
-          if (settingsRes.data) {
-            newBrand = { ...prev.brand, ...(settingsRes.data.brand || {}) };
-            newContactInfo = { ...prev.contactInfo, ...(settingsRes.data.contactInfo || {}) };
-            newAiConfig = { ...prev.aiConfig, ...(settingsRes.data.aiConfig || {}) };
-            newFeatures = { ...prev.features, ...(settingsRes.data.features || {}) };
-            newFaqs = settingsRes.data.faqs || prev.faqs;
-            newTestimonials = settingsRes.data.testimonials || prev.testimonials;
-            newProcess = settingsRes.data.process || prev.process;
-            newStats = settingsRes.data.stats || prev.stats;
-            newProfile = { ...prev.profile, ...(settingsRes.data.profile || {}) };
-            newAutopilot = { ...prev.autopilot, ...(settingsRes.data.autopilot || {}) };
+        Object.entries(tableMap).forEach(([tableName, stateKey]) => {
+          const res = responses[tableName];
+          if (res?.data && res.data.length > 0) {
+            updates[stateKey as any] = extractJsonbData<any>(res.data);
           }
-
-          return {
-            ...prev,
-            brand: newBrand,
-            contactInfo: newContactInfo,
-            aiConfig: newAiConfig,
-            features: newFeatures,
-            faqs: newFaqs,
-            testimonials: newTestimonials,
-            process: newProcess,
-            stats: newStats,
-            profile: newProfile,
-            autopilot: newAutopilot,
-            clients: newClients as Client[],
-            projects: newProjects as Project[],
-            services: newServices as Service[],
-            articles: newArticles as Article[],
-            invoices: newInvoices as Invoice[],
-            serviceRequests: newRequests as ServiceRequest[],
-            expenses: newExpenses as Expense[],
-            socialPosts: newSocialPosts as SocialPost[],
-            integrations: newIntegrations as SocialIntegration[],
-            contentPlan: newContentPlan as ContentPlanItem[],
-            decisionPages: newDecisionPages as DecisionPage[],
-            activityLog: newActivityLog as SystemActivity[]
-          };
         });
+
+        // 2. Handle Articles with complex merge logic
+        const hiddenIds = settingsRes.data?.hidden_ids || siteData.hiddenIds || [];
+        const cloudArticles = extractJsonbData<Article>(articlesRes.data);
+        const localMasterIds = ARTICLES.map(a => a.id);
+        const visibleLocalArticles = ARTICLES.filter(a => !hiddenIds.includes(a.id));
+        const filteredCloudArticles = cloudArticles.filter(a => !localMasterIds.includes(a.id) && !hiddenIds.includes(a.id));
+        updates.articles = [...visibleLocalArticles, ...filteredCloudArticles];
+        updates.hiddenIds = hiddenIds;
+
+        // 3. Handle Site Settings (JSONB fields)
+        if (settingsRes.data) {
+          const settings = settingsRes.data;
+          const jsonFields: (keyof SiteData)[] = [
+            'brand', 'contactInfo', 'aiConfig', 'features', 'faqs',
+            'testimonials', 'process', 'stats', 'profile', 'autopilot'
+          ];
+
+          jsonFields.forEach(field => {
+            if (settings[field]) {
+              // Deep merge for objects, direct assignment for chips/arrays
+              if (typeof settings[field] === 'object' && !Array.isArray(settings[field])) {
+                updates[field as any] = { ...siteData[field as keyof SiteData], ...settings[field] };
+              } else {
+                updates[field as any] = settings[field];
+              }
+            }
+          });
+        }
+
+        // Apply all updates at once
+        setSiteData(prevData => ({
+          ...prevData,
+          ...updates
+        }));
 
       } catch (error) {
         console.error("Supabase Sync Error", error);
@@ -408,11 +399,15 @@ If you run a pure e-commerce store (Shopify), stick to Klaviyo. GHL is built for
 
   const syncSettings = async (data: Partial<SiteData>) => {
     if (!isSupabaseConfigured() || !supabase) return;
-    const settingsKeys = ['brand', 'contactInfo', 'aiConfig', 'features', 'faqs', 'testimonials', 'process', 'stats', 'profile', 'autopilot', 'contentPlan'];
+    const settingsKeys = ['brand', 'contactInfo', 'aiConfig', 'features', 'faqs', 'testimonials', 'process', 'stats', 'profile', 'autopilot', 'contentPlan', 'hiddenIds'];
     const updatePayload: any = {};
     Object.keys(data).forEach(key => {
       if (settingsKeys.includes(key)) {
-        updatePayload[key] = data[key as keyof SiteData];
+        if (key === 'hiddenIds') {
+          updatePayload.hidden_ids = data[key];
+        } else {
+          updatePayload[key] = data[key as keyof SiteData];
+        }
       }
     });
 
@@ -643,8 +638,27 @@ If you run a pure e-commerce store (Shopify), stick to Klaviyo. GHL is built for
   };
 
   const deleteArticle = async (id: string): Promise<void> => {
-    setSiteData(prev => ({ ...prev, articles: (prev.articles || []).filter(a => a.id !== id) }));
-    if (isSupabaseConfigured() && supabase) {
+    const isHardcoded = ARTICLES.some(a => a.id === id);
+
+    setSiteData(prev => {
+      const newHiddenIds = isHardcoded
+        ? [...(prev.hiddenIds || []), id].filter((v, i, a) => a.indexOf(v) === i)
+        : prev.hiddenIds;
+
+      const newData = {
+        ...prev,
+        articles: prev.articles.filter(a => a.id !== id),
+        hiddenIds: newHiddenIds
+      };
+
+      if (isHardcoded) {
+        syncSettings({ hiddenIds: newHiddenIds });
+      }
+
+      return newData;
+    });
+
+    if (isSupabaseConfigured() && supabase && !isHardcoded) {
       await supabase.from('articles').delete().eq('id', id);
     }
   };

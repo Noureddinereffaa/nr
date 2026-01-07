@@ -287,7 +287,7 @@ const ArticleReader: React.FC<ArticleReaderProps> = ({ article, onClose }) => {
                             initial={{ opacity: 0, y: 20 }}
                             whileInView={{ opacity: 1, y: 0 }}
                             viewport={{ once: true }}
-                            className="prose prose-invert prose-indigo max-w-none text-right"
+                            className="prose prose-invert prose-indigo max-w-none text-right article-reader-prose"
                             dir="rtl"
                         >
                             {article.content.startsWith('{"nextjs":true') ? (
@@ -507,43 +507,6 @@ const ArticleReader: React.FC<ArticleReaderProps> = ({ article, onClose }) => {
             </motion.div>
 
 
-            <style>{`
-        .custom-scrollbar::-webkit-scrollbar {
-          width: 8px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-track {
-          background: rgba(15, 23, 42, 0.5);
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-          background: rgba(79, 70, 229, 0.5);
-          border-radius: 20px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-          background: rgba(79, 70, 229, 0.8);
-        }
-        
-        :global(.prose h1) { font-size: clamp(1.75rem, 4vw, 3rem); font-weight: 900; margin-bottom: 2rem; color: #fff; line-height: 1.1; letter-spacing: -0.03em; border-right: 6px solid #6366f1; padding-right: 1.5rem; text-transform: uppercase; }
-        :global(.prose h2) { font-size: clamp(1.5rem, 3.5vw, 2.25rem); font-weight: 800; margin-top: 3.5rem; margin-bottom: 1.5rem; color: #fff; line-height: 1.2; letter-spacing: -0.02em; border-right: 4px solid rgba(99, 102, 241, 0.5); padding-right: 1.25rem; }
-        :global(.prose h3) { font-size: clamp(1.25rem, 2.5vw, 1.75rem); font-weight: 700; margin-top: 2.5rem; margin-bottom: 1rem; color: #fff; line-height: 1.3; }
-        :global(.prose p) { font-size: clamp(1rem, 1.3vw, 1.15rem); line-height: 1.9; margin-bottom: 1.75rem; color: #cbd5e1; font-weight: 400; text-align: right; }
-        :global(.prose ul) { margin-bottom: 2rem; list-style-type: none; padding-right: 0; }
-        :global(.prose li) { font-size: clamp(1rem, 1.3vw, 1.1rem); color: #e2e8f0; margin-bottom: 1rem; position: relative; font-weight: 500; line-height: 1.8; padding-right: 2rem; }
-        :global(.prose li::before) { content: "›"; position: absolute; right: 0; top: 0; font-size: 1.5rem; color: #6366f1; font-weight: 800; }
-        :global(.prose blockquote) { margin: 3rem 0; padding: 2.5rem; background: linear-gradient(135deg, rgba(79, 70, 229, 0.12), rgba(168, 85, 247, 0.08)); border-right: 6px solid #6366f1; border-radius: 1.5rem; font-style: italic; font-size: clamp(1.1rem, 1.8vw, 1.4rem); color: #fff; line-height: 1.7; font-weight: 500; position: relative; overflow: hidden; box-shadow: 0 20px 50px rgba(0,0,0,0.2); }
-        :global(.prose blockquote::after) { content: '"'; position: absolute; top: -1rem; left: 1rem; font-size: 8rem; color: rgba(255,255,255,0.05); font-family: serif; }
-        :global(.prose strong) { color: #818cf8; font-weight: 700; }
-        :global(.prose a) { color: #6366f1; text-decoration: none; border-bottom: 2px solid rgba(99, 102, 241, 0.3); transition: all 0.3s; font-weight: 600; }
-        :global(.prose a:hover) { border-bottom-color: #6366f1; background: rgba(99, 102, 241, 0.1); color: #fff; }
-        :global(.prose img) { border-radius: 2rem; margin: 3.5rem 0; border: 1px solid rgba(255,255,255,0.15); box-shadow: 0 30px 60px rgba(0,0,0,0.4); width: 100%; transition: transform 0.5s ease; }
-        :global(.prose img:hover) { transform: scale(1.02); }
-        
-        @media (max-width: 768px) {
-          :global(.prose h1) { font-size: 2rem; border-right-width: 4px; padding-right: 1rem; }
-          :global(.prose h2) { font-size: 1.5rem; border-right-width: 3px; padding-right: 0.75rem; }
-          :global(.prose p) { font-size: 1.05rem; line-height: 1.8; }
-          :global(.prose blockquote) { font-size: 1.15rem; padding: 1.5rem; }
-        }
-      `}</style>
         </div>
     );
 };
