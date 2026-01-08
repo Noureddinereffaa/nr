@@ -9,7 +9,7 @@ import { DEFAULT_SITE_TEXTS, SiteTexts } from '../types';
 const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { brand, contactInfo, siteData } = useSystem() as any;
-  const { profile } = siteData || {};
+  const profile = siteData?.profile || {};
 
   // Get site texts with fallback to defaults
   const siteTexts: SiteTexts = DEFAULT_SITE_TEXTS;

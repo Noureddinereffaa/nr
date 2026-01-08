@@ -1,5 +1,5 @@
 import React, { lazy, Suspense } from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { Routes, Route } from 'react-router-dom';
 import { SystemProvider } from './context/SystemContext';
 import { ContentProvider } from './context/ContentContext';
 import { BusinessProvider } from './context/BusinessContext';
@@ -33,18 +33,16 @@ function App() {
           <BusinessProvider>
             <UIProvider>
               <SyncProvider>
-                <Router>
-                  <Suspense fallback={<LoadingFallback />}>
-                    <Routes>
-                      <Route path="/" element={<HomePage />} />
-                      <Route path="/dashboard/*" element={<DashboardPage />} />
-                      <Route path="/blog" element={<BlogPage />} />
-                      <Route path="/blog/:slug" element={<ArticlePage />} />
-                      <Route path="/reviews" element={<ReviewsPage />} />
-                      <Route path="/reviews/:id" element={<ReviewDetailsPage />} />
-                    </Routes>
-                  </Suspense>
-                </Router>
+                <Suspense fallback={<LoadingFallback />}>
+                  <Routes>
+                    <Route path="/" element={<HomePage />} />
+                    <Route path="/dashboard/*" element={<DashboardPage />} />
+                    <Route path="/blog" element={<BlogPage />} />
+                    <Route path="/blog/:slug" element={<ArticlePage />} />
+                    <Route path="/reviews" element={<ReviewsPage />} />
+                    <Route path="/reviews/:id" element={<ReviewDetailsPage />} />
+                  </Routes>
+                </Suspense>
               </SyncProvider>
             </UIProvider>
           </BusinessProvider>
