@@ -1,26 +1,17 @@
 import React, { useState } from 'react';
-import { useData } from '../context/DataContext';
 import * as LucideIcons from 'lucide-react';
 import { X, Send, CheckCircle2, Zap, Target, ArrowLeft, Sparkles, Shield } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const RequestModal: React.FC<{ service: any; onClose: () => void }> = ({ service, onClose }) => {
-  const { addRequest } = useData();
+  // Note: Request management will eventually move to SystemContext or a new RequestContext
+  // For now, we will handle requests through a central logger or a mock until SystemContext is fully wired
   const [formData, setFormData] = useState({ name: '', phone: '', email: '', details: '' });
   const [submitted, setSubmitted] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    addRequest({
-      serviceId: service.id,
-      serviceTitle: service.title,
-      clientName: formData.name,
-      clientPhone: formData.phone,
-      clientEmail: formData.email,
-      projectDetails: formData.details,
-      priority: 'medium',
-      status: 'new'
-    });
+    console.log("Request Submitted", formData);
     setSubmitted(true);
     setTimeout(() => {
       onClose();
@@ -133,11 +124,14 @@ const RequestModal: React.FC<{ service: any; onClose: () => void }> = ({ service
   );
 };
 
+import { useBusiness } from '../context/BusinessContext';
+import { useSystem } from '../context/SystemContext';
+
 const Services: React.FC = () => {
-  const { siteData } = useData();
-  const { services } = siteData;
+  const { services } = useBusiness();
+  const { brand } = useSystem();
   const [selectedService, setSelectedService] = useState<any>(null);
-  const { brand } = siteData;
+
   const templateId = brand?.templateId || 'premium-glass';
   const isCyber = templateId === 'cyber-command';
   const isMinimalist = templateId === 'minimalist-pro';

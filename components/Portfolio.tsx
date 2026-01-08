@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
-import { useData } from '../context/DataContext';
-import { ExternalLink, BarChart3, X, Calendar, User, Zap, ChevronLeft, ArrowRight, ImageIcon, Sparkles, Target, Globe } from 'lucide-react';
+import { useBusiness } from '../context/BusinessContext';
+import { useSystem } from '../context/SystemContext';
+import * as LucideIcons from 'lucide-react';
+import { ExternalLink, BarChart3, X, Calendar, User, Zap, ChevronLeft, ArrowRight, ImageIcon, Sparkles, Target, Globe, Send, CheckCircle2, Shield, ArrowLeft } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const ProjectDetail: React.FC<{ project: any; onClose: () => void }> = ({ project, onClose }) => {
@@ -154,10 +156,10 @@ const ProjectDetail: React.FC<{ project: any; onClose: () => void }> = ({ projec
 };
 
 const Portfolio: React.FC = () => {
-  const { siteData } = useData();
-  const { projects } = siteData;
+  const { projects } = useBusiness();
+  const { brand } = useSystem();
   const [selectedProject, setSelectedProject] = useState<any>(null);
-  const { brand } = siteData;
+
   const templateId = brand?.templateId || 'premium-glass';
   const isCyber = templateId === 'cyber-command';
   const isMinimalist = templateId === 'minimalist-pro';

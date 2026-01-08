@@ -1,11 +1,10 @@
 
 import React, { useState } from 'react';
-import { useData } from '../context/DataContext';
+import { useSystem } from '../context/SystemContext';
 import { ChevronDown, ChevronUp, HelpCircle } from 'lucide-react';
 
 const FAQ: React.FC = () => {
-  const { siteData } = useData();
-  const { faqs } = siteData;
+  const { faqs } = useSystem();
   const [openIndex, setOpenIndex] = useState<number | null>(0);
 
   return (

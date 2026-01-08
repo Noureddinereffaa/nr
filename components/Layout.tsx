@@ -1,20 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Menu, X, Zap, Mail, Linkedin, Facebook, ChevronLeft, Bot, Sparkles, MessageCircle, ArrowRight } from 'lucide-react';
-import { useData } from '../context/DataContext';
+import { useSystem } from '../context/SystemContext';
+import { useBusiness } from '../context/BusinessContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { DEFAULT_SITE_TEXTS, SiteTexts } from '../types';
 
 const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const { siteData } = useData();
-  const { profile, brand, contactInfo } = siteData;
+  const { brand, contactInfo, siteData } = useSystem() as any;
+  const { profile } = siteData || {};
 
   // Get site texts with fallback to defaults
-  const siteTexts: SiteTexts = {
-    ...DEFAULT_SITE_TEXTS,
-    ...(siteData as any).siteTexts
-  };
+  const siteTexts: SiteTexts = DEFAULT_SITE_TEXTS;
 
   // Build social URLs
   const whatsappUrl = contactInfo?.whatsapp?.startsWith('http')

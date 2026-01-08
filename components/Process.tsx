@@ -1,11 +1,10 @@
 import React from 'react';
-import { useData } from '../context/DataContext';
+import { useSystem } from '../context/SystemContext';
 import { motion } from 'framer-motion';
 import { Target, Zap, Shield, Sparkles } from 'lucide-react';
 
 const Process: React.FC = () => {
-  const { siteData } = useData();
-  const { process } = siteData;
+  const { process } = useSystem();
 
   const icons = [Target, Zap, Shield, Sparkles];
 

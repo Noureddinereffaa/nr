@@ -1,11 +1,11 @@
 
 import React from 'react';
-import { useData } from '../context/DataContext';
+import { useSystem } from '../context/SystemContext';
 import { Quote } from 'lucide-react';
 
 const Testimonials: React.FC = () => {
-  const { siteData } = useData();
-  const { testimonials } = siteData;
+  const { brand } = useSystem();
+  const testimonials = brand.testimonials || [];
 
   return (
     <section id="testimonials" className="py-12 md:py-20 relative overflow-hidden">

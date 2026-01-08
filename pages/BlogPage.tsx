@@ -1,23 +1,21 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import Layout from '../components/Layout';
-import { useData } from '../context/DataContext';
+import { useContent } from '../context/ContentContext';
+import { useSystem } from '../context/SystemContext';
 import { Calendar, Clock, ArrowRight, Search, Sparkles, TrendingUp, Filter, Share2, Newspaper, Zap, Bookmark } from 'lucide-react';
 import ArticleReader from '../components/ArticleReader';
 import { Article, DEFAULT_SITE_TEXTS, SiteTexts } from '../types';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const BlogPage: React.FC = () => {
-    const { siteData } = useData();
-    const articles = useMemo(() => siteData.articles || [], [siteData.articles]);
+    const { articles } = useContent();
+    const { brand } = useSystem();
     const [selectedArticle, setSelectedArticle] = useState<Article | null>(null);
     const [filter, setFilter] = useState('');
     const [activeCategory, setActiveCategory] = useState('الكل');
 
     // Get site texts with fallback to defaults
-    const siteTexts: SiteTexts = {
-        ...DEFAULT_SITE_TEXTS,
-        ...(siteData as any).siteTexts
-    };
+    const siteTexts: SiteTexts = DEFAULT_SITE_TEXTS;
 
     // Deep Linking: Check URL on mount
     useEffect(() => {
@@ -46,17 +44,37 @@ const BlogPage: React.FC = () => {
         return ['الكل', ...Array.from(cats)];
     }, [articles]);
 
-    const filteredArticles = useMemo(() => articles.filter(a => {
-        const title = a.title || '';
-        const content = a.content || '';
-        const matchesFilter = title.includes(filter) || content.includes(filter);
-        const matchesCategory = activeCategory === 'الكل' || a.category === activeCategory;
-        return matchesFilter && matchesCategory;
-    }), [articles, filter, activeCategory]);
+    const filteredArticles = useMemo(() => {
+        return articles
+            .filter(a => {
+                const title = (a.title || '').toLowerCase();
+                const content = (a.content || '').toLowerCase();
+                const searchTerm = filter.toLowerCase();
+                const matchesFilter = title.includes(searchTerm) || content.includes(searchTerm);
+                const matchesCategory = activeCategory === 'الكل' || a.category === activeCategory;
+                const isPublished = a.status === 'published';
+                return matchesFilter && matchesCategory && isPublished;
+            })
+            .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    }, [articles, filter, activeCategory]);
 
-    const featuredArticle = useMemo(() => articles.find(a => a.featured) || articles[0], [articles]);
-    const trendingArticles = useMemo(() => articles.filter(a => a.popular).slice(0, 5), [articles]);
-    const latestArticles = useMemo(() => filteredArticles.filter(a => a.id !== featuredArticle?.id), [filteredArticles, featuredArticle]);
+    // Priority for Featured: Explicitly featured or the latest published article
+    const featuredArticle = useMemo(() => {
+        const published = articles.filter(a => a.status === 'published');
+        return published.find(a => a.featured) || published.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())[0];
+    }, [articles]);
+
+    const trendingArticles = useMemo(() => {
+        return articles
+            .filter(a => a.status === 'published' && a.popular)
+            .sort((a, b) => (b.views || 0) - (a.views || 0))
+            .slice(0, 5);
+    }, [articles]);
+
+    const latestArticles = useMemo(() => {
+        return filteredArticles.filter(a => a.id !== featuredArticle?.id);
+    }, [filteredArticles, featuredArticle]);
+
 
     return (
         <Layout>

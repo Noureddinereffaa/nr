@@ -1,6 +1,8 @@
 import React, { Suspense } from 'react';
 import { Routes, Route } from 'react-router-dom';
-import { DataProvider } from './context/DataContext';
+import { SystemProvider } from './context/SystemContext';
+import { ContentProvider } from './context/ContentContext';
+import { BusinessProvider } from './context/BusinessContext';
 import { UIProvider } from './context/UIContext';
 import { AuthProvider } from './context/AuthContext';
 
@@ -23,29 +25,33 @@ const ReviewDetailsPage = React.lazy(() => import('./pages/ReviewDetailsPage'));
 const App: React.FC = () => {
   return (
     <AuthProvider>
-      <DataProvider>
-        <UIProvider>
-          <Suspense fallback={<div className="h-screen w-full flex items-center justify-center bg-slate-950"><LoadingSpinner /></div>}>
-            <ScrollToTop />
-            <Routes>
-              <Route path="/" element={<HomePage />} />
-              <Route path="/en/reviews" element={<ReviewsPage />} />
-              <Route path="/en/reviews/:slug" element={<ReviewDetailsPage />} />
-              <Route path="/dashboard" element={
-                <ProtectedRoute>
-                  <Dashboard />
-                </ProtectedRoute>
-              } />
-              <Route path="/services" element={<ServicesPage />} />
-              <Route path="/portfolio" element={<PortfolioPage />} />
-              <Route path="/blog" element={<BlogPage />} />
-              <Route path="/faq" element={<FaqPage />} />
-              <Route path="/contact" element={<ContactPage />} />
-              <Route path="/reset-data" element={<ResetData />} />
-            </Routes>
-          </Suspense>
-        </UIProvider>
-      </DataProvider>
+      <SystemProvider>
+        <ContentProvider>
+          <BusinessProvider>
+            <UIProvider>
+              <Suspense fallback={<div className="h-screen w-full flex items-center justify-center bg-slate-950"><LoadingSpinner /></div>}>
+                <ScrollToTop />
+                <Routes>
+                  <Route path="/" element={<HomePage />} />
+                  <Route path="/en/reviews" element={<ReviewsPage />} />
+                  <Route path="/en/reviews/:slug" element={<ReviewDetailsPage />} />
+                  <Route path="/dashboard/*" element={
+                    <ProtectedRoute>
+                      <Dashboard />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/services" element={<ServicesPage />} />
+                  <Route path="/portfolio" element={<PortfolioPage />} />
+                  <Route path="/blog" element={<BlogPage />} />
+                  <Route path="/faq" element={<FaqPage />} />
+                  <Route path="/contact" element={<ContactPage />} />
+                  <Route path="/reset-data" element={<ResetData />} />
+                </Routes>
+              </Suspense>
+            </UIProvider>
+          </BusinessProvider>
+        </ContentProvider>
+      </SystemProvider>
     </AuthProvider>
   );
 };

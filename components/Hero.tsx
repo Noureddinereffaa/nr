@@ -1,13 +1,20 @@
 import React from 'react';
-import { useData } from '../context/DataContext';
+import { useSystem } from '../context/SystemContext';
 import { useUI } from '../context/UIContext';
 import { ArrowLeft, Sparkles, Shield, Layout as LayoutIcon, Zap, Globe, MousePointer2, Bot } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 const Hero: React.FC = () => {
-  const { siteData } = useData();
-  const { profile } = siteData;
+  const { brand, contactInfo, aiConfig } = useSystem();
   const { openChat } = useUI();
+
+  // Create a profile object for compatibility if needed, or use brand/aiConfig directly
+  const profile = {
+    name: brand.siteName,
+    primaryTitle: aiConfig.field || "Strategic Digital Architecture",
+    bio: aiConfig.mission,
+    photoUrl: "https://images.unsplash.com/photo-1542435503-956c469947f6?auto=format&fit=crop&q=80"
+  };
 
   const scrollToSection = (e: React.MouseEvent, id: string) => {
     e.preventDefault();
@@ -19,7 +26,6 @@ const Hero: React.FC = () => {
     }
   };
 
-  const { brand } = siteData;
   const templateId = brand?.templateId || 'premium-glass';
   const isCyber = templateId === 'cyber-command';
   const isMinimalist = templateId === 'minimalist-pro';

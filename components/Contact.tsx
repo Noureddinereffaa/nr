@@ -1,10 +1,9 @@
 import React from 'react';
-import { useData } from '../context/DataContext';
+import { useSystem } from '../context/SystemContext';
 import { Mail, MessageSquare, MapPin, Send, Phone, MessageCircle, ExternalLink } from 'lucide-react';
 
 const Contact: React.FC = () => {
-  const { siteData } = useData();
-  const { contactInfo } = siteData;
+  const { contactInfo } = useSystem();
 
   // Build WhatsApp URL from phone number if not a full URL
   const whatsappUrl = contactInfo?.whatsapp?.startsWith('http')

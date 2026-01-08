@@ -284,6 +284,7 @@ export interface BrandIdentity {
   borderRadius: string;
   glassOpacity: string;
   templateId?: 'premium-glass' | 'minimalist-pro' | 'cyber-command';
+  testimonials?: any[];
 }
 
 export interface ContactInfo {
@@ -442,6 +443,7 @@ export interface SiteData {
   integrations?: SocialIntegration[];
   contentPlan?: ContentPlanItem[];
   decisionPages?: DecisionPage[];
+  siteTexts?: any;
   autopilot?: AutopilotConfig;
   activityLog?: SystemActivity[];
   // UI/Legacy compatibility

@@ -1,34 +1,36 @@
 import React, { useState } from 'react';
-import { useData } from '../context/DataContext';
+import { useContent } from '../context/ContentContext';
+import { useSystem } from '../context/SystemContext';
 import { BookOpen, ArrowLeft, Clock, User, Calendar, Sparkles } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import ArticleReader from './ArticleReader';
 import { Article } from '../types';
+import ArticleReader from './ArticleReader';
 
 const StrategicBlog: React.FC = () => {
-    const { siteData } = useData();
-    const { articles } = siteData;
+    const { articles } = useContent();
+    const { brand } = useSystem();
     const [selectedArticle, setSelectedArticle] = useState<Article | null>(null);
 
     // Priority: Featured first, then by date. Only show published.
     // Priority Selection: Show published if available, otherwise show any to avoid empty section.
     const allArticles = articles || [];
-    let displayArticles = [...allArticles].filter(a => a.status === 'published');
+    let displayArticles = [...allArticles]
+        .filter(a => a.status === 'published')
+        .sort((a, b) => {
+            const aFeat = a.featured ? 1 : 0;
+            const bFeat = b.featured ? 1 : 0;
+            if (aFeat !== bFeat) return bFeat - aFeat;
+            return new Date(b.date).getTime() - new Date(a.date).getTime();
+        });
 
     if (displayArticles.length === 0 && allArticles.length > 0) {
-        displayArticles = [...allArticles].slice(0, 3);
-    } else {
-        displayArticles = displayArticles
-            .sort((a, b) => {
-                const aFeat = a.featured ? 1 : 0;
-                const bFeat = b.featured ? 1 : 0;
-                if (aFeat !== bFeat) return bFeat - aFeat;
-                return new Date(b.date).getTime() - new Date(a.date).getTime();
-            })
+        displayArticles = [...allArticles]
+            .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
             .slice(0, 3);
+    } else {
+        displayArticles = displayArticles.slice(0, 3);
     }
 
-    const { brand } = siteData;
     const templateId = brand?.templateId || 'premium-glass';
     const isCyber = templateId === 'cyber-command';
     const isMinimalist = templateId === 'minimalist-pro';
