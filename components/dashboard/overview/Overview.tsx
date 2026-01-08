@@ -12,8 +12,7 @@ import {
     ArrowUpRight,
     TrendingUp,
     ShieldCheck,
-    Briefcase,
-    Layout
+    Briefcase
 } from 'lucide-react';
 import WidgetWrapper from '../widgets/WidgetWrapper';
 import { WIDGET_REGISTRY } from '../widgets/WidgetRegistry';

@@ -1,5 +1,5 @@
 export async function submitToIndexNow(urls: string[], key: string) {
-    const host = 'nr-os.vercel.app'; // Should be environmental variable in production
+    const host = typeof window !== 'undefined' ? window.location.hostname : 'nr-os.vercel.app';
     const keyLocation = `https://${host}/${key}.txt`;
 
     const body = {

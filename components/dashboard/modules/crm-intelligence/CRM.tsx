@@ -11,7 +11,7 @@ import { Client } from '../../../../types';
 const CRM: React.FC = () => {
     const { clients, deleteClient } = useBusiness();
     const { aiConfig } = useSystem();
-    const { openClientModal } = useUI();
+    const { openClientModal, mask } = useUI();
     const [viewMode, setViewMode] = useState<'pipeline' | 'list'>('pipeline');
     const [selectedClient, setSelectedClient] = useState<Client | null>(null);
     const [searchTerm, setSearchTerm] = useState('');
@@ -118,7 +118,7 @@ const CRM: React.FC = () => {
                                     <div className="flex items-center gap-6 mt-4 md:mt-0">
                                         <div className="text-left">
                                             <p className="text-[10px] text-slate-600 font-black uppercase tracking-widest text-right">قيمة الصفقة</p>
-                                            <p className="text-white font-mono">${client.value?.toLocaleString() || '0'}</p>
+                                            <p className="text-white font-mono">{mask(client.value?.toLocaleString() || '0', 'currency')}</p>
                                         </div>
                                         <div className={`px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest border ${client.status === 'lead' ? 'bg-amber-500/10 text-amber-500 border-amber-500/20' : 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20'}`}>
                                             {client.status}

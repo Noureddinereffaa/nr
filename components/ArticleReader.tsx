@@ -23,6 +23,7 @@ const ArticleReader: React.FC<ArticleReaderProps> = ({ article: propArticle, onC
     const [activeSection, setActiveSection] = useState<string>('');
     const [isAiLoading, setIsAiLoading] = useState(false);
     const [aiSummary, setAiSummary] = useState<string | null>(null);
+    const [showMobileMenu, setShowMobileMenu] = useState(false);
 
     const siteTexts: SiteTexts = {
         ...DEFAULT_SITE_TEXTS,
@@ -140,18 +141,18 @@ const ArticleReader: React.FC<ArticleReaderProps> = ({ article: propArticle, onC
                 </div>
 
                 {/* Navigation Header */}
-                <header className="sticky top-0 w-full px-3 py-3 md:px-12 md:py-6 border-b border-white/5 bg-slate-950/40 backdrop-blur-2xl z-[200] flex items-center justify-between gap-2 md:gap-8">
-                    <div className="flex items-center gap-2 md:gap-4">
+                <header className="sticky top-0 w-full px-4 py-3 md:px-12 md:py-6 border-b border-white/5 bg-slate-950/80 backdrop-blur-2xl z-[200] flex items-center justify-between gap-4">
+                    <div className="flex items-center gap-2">
                         <button
                             onClick={onClose}
-                            className="p-2 md:p-3 rounded-xl md:rounded-2xl bg-white/5 hover:bg-red-500/10 text-slate-400 hover:text-red-500 transition-all min-h-[44px] min-w-[44px] flex items-center justify-center"
+                            className="p-2.5 rounded-xl bg-white/5 hover:bg-red-500/10 text-slate-400 hover:text-red-500 transition-all min-h-[44px] min-w-[44px] flex items-center justify-center border border-white/5"
                             aria-label="إغلاق"
                         >
                             <X size={20} />
                         </button>
                         <button
                             onClick={handleShare}
-                            className="p-2 md:p-3 rounded-xl md:rounded-2xl bg-white/5 hover:bg-indigo-600/10 text-slate-400 hover:text-indigo-400 transition-all min-h-[44px] min-w-[44px] flex items-center justify-center"
+                            className="p-2.5 rounded-xl bg-white/5 hover:bg-indigo-600/10 text-slate-400 hover:text-indigo-400 transition-all min-h-[44px] min-w-[44px] flex items-center justify-center border border-white/5"
                             aria-label="مشاركة"
                         >
                             <Share2 size={20} />
@@ -159,11 +160,11 @@ const ArticleReader: React.FC<ArticleReaderProps> = ({ article: propArticle, onC
                     </div>
 
                     <div className="flex-1 min-w-0 flex flex-col items-end text-right">
-                        <h4 className="text-white font-black text-xs sm:text-sm md:text-xl truncate w-full" dir="rtl">{article.title}</h4>
-                        <div className="hidden sm:flex items-center gap-3 text-indigo-400 text-[9px] md:text-[10px] font-black uppercase tracking-[0.2em] mt-1">
+                        <h4 className="text-white font-black text-sm md:text-xl truncate w-full" dir="rtl">{article.title}</h4>
+                        <div className="flex items-center gap-3 text-indigo-400 text-[10px] font-black uppercase tracking-[0.1em] mt-0.5 opacity-80 lg:tracking-[0.2em]">
                             <span className="flex items-center gap-1.5"><Clock size={12} /> {article.readTime}</span>
-                            <span className="w-1 h-1 rounded-full bg-indigo-900/40"></span>
-                            <span className="flex items-center gap-1.5">{article.category} <Target size={12} /></span>
+                            <span className="hidden sm:inline w-1 h-1 rounded-full bg-indigo-900/40"></span>
+                            <span className="hidden sm:flex items-center gap-1.5">{article.category} <Target size={12} /></span>
                         </div>
                     </div>
                 </header>
@@ -314,6 +315,85 @@ const ArticleReader: React.FC<ArticleReaderProps> = ({ article: propArticle, onC
                         </button>
                     </div>
                 </div>
+
+                {/* Mobile Quick Navigation Button */}
+                <div className="lg:hidden fixed bottom-6 left-6 z-[250]">
+                    <button
+                        onClick={() => setShowMobileMenu(true)}
+                        className="w-14 h-14 rounded-2xl bg-indigo-600 text-white shadow-2xl shadow-indigo-600/40 flex items-center justify-center active:scale-90 transition-all border border-white/10"
+                    >
+                        <Sparkles size={24} />
+                    </button>
+                </div>
+
+                {/* Mobile Menu Drawer */}
+                <AnimatePresence>
+                    {showMobileMenu && (
+                        <>
+                            <motion.div
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                exit={{ opacity: 0 }}
+                                onClick={() => setShowMobileMenu(false)}
+                                className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-[300]"
+                            />
+                            <motion.div
+                                initial={{ y: '100%' }}
+                                animate={{ y: 0 }}
+                                exit={{ y: '100%' }}
+                                transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+                                className="fixed bottom-0 left-0 right-0 bg-slate-900 border-t border-white/10 rounded-t-[2.5rem] z-[310] max-h-[85vh] overflow-y-auto"
+                            >
+                                <div className="p-8 space-y-10" dir="rtl">
+                                    <div className="w-12 h-1.5 bg-white/10 rounded-full mx-auto -mt-2 mb-6"></div>
+
+                                    {/* AI Summary Section Mobile */}
+                                    <div className="space-y-6">
+                                        <div className="flex items-center justify-between">
+                                            <div className="flex items-center gap-3">
+                                                <Sparkles className="text-indigo-400" size={20} />
+                                                <h5 className="text-lg font-black text-white">الملخص الذكي</h5>
+                                            </div>
+                                            <button onClick={() => setShowMobileMenu(false)} className="text-slate-500"><X size={20} /></button>
+                                        </div>
+
+                                        {!aiSummary && !isAiLoading && (
+                                            <button
+                                                onClick={generateAiSummary}
+                                                className="w-full py-4 rounded-xl bg-indigo-600 text-white font-black text-sm transition-all"
+                                            >
+                                                توليد الملخص الآن
+                                            </button>
+                                        )}
+                                        {isAiLoading && <div className="h-20 bg-white/5 rounded-xl animate-pulse"></div>}
+                                        {aiSummary && (
+                                            <div className="text-slate-300 text-sm leading-relaxed bg-white/5 p-6 rounded-2xl" dangerouslySetInnerHTML={{ __html: aiSummary }} />
+                                        )}
+                                    </div>
+
+                                    {/* Index Section Mobile */}
+                                    <div className="space-y-6">
+                                        <h5 className="text-lg font-black text-white border-r-4 border-indigo-600 pr-4">فهرس المحتوى</h5>
+                                        <nav className="grid gap-3">
+                                            {toc.map((item) => (
+                                                <button
+                                                    key={item.id}
+                                                    onClick={() => {
+                                                        setShowMobileMenu(false);
+                                                        document.getElementById(item.id)?.scrollIntoView({ behavior: 'smooth' });
+                                                    }}
+                                                    className={`text-right p-4 rounded-xl text-sm font-bold transition-all ${activeSection === item.id ? 'bg-indigo-600/20 text-indigo-400' : 'bg-white/5 text-slate-400'}`}
+                                                >
+                                                    {item.text}
+                                                </button>
+                                            ))}
+                                        </nav>
+                                    </div>
+                                </div>
+                            </motion.div>
+                        </>
+                    )}
+                </AnimatePresence>
             </motion.div>
 
             <style>{`
@@ -376,7 +456,16 @@ const ArticleReader: React.FC<ArticleReaderProps> = ({ article: propArticle, onC
                 }
                 @media (max-width: 640px) {
                     .article-body-professional {
-                        font-size: 16px; /* Prevent zoom on iOS */
+                        font-size: 17px;
+                        line-height: 1.8;
+                    }
+                    .article-body-professional h2 {
+                        font-size: 1.5rem;
+                        margin-top: 2.5rem;
+                        margin-bottom: 1rem;
+                    }
+                    .article-body-professional p {
+                        margin-bottom: 1.5rem;
                     }
                 }
             `}</style>

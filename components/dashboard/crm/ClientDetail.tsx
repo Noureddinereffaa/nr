@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useBusiness } from '../../../context/BusinessContext';
+import { useUI } from '../../../context/UIContext';
 import { Client } from '../../../types';
 import { X, Save, Trash2, Phone, Mail, Globe, MapPin, Tag, Calendar, User, DollarSign, FileText } from 'lucide-react';
 
@@ -10,6 +11,7 @@ interface ClientDetailProps {
 
 const ClientDetail: React.FC<ClientDetailProps> = ({ client, onClose }) => {
     const { updateClient, deleteClient, invoices } = useBusiness();
+    const { isShieldMode } = useUI();
     const clientInvoices = invoices.filter(i => i.clientId === client.id);
     const [formData, setFormData] = useState<Client>(client);
     const [tagInput, setTagInput] = useState('');
@@ -103,7 +105,7 @@ const ClientDetail: React.FC<ClientDetailProps> = ({ client, onClose }) => {
                             <div className="flex items-center gap-2 bg-slate-950 border border-white/10 rounded-lg p-3">
                                 <Phone size={18} className="text-slate-500" />
                                 <input
-                                    type="tel"
+                                    type={isShieldMode ? "password" : "tel"}
                                     value={formData.phone}
                                     onChange={(e) => handleChange('phone', e.target.value)}
                                     className="bg-transparent border-none outline-none text-white w-full font-mono"
@@ -116,7 +118,7 @@ const ClientDetail: React.FC<ClientDetailProps> = ({ client, onClose }) => {
                             <div className="flex items-center gap-2 bg-slate-950 border border-white/10 rounded-lg p-3">
                                 <Mail size={18} className="text-slate-500" />
                                 <input
-                                    type="email"
+                                    type={isShieldMode ? "password" : "email"}
                                     value={formData.email}
                                     onChange={(e) => handleChange('email', e.target.value)}
                                     className="bg-transparent border-none outline-none text-white w-full font-mono"
@@ -147,7 +149,7 @@ const ClientDetail: React.FC<ClientDetailProps> = ({ client, onClose }) => {
                             <div className="flex items-center gap-2 bg-slate-950 border border-white/10 rounded-lg p-3">
                                 <DollarSign size={18} className="text-emerald-500" />
                                 <input
-                                    type="number"
+                                    type={isShieldMode ? "password" : "number"}
                                     value={formData.value}
                                     onChange={(e) => handleChange('value', Number(e.target.value))}
                                     className="bg-transparent border-none outline-none text-white w-full font-mono font-bold"

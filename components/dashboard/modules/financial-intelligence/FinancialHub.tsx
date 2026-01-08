@@ -14,11 +14,13 @@ import {
     Filter,
     Download
 } from 'lucide-react';
+import { useUI } from '../../../../context/UIContext';
 import ExpenseForm from '../../forms/ExpenseForm';
 
 const FinancialHub: React.FC = () => {
     const { siteData } = useSystem();
     const { invoices, expenses, addExpense, deleteExpense } = useBusiness();
+    const { isShieldMode, mask } = useUI();
     const [isAddingExpense, setIsAddingExpense] = useState(false);
     const [expenseFilter, setExpenseFilter] = useState('all');
 
@@ -82,7 +84,7 @@ const FinancialHub: React.FC = () => {
                     </div>
                     <div className="text-right">
                         <p className="text-slate-400 text-xs font-bold uppercase tracking-widest mb-1">إجمالي الدخل</p>
-                        <h4 className="text-2xl font-black text-white">{stats.totalIncome.toLocaleString()} <span className="text-xs text-slate-500 italic">DZD</span></h4>
+                        <h4 className="text-2xl font-black text-white">{mask(stats.totalIncome.toLocaleString(), 'currency')} <span className="text-xs text-slate-500 italic">DZD</span></h4>
                     </div>
                 </div>
 
@@ -96,7 +98,7 @@ const FinancialHub: React.FC = () => {
                     </div>
                     <div className="text-right">
                         <p className="text-slate-400 text-xs font-bold uppercase tracking-widest mb-1">إجمالي المصاريف</p>
-                        <h4 className="text-2xl font-black text-white">{stats.totalExpenses.toLocaleString()} <span className="text-xs text-slate-500 italic">DZD</span></h4>
+                        <h4 className="text-2xl font-black text-white">{mask(stats.totalExpenses.toLocaleString(), 'currency')} <span className="text-xs text-slate-500 italic">DZD</span></h4>
                     </div>
                 </div>
 
@@ -110,7 +112,7 @@ const FinancialHub: React.FC = () => {
                     </div>
                     <div className="text-right">
                         <p className="text-slate-400 text-xs font-bold uppercase tracking-widest mb-1">الأرباح الصافية</p>
-                        <h4 className="text-2xl font-black text-white">{stats.profit.toLocaleString()} <span className="text-xs text-slate-500 italic">DZD</span></h4>
+                        <h4 className="text-2xl font-black text-white">{mask(stats.profit.toLocaleString(), 'currency')} <span className="text-xs text-slate-500 italic">DZD</span></h4>
                     </div>
                 </div>
 
@@ -182,7 +184,7 @@ const FinancialHub: React.FC = () => {
                         <div className="space-y-2">
                             <div className="flex justify-between items-center text-xs" dir="rtl">
                                 <span className="font-black text-white">DZD - الدينار الجزائري</span>
-                                <span className="text-slate-400 font-bold">{incomeByCurrency.DZD.toLocaleString()}</span>
+                                <span className="text-slate-400 font-bold">{mask(incomeByCurrency.DZD.toLocaleString(), 'currency')}</span>
                             </div>
                             <div className="h-2 bg-slate-800 rounded-full overflow-hidden">
                                 <div style={{ width: '85%' }} className="h-full bg-[var(--accent-indigo)] shadow-[0_0_10px_rgba(var(--accent-indigo-rgb),0.5)]"></div>
@@ -191,7 +193,7 @@ const FinancialHub: React.FC = () => {
                         <div className="space-y-2">
                             <div className="flex justify-between items-center text-xs" dir="rtl">
                                 <span className="font-black text-white">EUR - اليورو</span>
-                                <span className="text-slate-400 font-bold">{incomeByCurrency.EUR.toLocaleString()}</span>
+                                <span className="text-slate-400 font-bold">{mask(incomeByCurrency.EUR.toLocaleString(), 'currency')}</span>
                             </div>
                             <div className="h-2 bg-slate-800 rounded-full overflow-hidden">
                                 <div style={{ width: '10%' }} className="h-full bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.5)]"></div>
@@ -200,7 +202,7 @@ const FinancialHub: React.FC = () => {
                         <div className="space-y-2">
                             <div className="flex justify-between items-center text-xs" dir="rtl">
                                 <span className="font-black text-white">USD - الدولار الأمريكي</span>
-                                <span className="text-slate-400 font-bold">{incomeByCurrency.USD.toLocaleString()}</span>
+                                <span className="text-slate-400 font-bold">{mask(incomeByCurrency.USD.toLocaleString(), 'currency')}</span>
                             </div>
                             <div className="h-2 bg-slate-800 rounded-full overflow-hidden">
                                 <div style={{ width: '5%' }} className="h-full bg-amber-500 shadow-[0_0_10px_rgba(245,158,11,0.5)]"></div>
@@ -251,7 +253,7 @@ const FinancialHub: React.FC = () => {
                                         <td className="px-6 py-4 text-indigo-400">
                                             <span className="bg-indigo-500/10 px-2 py-1 rounded-lg border border-indigo-500/10">{e.category}</span>
                                         </td>
-                                        <td className="px-6 py-4 font-black text-white">{e.amount.toLocaleString()} {e.currency}</td>
+                                        <td className="px-6 py-4 font-black text-white">{mask(e.amount.toLocaleString(), 'currency')} {e.currency}</td>
                                         <td className="px-6 py-4">
                                             <span className="flex items-center gap-1.5 text-emerald-400">
                                                 <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 shadow-[0_0_5px_#10b981]"></div>

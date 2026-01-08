@@ -7,9 +7,12 @@ import InvoicePrint from '../../billing/InvoicePrint';
 import { Invoice } from '../../../../types';
 import { useReactToPrint } from 'react-to-print';
 
+import { useUI } from '../../../../context/UIContext';
+
 const Billing: React.FC = () => {
     const { siteData } = useSystem();
     const { invoices, deleteInvoice, updateInvoice, clients } = useBusiness();
+    const { mask } = useUI();
     const [isFormOpen, setIsFormOpen] = useState(false);
     const [editingInvoice, setEditingInvoice] = useState<Invoice | undefined>(undefined);
     const [searchTerm, setSearchTerm] = useState('');
@@ -82,11 +85,11 @@ const Billing: React.FC = () => {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div className="p-8 bg-slate-900/40 border border-white/5 backdrop-blur-md rounded-[2rem]">
                     <div className="text-[10px] text-slate-500 font-black uppercase tracking-[0.2em] mb-4 text-right">إجمالي المداخيل المحصلة</div>
-                    <div className="text-3xl font-black text-white tracking-tighter text-right">{totalRevenue.toLocaleString()} د.ج</div>
+                    <div className="text-3xl font-black text-white tracking-tighter text-right">{mask(totalRevenue.toLocaleString(), 'currency')} د.ج</div>
                 </div>
                 <div className="p-8 bg-slate-900/40 border border-white/5 backdrop-blur-md rounded-[2rem]">
                     <div className="text-[10px] text-slate-500 font-black uppercase tracking-[0.2em] mb-4 text-right">فواتير قيد الانتظار</div>
-                    <div className="text-3xl font-black text-amber-400 tracking-tighter text-right">{pendingAmount.toLocaleString()} د.ج</div>
+                    <div className="text-3xl font-black text-amber-400 tracking-tighter text-right">{mask(pendingAmount.toLocaleString(), 'currency')} د.ج</div>
                 </div>
                 <div className="p-8 bg-[rgba(var(--accent-indigo-rgb),0.1)] border border-[rgba(var(--accent-indigo-rgb),0.2)] backdrop-blur-md rounded-[2rem]">
                     <div className="text-[10px] text-[var(--accent-indigo)] font-black uppercase tracking-[0.2em] mb-4 text-right">معدل التحصيل النقدي</div>
@@ -122,9 +125,9 @@ const Billing: React.FC = () => {
                                 </div>
                                 <div className="flex items-center gap-12">
                                     <div className="text-right">
-                                        <div className="text-white font-black text-2xl tracking-tighter">{inv.total.toLocaleString()} د.ج</div>
+                                        <div className="text-white font-black text-2xl tracking-tighter">{mask(inv.total.toLocaleString(), 'currency')} د.ج</div>
                                         <div className="text-[8px] text-slate-600 font-black uppercase tracking-widest mt-1">
-                                            {inv.payments?.length > 0 ? `Paid: ${(inv.payments.reduce((s, p) => s + p.amount, 0)).toLocaleString()}` : 'Unpaid Balance'}
+                                            {inv.payments?.length > 0 ? `Paid: ${mask((inv.payments.reduce((s, p) => s + p.amount, 0)).toLocaleString(), 'currency')}` : 'Unpaid Balance'}
                                         </div>
                                     </div>
                                     <div className="flex gap-1">

@@ -1,9 +1,11 @@
 import React from 'react';
 import { TrendingUp, ArrowUpRight, DollarSign } from 'lucide-react';
 import { useBusiness } from '../../../context/BusinessContext';
+import { useUI } from '../../../context/UIContext';
 
 const RevenueWidget: React.FC = () => {
     const { invoices, expenses } = useBusiness();
+    const { mask } = useUI();
     const totalPaid = (invoices || []).reduce((acc, inv) => inv.status === 'paid' ? acc + inv.total : acc, 0);
 
     return (
@@ -19,7 +21,7 @@ const RevenueWidget: React.FC = () => {
                     </div>
                 </div>
                 <div className="text-4xl font-black text-white tracking-tighter mb-1">
-                    {totalPaid.toLocaleString()} <span className="text-xs text-slate-500">د.ج</span>
+                    {mask(totalPaid.toLocaleString(), 'currency')} <span className="text-xs text-slate-500">د.ج</span>
                 </div>
                 <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest">إجمالي المدفوعات المسجلة</p>
             </div>
