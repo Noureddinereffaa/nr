@@ -3,7 +3,7 @@ import {
     X, Save, Eye, Layout, Type, Target,
     Zap, CheckCircle, ArrowRight, Image as ImageIcon,
     Code2, Activity, Users, Globe, Smartphone, Download, Hash,
-    Settings, ChevronRight, Sparkles
+    Settings, ChevronRight, Sparkles, Link as LinkIcon, FileText
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Article, AIConfig } from '../../../types';
@@ -39,6 +39,7 @@ const WritingWorkspace: React.FC<WritingWorkspaceProps> = ({ article: initialArt
     const [linkText, setLinkText] = useState('');
     const [imageUrl, setImageUrl] = useState('');
     const [tagInput, setTagInput] = useState('');
+    const [showIndexing, setShowIndexing] = useState(false);
 
     // Developer Mode (Next.js) State
     const [editorMode, setEditorMode] = useState<'classic' | 'nextjs'>('classic');
@@ -629,6 +630,44 @@ const WritingWorkspace: React.FC<WritingWorkspaceProps> = ({ article: initialArt
 
                         {/* Keyword Strategy Panel */}
                         <div className="p-6 bg-slate-900/50 rounded-[2.5rem] border border-white/5 space-y-6">
+                            {/* Permalink Control */}
+                            <div className="space-y-3 pb-4 border-b border-white/5">
+                                <label className="text-[9px] font-black text-slate-600 uppercase tracking-widest flex items-center gap-2">
+                                    <LinkIcon size={10} /> Permalink / Slug
+                                </label>
+                                <div className="flex gap-2">
+                                    <input
+                                        type="text"
+                                        value={article.slug}
+                                        onChange={(e) => {
+                                            const val = e.target.value
+                                                .toLowerCase()
+                                                .replace(/[^a-z0-9-\u0600-\u06FF]/g, '-') // Support Arabic characters + standard slug chars
+                                                .replace(/-+/g, '-');
+                                            setArticle({ ...article, slug: val });
+                                        }}
+                                        className="flex-1 bg-slate-950 border border-white/10 text-white text-[10px] p-4 rounded-2xl outline-none focus:border-indigo-500 transition-all font-mono"
+                                        placeholder="article-slug..."
+                                    />
+                                    <button
+                                        onClick={() => {
+                                            const generated = article.title
+                                                .toLowerCase()
+                                                .trim()
+                                                .replace(/[^a-z0-9-\u0600-\u06FF]/g, '-')
+                                                .replace(/-+/g, '-')
+                                                .replace(/^-+|-+$/g, '');
+                                            setArticle({ ...article, slug: generated });
+                                        }}
+                                        className="px-4 bg-white/5 hover:bg-white/10 text-[9px] font-black text-slate-400 rounded-2xl transition-all uppercase"
+                                        title="Auto-generate from title"
+                                    >
+                                        Auto
+                                    </button>
+                                </div>
+                                <p className="text-[8px] text-slate-500 font-bold italic px-2">Preview: /blog/{article.slug}</p>
+                            </div>
+
                             <div className="space-y-3">
                                 <label className="text-[9px] font-black text-slate-600 uppercase tracking-widest flex items-center gap-2">
                                     <Globe size={10} /> Primary Focus Keyword
@@ -639,6 +678,33 @@ const WritingWorkspace: React.FC<WritingWorkspaceProps> = ({ article: initialArt
                                     onChange={(e) => setArticle({ ...article, seo: { ...article.seo, focusKeyword: e.target.value } })}
                                     className="w-full bg-slate-950 border border-white/10 text-white text-xs p-4 rounded-2xl outline-none focus:border-indigo-500 transition-all font-bold"
                                     placeholder="e.g. أتمتة الشركات"
+                                    dir="rtl"
+                                />
+                            </div>
+
+                            <div className="space-y-3">
+                                <label className="text-[9px] font-black text-slate-600 uppercase tracking-widest flex items-center gap-2">
+                                    <Type size={10} /> SEO Strategic Title
+                                </label>
+                                <input
+                                    type="text"
+                                    value={article.seo?.title || ''}
+                                    onChange={(e) => setArticle({ ...article, seo: { ...article.seo, title: e.target.value } })}
+                                    className="w-full bg-slate-950 border border-white/10 text-white text-xs p-4 rounded-2xl outline-none focus:border-indigo-500 transition-all font-bold"
+                                    placeholder="SEO Title (Google format)..."
+                                    dir="rtl"
+                                />
+                            </div>
+
+                            <div className="space-y-3">
+                                <label className="text-[9px] font-black text-slate-600 uppercase tracking-widest flex items-center gap-2">
+                                    <FileText size={10} /> Strategic Meta Description
+                                </label>
+                                <textarea
+                                    value={article.seo?.description || ''}
+                                    onChange={(e) => setArticle({ ...article, seo: { ...article.seo, description: e.target.value } })}
+                                    className="w-full bg-slate-950 border border-white/10 text-white text-[10px] p-4 rounded-2xl outline-none focus:border-indigo-500 transition-all font-bold resize-none h-24"
+                                    placeholder="Meta description for search engines..."
                                     dir="rtl"
                                 />
                             </div>
@@ -801,64 +867,105 @@ const WritingWorkspace: React.FC<WritingWorkspaceProps> = ({ article: initialArt
                         </div>
                     )}
 
-                    {/* Strategic Links */}
-                    <div className="space-y-4 pt-8 border-t border-white/5">
-                        <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest px-2 flex items-center gap-2">
-                            <Settings size={12} /> Strategic CTA
-                        </label>
-                        <div className="space-y-3">
-                            <div className="relative group">
-                                <Smartphone size={10} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" />
-                                <input
-                                    type="text"
-                                    value={article.ctaWhatsApp || ''}
-                                    onChange={(e) => setArticle({ ...article, ctaWhatsApp: e.target.value })}
-                                    className="w-full bg-slate-900/50 border border-white/10 text-white text-[10px] pl-10 pr-4 py-3 rounded-xl outline-none focus:border-green-500/50 transition-all font-mono"
-                                    placeholder="wa.me/link..."
-                                />
-                            </div>
-                            <div className="relative group">
-                                <Download size={10} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" />
-                                <input
-                                    type="text"
-                                    value={article.ctaDownloadUrl || ''}
-                                    onChange={(e) => setArticle({ ...article, ctaDownloadUrl: e.target.value })}
-                                    className="w-full bg-slate-900/50 border border-white/10 text-white text-[10px] pl-10 pr-4 py-3 rounded-xl outline-none focus:border-blue-500/50 transition-all font-mono"
-                                    placeholder="download/url..."
-                                />
-                            </div>
-                        </div>
-                    </div>
+                    {/* Indexing & CRM Collapsible */}
+                    <div className="pt-8 border-t border-white/5">
+                        <button
+                            onClick={() => setShowIndexing(!showIndexing)}
+                            className="w-full flex items-center justify-between px-2 mb-4 group"
+                        >
+                            <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest cursor-pointer group-hover:text-indigo-400 transition-colors">Indexing & CRM Studio</label>
+                            <motion.div
+                                animate={{ rotate: showIndexing ? 90 : 0 }}
+                                className="text-slate-600 group-hover:text-indigo-400 transition-colors"
+                            >
+                                <ChevronRight size={14} />
+                            </motion.div>
+                        </button>
 
-                    {/* Session History Snapshot */}
-                    <div className="space-y-4 pt-8 border-t border-white/5">
-                        <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest px-2 flex items-center justify-between w-full">
-                            History
-                            <span className="text-indigo-400 tracking-tighter">{revisions.length} Snapshots</span>
-                        </label>
-                        <div className="space-y-2">
-                            {revisions.map((rev, idx) => (
-                                <button
-                                    key={idx}
-                                    onClick={() => {
-                                        if (confirm(`Restore version from ${rev.timestamp}?`)) {
-                                            setArticle(rev.article);
-                                            if (rev.article.content.startsWith('{"nextjs"')) {
-                                                const parsed = JSON.parse(rev.article.content);
-                                                setProjectFiles(parsed.files);
-                                                setEditorMode('nextjs');
-                                            } else {
-                                                setEditorMode('classic');
-                                            }
-                                        }
-                                    }}
-                                    className="w-full flex items-center justify-between p-3 rounded-xl bg-slate-900 hover:bg-slate-800 border border-white/5 transition-all group"
+                        <AnimatePresence>
+                            {showIndexing && (
+                                <motion.div
+                                    initial={{ height: 0, opacity: 0 }}
+                                    animate={{ height: 'auto', opacity: 1 }}
+                                    exit={{ height: 0, opacity: 0 }}
+                                    className="overflow-hidden space-y-8"
                                 >
-                                    <span className="text-[10px] font-mono text-slate-500 group-hover:text-indigo-400">{rev.timestamp}</span>
-                                    <span className="text-[8px] font-black text-slate-700 group-hover:text-white uppercase">Restore</span>
-                                </button>
-                            ))}
-                        </div>
+                                    {/* Strategic Meta (Excerpt) */}
+                                    <div className="space-y-3">
+                                        <label className="text-[9px] font-black text-slate-600 uppercase tracking-widest flex items-center gap-2">
+                                            <Type size={10} /> Strategic Meta Excerpt
+                                        </label>
+                                        <textarea
+                                            value={article.excerpt || ''}
+                                            onChange={(e) => setArticle({ ...article, excerpt: e.target.value })}
+                                            className="w-full bg-slate-900/50 border border-white/10 text-white text-[10px] p-4 rounded-xl outline-none focus:border-indigo-500 transition-all font-bold resize-none h-20"
+                                            placeholder="Brief strategic summary for previews..."
+                                            dir="rtl"
+                                        />
+                                    </div>
+
+                                    {/* Strategic CTA */}
+                                    <div className="space-y-4">
+                                        <label className="text-[9px] font-black text-slate-600 uppercase tracking-widest px-2 flex items-center gap-2">
+                                            <Settings size={12} /> Strategic CTA Links
+                                        </label>
+                                        <div className="space-y-3">
+                                            <div className="relative group">
+                                                <Smartphone size={10} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" />
+                                                <input
+                                                    type="text"
+                                                    value={article.ctaWhatsApp || ''}
+                                                    onChange={(e) => setArticle({ ...article, ctaWhatsApp: e.target.value })}
+                                                    className="w-full bg-slate-900/50 border border-white/10 text-white text-[10px] pl-10 pr-4 py-3 rounded-xl outline-none focus:border-green-500/50 transition-all font-mono"
+                                                    placeholder="wa.me/link..."
+                                                />
+                                            </div>
+                                            <div className="relative group">
+                                                <Download size={10} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" />
+                                                <input
+                                                    type="text"
+                                                    value={article.ctaDownloadUrl || ''}
+                                                    onChange={(e) => setArticle({ ...article, ctaDownloadUrl: e.target.value })}
+                                                    className="w-full bg-slate-900/50 border border-white/10 text-white text-[10px] pl-10 pr-4 py-3 rounded-xl outline-none focus:border-blue-500/50 transition-all font-mono"
+                                                    placeholder="download/url..."
+                                                />
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Session History */}
+                                    <div className="space-y-4">
+                                        <label className="text-[9px] font-black text-slate-600 uppercase tracking-widest px-2 flex items-center justify-between w-full">
+                                            History Snapshot
+                                            <span className="text-indigo-400 tracking-tighter">{revisions.length} Snapshots</span>
+                                        </label>
+                                        <div className="space-y-2 max-h-40 overflow-y-auto scrollbar-hide pr-1">
+                                            {revisions.map((rev, idx) => (
+                                                <button
+                                                    key={idx}
+                                                    onClick={() => {
+                                                        if (confirm(`Restore version from ${rev.timestamp}?`)) {
+                                                            setArticle(rev.article);
+                                                            if (rev.article.content.startsWith('{"nextjs"')) {
+                                                                const parsed = JSON.parse(rev.article.content);
+                                                                setProjectFiles(parsed.files);
+                                                                setEditorMode('nextjs');
+                                                            } else {
+                                                                setEditorMode('classic');
+                                                            }
+                                                        }
+                                                    }}
+                                                    className="w-full flex items-center justify-between p-3 rounded-xl bg-slate-900 hover:bg-slate-800 border border-white/5 transition-all group"
+                                                >
+                                                    <span className="text-[10px] font-mono text-slate-500 group-hover:text-indigo-400">{rev.timestamp}</span>
+                                                    <span className="text-[8px] font-black text-slate-700 group-hover:text-white uppercase">Restore</span>
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
                     </div>
                 </div>
             </div>
