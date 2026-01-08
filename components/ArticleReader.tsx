@@ -175,41 +175,43 @@ const ArticleReader: React.FC<ArticleReaderProps> = ({ article, onClose }) => {
                 </div>
 
                 {/* Dynamic Header - Sovereign Control */}
-                <div className="sticky top-0 left-0 right-0 p-4 md:px-16 md:py-6 border-b border-white/5 bg-slate-950/90 backdrop-blur-xl z-[100] flex flex-row-reverse items-center justify-between gap-4">
+                <div className="sticky top-0 left-0 right-0 p-3 md:px-16 md:py-6 border-b border-white/5 bg-slate-950/90 backdrop-blur-xl z-[100] flex flex-row-reverse items-center justify-between gap-4">
 
                     {/* Right: Title & Category (RTL) */}
                     <div className="flex-1 min-w-0 flex flex-col items-end text-right">
-                        <h4 className="text-white font-black text-sm md:text-lg leading-tight truncate w-full pl-4" dir="rtl">
+                        <h4 className="text-white font-black text-xs md:text-lg leading-tight truncate w-full pl-4" dir="rtl">
                             {article.title}
                         </h4>
-                        <p className="text-indigo-500 text-[9px] font-black uppercase tracking-widest mt-1 flex items-center gap-2">
+                        <p className="text-indigo-500 text-[8px] md:text-[9px] font-black uppercase tracking-widest mt-0.5 md:mt-1 flex items-center gap-2">
                             {article.category} <Target size={10} />
                         </p>
                     </div>
 
                     {/* Left: Actions (LTR visual order: Share then Close) */}
-                    <div className="flex items-center gap-3 shrink-0">
-                        <div className="hidden lg:flex flex-col items-start border-l border-white/10 pl-6 ml-2 text-left">
-                            <span className="text-white font-black text-xs uppercase tracking-widest">Noureddine</span>
-                            <span className="text-slate-500 text-[10px] font-black tracking-widest mt-1">Sovereign Expert</span>
+                    <div className="flex items-center gap-2 md:gap-3 shrink-0">
+                        <div className="hidden sm:flex flex-col items-start border-l border-white/10 pl-6 ml-2 text-left">
+                            <span className="text-white font-black text-[10px] md:text-xs uppercase tracking-widest">Noureddine</span>
+                            <span className="text-slate-500 text-[8px] md:text-[10px] font-black tracking-widest mt-0.5 md:mt-1">Sovereign Expert</span>
                         </div>
 
                         <button
                             onClick={handleShare}
-                            className="p-3 rounded-xl bg-white/5 hover:bg-indigo-600 text-white transition-all shadow-xl relative group"
+                            className="p-2.5 md:p-3 rounded-xl bg-white/5 hover:bg-indigo-600 text-white transition-all shadow-xl relative group"
                         >
-                            <Share2 size={18} />
-                            <span className="absolute top-full left-1/2 -translate-x-1/2 mt-2 px-2 py-1 bg-black text-white text-[10px] rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
-                                {siteTexts.common.viewAll}
+                            <Share2 size={16} />
+                            <span className="absolute -bottom-10 left-1/2 -translate-x-1/2 px-2 py-1 bg-white text-slate-950 text-[10px] font-black rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
+                                {siteTexts.blog.readMore || 'Share'}
                             </span>
                         </button>
 
                         <button
                             onClick={onClose}
-                            className="w-12 h-12 flex items-center justify-center rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 hover:bg-red-500 hover:text-white transition-all active:scale-95"
-                            title={siteTexts.common.close}
+                            className="p-2.5 md:p-3 rounded-xl bg-white/5 hover:bg-red-500 text-white transition-all shadow-xl relative group"
                         >
-                            <X size={20} />
+                            <X size={16} />
+                            <span className="absolute -bottom-10 left-1/2 -translate-x-1/2 px-2 py-1 bg-white text-slate-950 text-[10px] font-black rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
+                                {siteTexts.common.close || 'Close'}
+                            </span>
                         </button>
                     </div>
                 </div>
@@ -253,8 +255,9 @@ const ArticleReader: React.FC<ArticleReaderProps> = ({ article, onClose }) => {
                             <motion.h1
                                 initial={{ opacity: 0, y: 30 }}
                                 animate={{ opacity: 1, y: 0 }}
-                                transition={{ delay: 0.4 }}
-                                className="text-3xl sm:text-4xl md:text-5xl lg:text-7xl font-black text-white leading-tight md:leading-[0.95] mb-6 md:mb-10 tracking-tighter drop-shadow-xl"
+                                transition={{ delay: 0.5 }}
+                                className="text-4xl md:text-7xl lg:text-8xl font-black text-white leading-[1.1] md:leading-tight mb-8 md:mb-12 tracking-tighter"
+                                dir="rtl"
                             >
                                 {article.title}
                             </motion.h1>
@@ -282,7 +285,7 @@ const ArticleReader: React.FC<ArticleReaderProps> = ({ article, onClose }) => {
                     </div>
 
                     {/* Elite Content Body - Readability Focus */}
-                    <div className="max-w-3xl mx-auto px-4 py-12 md:py-20">
+                    <div className="max-w-4xl mx-auto fluid-px py-12 md:py-20">
                         <motion.div
                             initial={{ opacity: 0, y: 20 }}
                             whileInView={{ opacity: 1, y: 0 }}

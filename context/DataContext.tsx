@@ -56,6 +56,7 @@ interface DataContextType {
   updateDecisionPage: (id: string, data: Partial<DecisionPage>) => Promise<void>;
   deleteDecisionPage: (id: string) => Promise<void>;
 
+  syncStatus: { total: number; current: number; errorCount: number; isSyncing: boolean };
   logActivity: (label: string, type: SystemActivity['type'], status?: SystemActivity['status'], metadata?: any) => void;
   syncArticlesToCloud: () => Promise<void>;
   resetToDefault: () => void;
@@ -251,6 +252,7 @@ If you run a pure e-commerce store (Shopify), stick to Klaviyo. GHL is built for
   });
 
   const [isLoading, setIsLoading] = useState(true);
+  const [syncStatus, setSyncStatus] = useState({ total: 0, current: 0, errorCount: 0, isSyncing: false });
 
   useEffect(() => {
     localStorage.setItem('nr_full_platform_data', JSON.stringify(siteData));
@@ -774,21 +776,54 @@ If you run a pure e-commerce store (Shopify), stick to Klaviyo. GHL is built for
 
   const syncArticlesToCloud = async () => {
     if (!isSupabaseConfigured() || !supabase) return;
+
+    setSyncStatus({ total: ARTICLES.length, current: 0, errorCount: 0, isSyncing: true });
+    let successCount = 0;
+    let errorCount = 0;
+
     try {
-      await supabase.from('articles').upsert(
-        ARTICLES.map(a => ({
-          id: a.id,
-          slug: a.slug,
-          title: a.title,
-          data: a,
-          status: a.status,
-          date: a.date
-        })),
-        { onConflict: 'id' }
-      );
-      logActivity('تمت مزامنة قوالب المقالات', 'content', 'success');
+      for (let i = 0; i < ARTICLES.length; i++) {
+        const a = ARTICLES[i];
+        try {
+          const { error } = await supabase.from('articles').upsert({
+            id: a.id,
+            slug: a.slug,
+            title: a.title,
+            content: a.content,
+            excerpt: a.excerpt,
+            image: a.image,
+            category: a.category,
+            date: a.date,
+            status: a.status,
+            author: a.author || 'Noureddine Reffaa',
+            views: a.views || 0,
+            seo_score: a.seoScore || 85,
+            keywords: a.keywords || []
+          }, { onConflict: 'id' });
+
+          if (error) throw error;
+          successCount++;
+        } catch (err) {
+          errorCount++;
+          Logger.error(`Sync failed for article: ${a.title}`, err);
+        }
+
+        setSyncStatus(prev => ({ ...prev, current: i + 1, errorCount }));
+        // Brief delay to prevent hitting rate limits or causing spikes
+        await new Promise(resolve => setTimeout(resolve, 100));
+      }
+
+      if (errorCount === 0) {
+        logActivity('تمت مزامنة كافة المقالات بنجاح', 'content', 'success');
+      } else {
+        logActivity(`اكتملت المزامنة مع وجود ${errorCount} أخطاء`, 'content', 'warning');
+      }
     } catch (err: any) {
-      logActivity('فشلت المزامنة', 'content', 'error');
+      logActivity('فشلت المزامنة الكلية', 'content', 'error');
+    } finally {
+      setTimeout(() => {
+        setSyncStatus(prev => ({ ...prev, isSyncing: false }));
+      }, 2000); // Keep status visible for 2 seconds
     }
   };
 
@@ -813,6 +848,7 @@ If you run a pure e-commerce store (Shopify), stick to Klaviyo. GHL is built for
       addDecisionPage, updateDecisionPage, deleteDecisionPage,
       logActivity,
       syncArticlesToCloud,
+      syncStatus,
       resetToDefault
     }}>
       {children}

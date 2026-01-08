@@ -11,7 +11,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import WritingWorkspace from './WritingWorkspace';
 
 const BlogManager: React.FC = () => {
-    const { siteData, updateArticle, deleteArticle, addArticle, syncArticlesToCloud } = useData();
+    const { siteData, updateArticle, deleteArticle, addArticle, syncArticlesToCloud, syncStatus } = useData();
     const { openArticleModal } = useUI();
     const { articles, aiConfig } = siteData;
 
@@ -140,17 +140,16 @@ const BlogManager: React.FC = () => {
                         <div className="flex flex-wrap items-center gap-4">
                             <button
                                 onClick={async () => {
-                                    if (confirm('هل تريد مزامنة المقالات المحلية مع السحابة؟ سيتم رفع القوالب المحلية غير الموجودة في قاعدة البيانات.')) {
-                                        setIsLoading(true);
+                                    if (confirm('هل تريد مزامنة المقالات المحلية مع السحابة؟ سيتم رفع القوالب المحلية بشكل تتابعي لضمان استقرار الاتصال.')) {
                                         await syncArticlesToCloud();
-                                        setIsLoading(false);
                                     }
                                 }}
-                                className="bg-indigo-600/20 text-indigo-400 border border-indigo-500/30 px-6 py-5 rounded-2xl font-black text-sm uppercase tracking-wider flex items-center gap-3 hover:bg-indigo-600 hover:text-white transition-all hover:scale-105 active:scale-95 shadow-xl"
+                                disabled={syncStatus.isSyncing}
+                                className={`px-6 py-5 rounded-2xl font-black text-sm uppercase tracking-wider flex items-center gap-3 transition-all hover:scale-105 active:scale-95 shadow-xl ${syncStatus.isSyncing ? 'bg-slate-800 text-slate-500 cursor-not-allowed' : 'bg-indigo-600/20 text-indigo-400 border border-indigo-500/30 hover:bg-indigo-600 hover:text-white'}`}
                                 title="مزامنة القوالب المحلية مع السحابة"
                             >
-                                <RefreshCw size={20} className={isLoading ? 'animate-spin' : ''} />
-                                مزامنة القوالب
+                                <RefreshCw size={20} className={syncStatus.isSyncing ? 'animate-spin' : ''} />
+                                {syncStatus.isSyncing ? 'جاري المزامنة...' : 'مزامنة القوالب'}
                             </button>
 
                             <button
@@ -179,6 +178,43 @@ const BlogManager: React.FC = () => {
                             </button>
                         </div>
                     </div>
+
+                    {/* Sync Progress Indicator */}
+                    <AnimatePresence>
+                        {syncStatus.isSyncing && (
+                            <motion.div
+                                initial={{ height: 0, opacity: 0 }}
+                                animate={{ height: 'auto', opacity: 1 }}
+                                exit={{ height: 0, opacity: 0 }}
+                                className="mt-8 pt-8 border-t border-white/5 overflow-hidden"
+                            >
+                                <div className="flex items-center justify-between mb-4" dir="rtl">
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-2 h-2 bg-indigo-500 rounded-full animate-pulse"></div>
+                                        <span className="text-[10px] font-black text-indigo-400 uppercase tracking-widest">
+                                            جاري رفع البيانات إلى السحابة السيادية
+                                        </span>
+                                    </div>
+                                    <span className="text-xs font-bold text-slate-500 tracking-tighter">
+                                        {syncStatus.current} / {syncStatus.total} مقال
+                                    </span>
+                                </div>
+                                <div className="h-1.5 w-full bg-slate-800 rounded-full overflow-hidden">
+                                    <motion.div
+                                        className="h-full bg-gradient-to-r from-indigo-600 via-purple-600 to-indigo-600"
+                                        initial={{ width: 0 }}
+                                        animate={{ width: `${(syncStatus.current / syncStatus.total) * 100}%` }}
+                                        transition={{ type: 'spring', damping: 20 }}
+                                    />
+                                </div>
+                                {syncStatus.errorCount > 0 && (
+                                    <p className="text-[9px] text-red-400 mt-2 font-bold" dir="rtl">
+                                        * تم اكتشاف {syncStatus.errorCount} أخطاء أثناء المزامنة. يرجى التحقق من السجل.
+                                    </p>
+                                )}
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
                 </div>
             </div>
 
@@ -288,7 +324,7 @@ const BlogManager: React.FC = () => {
                                     animate={{ opacity: 1 }}
                                     exit={{ opacity: 0, scale: 0.9 }}
                                     onClick={() => isMultiSelect && toggleSelect(art.id)}
-                                    className={`group relative bg-slate-900 border rounded-[2.5rem] overflow-hidden transition-all duration-500 flex flex-col ${isMultiSelect && selectedIds.includes(art.id) ? 'border-indigo-500 shadow-[0_0_30px_rgba(99,102,241,0.2)]' : 'border-white/5 hover:border-indigo-500/40 hover:shadow-[0_20px_50px_rgba(0,0,0,0.5)]'} ${isMultiSelect ? 'cursor-pointer' : ''}`}
+                                    className={`group relative bg-slate-900 border rounded-[2rem] md:rounded-[2.5rem] overflow-hidden transition-all duration-500 flex flex-col ${isMultiSelect && selectedIds.includes(art.id) ? 'border-indigo-500 shadow-[0_0_30px_rgba(99,102,241,0.2)]' : 'border-white/5 hover:border-indigo-500/40 hover:shadow-[0_20px_50px_rgba(0,0,0,0.5)]'} ${isMultiSelect ? 'cursor-pointer' : ''}`}
                                 >
                                     {/* Multi-select indicator */}
                                     {isMultiSelect && (
@@ -330,7 +366,7 @@ const BlogManager: React.FC = () => {
                                     </div>
 
                                     {/* Content Section */}
-                                    <div className="p-8 flex-1 flex flex-col text-right" dir="rtl">
+                                    <div className="p-6 md:p-8 flex-1 flex flex-col text-right" dir="rtl">
                                         <div className="flex items-center justify-between mb-4">
                                             <div className="flex items-center gap-4">
                                                 <div className="flex items-center gap-1.5 text-[10px] font-black text-slate-500 uppercase">
@@ -345,53 +381,54 @@ const BlogManager: React.FC = () => {
                                             </span>
                                         </div>
 
-                                        <h4 className={`text-2xl font-black mb-4 transition-all line-clamp-2 leading-[1.3] text-right ${isMultiSelect && selectedIds.includes(art.id) ? 'text-indigo-400' : 'text-white group-hover:text-indigo-400'}`}>
+                                        <h4 className={`text-xl md:text-2xl font-black mb-3 md:mb-4 transition-all line-clamp-2 leading-[1.3] text-right ${isMultiSelect && selectedIds.includes(art.id) ? 'text-indigo-400' : 'text-white group-hover:text-indigo-400'}`}>
                                             {art.title}
                                         </h4>
 
-                                        <p className="text-slate-500 text-sm mb-8 line-clamp-2 leading-relaxed">
+                                        <p className="text-slate-500 text-xs md:text-sm mb-6 md:mb-8 line-clamp-2 leading-relaxed">
                                             {art.excerpt || 'لا يوجد وصف مختصر لهذا المقال الاستراتيجي بعد. ابدأ بصياغة مقتطف قوي لزيادة التحويل...'}
                                         </p>
 
                                         {/* SEO Performance Footer */}
                                         <div className="mt-auto">
-                                            <div className="flex items-center justify-between p-4 bg-slate-950 rounded-2xl border border-white/5 mb-8 group-hover:bg-slate-950/50 transition-colors">
+                                            <div className="flex items-center justify-between p-3 md:p-4 bg-slate-950 rounded-xl md:rounded-2xl border border-white/5 mb-6 md:mb-8 group-hover:bg-slate-950/50 transition-colors">
                                                 <div className="flex items-center gap-3">
-                                                    <div className="w-10 h-10 rounded-xl bg-indigo-500/10 flex items-center justify-center text-indigo-400 font-black text-sm border border-indigo-500/20">
+                                                    <div className="w-8 h-8 md:w-10 md:h-10 rounded-lg md:rounded-xl bg-indigo-500/10 flex items-center justify-center text-indigo-400 font-black text-xs md:text-sm border border-indigo-500/20">
                                                         {art.seoScore || 85}
                                                     </div>
                                                     <div>
-                                                        <p className="text-[9px] text-slate-500 font-black uppercase tracking-tighter">Authority Rank</p>
-                                                        <p className="text-[10px] text-emerald-400 font-black uppercase">Elite Status</p>
+                                                        <p className="text-[8px] md:text-[9px] text-slate-500 font-black uppercase tracking-tighter">Authority Rank</p>
+                                                        <p className="text-[9px] md:text-[10px] text-emerald-400 font-black uppercase">Elite Status</p>
                                                     </div>
                                                 </div>
-                                                <Sparkles size={16} className="text-amber-500 opacity-50" />
+                                                <Sparkles size={14} className="text-amber-500 opacity-50 md:hidden" />
+                                                <Sparkles size={16} className="text-amber-500 opacity-50 hidden md:block" />
                                             </div>
 
-                                            <div className="flex items-center justify-between">
-                                                <div className="flex gap-2">
+                                            <div className="flex items-center justify-between gap-2">
+                                                <div className="flex gap-1.5 md:gap-2">
                                                     <button
                                                         disabled={isMultiSelect}
                                                         onClick={(e) => { e.stopPropagation(); setEditingArticle(art); }}
-                                                        className={`p-3 rounded-xl transition-all border border-transparent ${isMultiSelect ? 'opacity-20 ' : 'bg-white/5 text-slate-400 hover:text-white hover:bg-white/10 hover:border-white/5'}`}
+                                                        className={`p-2.5 md:p-3 rounded-xl transition-all border border-transparent ${isMultiSelect ? 'opacity-20 ' : 'bg-white/5 text-slate-400 hover:text-white hover:bg-white/10 hover:border-white/5'}`}
                                                     >
-                                                        <Edit3 size={18} />
+                                                        <Edit3 size={16} className="md:w-[18px]" />
                                                     </button>
                                                     <button
                                                         disabled={isMultiSelect}
                                                         onClick={(e) => { e.stopPropagation(); if (confirm('متأكد؟')) deleteArticle(art.id); }}
-                                                        className={`p-3 rounded-xl transition-all border border-transparent ${isMultiSelect ? 'opacity-20 ' : 'bg-white/5 text-slate-400 hover:text-red-400 hover:bg-red-500/10 hover:border-red-500/10'}`}
+                                                        className={`p-2.5 md:p-3 rounded-xl transition-all border border-transparent ${isMultiSelect ? 'opacity-20 ' : 'bg-white/5 text-slate-400 hover:text-red-400 hover:bg-red-500/10 hover:border-red-500/10'}`}
                                                     >
-                                                        <Trash2 size={18} />
+                                                        <Trash2 size={16} className="md:w-[18px]" />
                                                     </button>
                                                 </div>
                                                 <button
                                                     disabled={isMultiSelect}
                                                     onClick={(e) => { e.stopPropagation(); setEditingArticle(art); }}
-                                                    className={`flex items-center gap-2 px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all group/btn ${isMultiSelect ? 'opacity-20 bg-slate-900 text-slate-800' : 'bg-indigo-600/10 hover:bg-indigo-600 text-indigo-400 hover:text-white'}`}
+                                                    className={`flex items-center gap-1.5 md:gap-2 px-4 md:px-6 py-2.5 md:py-3 rounded-xl text-[9px] md:text-[10px] font-black uppercase tracking-widest transition-all group/btn ${isMultiSelect ? 'opacity-20 bg-slate-900 text-slate-800' : 'bg-indigo-600/10 hover:bg-indigo-600 text-indigo-400 hover:text-white'}`}
                                                 >
                                                     دخول الاستوديو
-                                                    <ArrowRight size={14} className="rotate-180 group-hover/btn:-translate-x-1 transition-transform" />
+                                                    <ArrowRight size={12} className="rotate-180 md:w-[14px] group-hover/btn:-translate-x-1 transition-transform" />
                                                 </button>
                                             </div>
                                         </div>
