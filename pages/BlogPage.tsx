@@ -122,7 +122,7 @@ const BlogPage: React.FC = () => {
                             initial={{ opacity: 0, y: 40 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: 0.3 }}
-                            className="relative aspect-[21/9] rounded-2xl overflow-hidden mb-12 group cursor-pointer border border-white/10 shadow-xl"
+                            className="relative aspect-video md:aspect-[2.4/1] rounded-3xl md:rounded-[3.5rem] overflow-hidden mb-12 group cursor-pointer border border-white/10 shadow-2xl premium-border"
                             onClick={() => handleOpenArticle(featuredArticle)}
                         >
                             <img
@@ -149,7 +149,7 @@ const BlogPage: React.FC = () => {
                                     <span className="flex items-center gap-2 md:gap-3"><Calendar size={18} className="text-indigo-500" /> {new Date(featuredArticle.date).toLocaleDateString('ar-EG')}</span>
                                     <span className="flex items-center gap-2 md:gap-3"><Clock size={18} className="text-indigo-500" /> {featuredArticle.readTime}</span>
                                 </div>
-                                <button className="group px-8 md:px-12 py-4 md:py-5 bg-white text-slate-950 rounded-2xl font-black text-lg md:text-xl flex items-center gap-5 hover:bg-indigo-600 hover:text-white transition-all shadow-3xl active:scale-95">
+                                <button className="group px-6 md:px-12 py-3.5 md:py-5 bg-white text-slate-950 rounded-xl md:rounded-2xl font-black text-base md:text-xl flex items-center gap-4 hover:bg-indigo-600 hover:text-white transition-all shadow-3xl active:scale-95">
                                     {siteTexts.blog.readMore}
                                     <ArrowRight size={24} className="rotate-180 group-hover:translate-x-[-8px] transition-transform" />
                                 </button>
@@ -238,7 +238,7 @@ const BlogPage: React.FC = () => {
                                             exit={{ opacity: 0, scale: 0.95 }}
                                             transition={{ delay: i * 0.05 }}
                                             onClick={() => handleOpenArticle(article)}
-                                            className="group flex flex-col glass-morph rounded-[3.5rem] overflow-hidden hover:border-indigo-500/50 transition-all duration-700 cursor-pointer shadow-2xl premium-border"
+                                            className="group flex flex-col glass-morph rounded-[2rem] md:rounded-[3.5rem] overflow-hidden hover:border-indigo-500/50 transition-all duration-700 cursor-pointer shadow-2xl premium-border"
                                         >
                                             <div className="aspect-[16/10] overflow-hidden relative">
                                                 <img
@@ -258,28 +258,28 @@ const BlogPage: React.FC = () => {
                                                 )}
                                             </div>
 
-                                            <div className="p-10 text-right flex-1 flex flex-col bg-slate-900/60" dir="rtl">
-                                                <div className="flex items-center gap-6 text-indigo-400/80 text-[10px] md:text-xs font-black uppercase tracking-widest mb-6">
-                                                    <span className="flex items-center gap-2"><Calendar size={14} className="text-indigo-500" /> {new Date(article.date).toLocaleDateString('ar-EG')}</span>
-                                                    <span className="flex items-center gap-2"><Clock size={14} className="text-indigo-500" /> {article.readTime}</span>
+                                            <div className="p-8 md:p-10 text-right flex-1 flex flex-col bg-slate-900/60" dir="rtl">
+                                                <div className="flex items-center gap-4 md:gap-6 text-indigo-400/80 text-[9px] md:text-xs font-black uppercase tracking-widest mb-4 md:mb-6">
+                                                    <span className="flex items-center gap-2"><Calendar size={12} className="text-indigo-500 md:w-3.5" /> {new Date(article.date).toLocaleDateString('ar-EG')}</span>
+                                                    <span className="flex items-center gap-2"><Clock size={12} className="text-indigo-500 md:w-3.5" /> {article.readTime}</span>
                                                 </div>
 
-                                                <h3 className="text-3xl font-black text-white mb-6 leading-[1.15] group-hover:text-indigo-400 transition-colors tracking-tight">
+                                                <h3 className="text-2xl md:text-3xl font-black text-white mb-4 md:mb-6 leading-[1.15] group-hover:text-indigo-400 transition-colors tracking-tight">
                                                     {article.title}
                                                 </h3>
 
-                                                <p className="text-slate-300 text-lg line-clamp-3 mb-10 flex-1 leading-relaxed font-medium opacity-80">
+                                                <p className="text-slate-300 text-sm md:text-lg line-clamp-3 mb-8 md:mb-10 flex-1 leading-relaxed font-medium opacity-80">
                                                     {article.excerpt}
                                                 </p>
 
-                                                <div className="flex items-center justify-between mt-auto pt-8 border-t border-white/5">
+                                                <div className="flex items-center justify-between mt-auto pt-6 md:pt-8 border-t border-white/5">
                                                     <div className="flex gap-4">
-                                                        <Share2 size={20} className="text-slate-500 hover:text-indigo-400 transition-colors cursor-pointer" />
-                                                        <Bookmark size={20} className="text-slate-500 hover:text-indigo-400 transition-colors cursor-pointer" />
+                                                        <Share2 size={18} className="text-slate-500 hover:text-indigo-400 transition-colors cursor-pointer" />
+                                                        <Bookmark size={18} className="text-slate-500 hover:text-indigo-400 transition-colors cursor-pointer" />
                                                     </div>
-                                                    <span className="flex items-center gap-4 text-indigo-500 font-black text-sm group-hover:text-white transition-all">
+                                                    <span className="flex items-center gap-3 md:gap-4 text-indigo-500 font-black text-xs md:sm group-hover:text-white transition-all">
                                                         {siteTexts.blog.readMore}
-                                                        <ArrowRight size={20} className="rotate-180 group-hover:translate-x-[-6px] transition-transform" />
+                                                        <ArrowRight size={18} className="rotate-180 group-hover:translate-x-[-6px] transition-transform md:w-5" />
                                                     </span>
                                                 </div>
                                             </div>

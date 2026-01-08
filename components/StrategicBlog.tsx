@@ -65,7 +65,7 @@ const StrategicBlog: React.FC = () => {
                         <article
                             key={article.id}
                             onClick={() => setSelectedArticle(article)}
-                            className="group relative bg-slate-900/40 border border-white/5 rounded-[var(--border-radius-elite)] overflow-hidden hover:border-indigo-500/50 transition-all duration-700 hover:-translate-y-2 flex flex-col h-full cursor-pointer glass-morph"
+                            className="group relative bg-slate-900/40 border border-white/5 rounded-[2rem] md:rounded-[var(--border-radius-elite)] overflow-hidden hover:border-indigo-500/50 transition-all duration-700 hover:-translate-y-2 flex flex-col h-full cursor-pointer glass-morph"
                         >
                             {article.featured && (
                                 <div className="absolute top-0 right-0 z-20">
@@ -90,18 +90,18 @@ const StrategicBlog: React.FC = () => {
                             </div>
 
                             {/* Card Content */}
-                            <div className="p-8 md:p-10 flex-1 flex flex-col text-right" dir="rtl">
-                                <div className="flex items-center gap-4 text-slate-500 text-[10px] font-black uppercase tracking-widest mb-6">
+                            <div className="p-6 md:p-10 flex-1 flex flex-col text-right" dir="rtl">
+                                <div className="flex items-center gap-4 text-slate-500 text-[9px] md:text-[10px] font-black uppercase tracking-widest mb-6">
                                     <div className="flex items-center gap-1.5"><Calendar size={12} /> {new Date(article.date).toLocaleDateString('ar-EG')}</div>
                                     <span className="w-1 h-1 rounded-full bg-slate-800"></span>
                                     <div className="flex items-center gap-1.5"><Clock size={12} /> {article.readTime}</div>
                                 </div>
 
-                                <h3 className="text-2xl font-black text-white mb-4 leading-tight group-hover:text-[var(--accent-indigo)] transition-colors">
+                                <h3 className="text-xl md:text-2xl font-black text-white mb-4 leading-tight group-hover:text-[var(--accent-indigo)] transition-colors">
                                     {article.title}
                                 </h3>
 
-                                <p className="text-slate-400 text-sm leading-relaxed mb-8 line-clamp-3">
+                                <p className="text-slate-400 text-xs md:text-sm leading-relaxed mb-8 line-clamp-3">
                                     {article.excerpt}
                                 </p>
 

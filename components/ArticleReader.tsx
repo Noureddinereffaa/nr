@@ -15,6 +15,8 @@ const ArticleReader: React.FC<ArticleReaderProps> = ({ article, onClose }) => {
     const [scrollProgress, setScrollProgress] = useState(0);
     const [showShareModal, setShowShareModal] = useState(false);
     const [copySuccess, setCopySuccess] = useState(false);
+    const [toc, setToc] = useState<{ id: string, text: string, level: number }[]>([]);
+    const [activeSection, setActiveSection] = useState<string>('');
 
     // Get site texts with fallback to defaults
     const siteTexts: SiteTexts = {
@@ -122,11 +124,35 @@ const ArticleReader: React.FC<ArticleReaderProps> = ({ article, onClose }) => {
                 const totalHeight = container.scrollHeight - container.clientHeight;
                 const progress = (container.scrollTop / totalHeight) * 100;
                 setScrollProgress(progress);
+
+                // Update active section based on scroll position
+                const headings = container.querySelectorAll('h2, h3');
+                let current = '';
+                headings.forEach((heading: any) => {
+                    const top = heading.offsetTop - 100;
+                    if (container.scrollTop >= top) {
+                        current = heading.id;
+                    }
+                });
+                setActiveSection(current);
             }
         };
 
         const container = document.getElementById('reader-content');
         container?.addEventListener('scroll', handleScroll);
+
+        // Extract ToC
+        const headings = container?.querySelectorAll('h2, h3') || [];
+        const tocItems: { id: string, text: string, level: number }[] = [];
+        headings.forEach((h: any, i) => {
+            if (!h.id) h.id = `section-${i}`;
+            tocItems.push({
+                id: h.id,
+                text: h.innerText,
+                level: h.tagName === 'H2' ? 2 : 3
+            });
+        });
+        setToc(tocItems);
 
         // Prevent background scroll
         document.body.style.overflow = 'hidden';
@@ -135,7 +161,7 @@ const ArticleReader: React.FC<ArticleReaderProps> = ({ article, onClose }) => {
             container?.removeEventListener('scroll', handleScroll);
             document.body.style.overflow = 'unset';
         };
-    }, []);
+    }, [article.content]);
 
     return (
         <div className="fixed inset-0 z-[20000] flex flex-col bg-slate-950">
@@ -209,8 +235,35 @@ const ArticleReader: React.FC<ArticleReaderProps> = ({ article, onClose }) => {
                 {/* Cinematic Scroll Content */}
                 <div
                     id="reader-content"
-                    className="flex-1 overflow-y-auto overflow-x-hidden scroll-smooth custom-scrollbar bg-slate-950"
+                    className="flex-1 overflow-y-auto overflow-x-hidden scroll-smooth custom-scrollbar bg-slate-950 relative"
                 >
+                    {/* Floating Table of Contents (Desktop Only) */}
+                    {toc.length > 0 && article.isDeepContent && (
+                        <motion.aside
+                            initial={{ opacity: 0, x: 20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            className="fixed left-8 top-32 w-64 hidden xl:block z-50 p-6 glass-card rounded-2xl border border-white/5"
+                        >
+                            <h5 className="text-[10px] font-black text-indigo-400 uppercase tracking-[0.2em] mb-6 flex items-center gap-2">
+                                <TrendingUp size={12} /> محتويات الدراسة
+                            </h5>
+                            <nav className="space-y-4 text-right" dir="rtl">
+                                {toc.map((item) => (
+                                    <button
+                                        key={item.id}
+                                        onClick={() => {
+                                            const el = document.getElementById(item.id);
+                                            el?.scrollIntoView({ behavior: 'smooth' });
+                                        }}
+                                        className={`block w-full text-right text-[11px] font-bold transition-all hover:text-indigo-400 ${activeSection === item.id ? 'text-indigo-500 pr-2 border-r-2 border-indigo-500' : 'text-slate-500'
+                                            } ${item.level === 3 ? 'pr-4 opacity-70' : ''}`}
+                                    >
+                                        {item.text}
+                                    </button>
+                                ))}
+                            </nav>
+                        </motion.aside>
+                    )}
                     {/* Immersive Cover Image & Hero Section */}
                     <div className="relative w-full flex flex-col md:block">
                         {/* Image Container - Stacked on Mobile, Absolute Cover on Desktop */}
@@ -395,7 +448,7 @@ const ArticleReader: React.FC<ArticleReaderProps> = ({ article, onClose }) => {
                         </div>
 
                         {/* Navigation Footer */}
-                        <div className="mt-20 border-t border-white/5 pt-8 text-center">
+                        <div className="mt-20 border-t border-white/5 pt-8 text-center pb-20">
                             <button
                                 onClick={onClose}
                                 className="text-slate-500 hover:text-white font-black text-sm uppercase tracking-widest flex items-center gap-3 mx-auto transition-colors group"
@@ -405,6 +458,27 @@ const ArticleReader: React.FC<ArticleReaderProps> = ({ article, onClose }) => {
                             </button>
                         </div>
                     </div>
+                </div>
+
+                {/* Floating Conversion Anchor (Mobile/Tablet Only) - Sticky to Bottom */}
+                <div className="fixed bottom-0 inset-x-0 p-4 z-[100] md:hidden">
+                    <motion.div
+                        initial={{ y: 100 }}
+                        animate={{ y: scrollProgress > 10 ? 0 : 100 }}
+                        className="glass-morph p-3 rounded-2xl border border-indigo-500/30 shadow-2xl flex items-center justify-between gap-4"
+                    >
+                        <div className="flex-1 text-right" dir="rtl">
+                            <p className="text-[10px] text-indigo-400 font-black uppercase tracking-tighter">استشارة فورية</p>
+                            <h5 className="text-white text-xs font-bold truncate">تواصل مع الخبير الرقمي</h5>
+                        </div>
+                        <a
+                            href={article.ctaWhatsApp || '#'}
+                            target="_blank"
+                            className="bg-indigo-600 text-white px-5 py-2.5 rounded-xl font-black text-xs shadow-xl active:scale-95 transition-transform"
+                        >
+                            تواصل واتساب
+                        </a>
+                    </motion.div>
                 </div>
 
                 {/* Fixed Action: Scroll to Top */}
