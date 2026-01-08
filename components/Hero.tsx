@@ -48,7 +48,7 @@ const Hero: React.FC = () => {
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className={`inline-flex items-center gap-3 px-5 py-2 rounded-full border text-[11px] font-black mb-10 mx-auto lg:mr-0 lg:ml-auto backdrop-blur-xl ${isCyber
+              className={`inline-flex items-center gap-3 px-6 py-2.5 rounded-full border text-[11px] font-black mb-12 mx-auto lg:mr-0 lg:ml-auto backdrop-blur-xl ${isCyber
                 ? 'bg-green-500/10 border-green-500/20 text-green-400'
                 : isMinimalist
                   ? 'bg-slate-100 border-slate-200 text-slate-900 shadow-sm'
@@ -56,7 +56,7 @@ const Hero: React.FC = () => {
                 }`}
             >
               <Sparkles size={16} className={`${isCyber ? 'text-green-500' : isMinimalist ? 'text-slate-900' : 'text-indigo-500'} animate-pulse`} />
-              <span className="tracking-[0.3em] uppercase">{isCyber ? 'CYBER COMMAND OS v5.0' : 'The Sovereign Digital Era 2025'}</span>
+              <span className="tracking-[0.4em] uppercase">{isCyber ? 'CYBER COMMAND OS v5.0' : 'The Sovereign Digital Era 2025'}</span>
             </motion.div>
 
             <motion.h1
@@ -153,12 +153,13 @@ const Hero: React.FC = () => {
               )}
 
               <motion.div
-                whileHover={{ rotateY: -5, rotateX: 5, scale: 1.02 }}
+                whileHover={{ rotateY: -8, rotateX: 8, scale: 1.05 }}
+                transition={{ type: 'spring', stiffness: 100, damping: 20 }}
                 className={`relative aspect-[1/1.3] overflow-hidden transition-all ${isCyber
                   ? 'rounded-none border-2 border-green-500/40'
                   : isMinimalist
                     ? 'rounded-3xl border border-slate-100 shadow-xl grayscale-0'
-                    : 'rounded-[4rem] sm:rounded-[5rem] border border-white/20 shadow-3xl grayscale-[15%] group-hover:grayscale-0'
+                    : 'rounded-[4rem] sm:rounded-[6rem] border border-white/20 shadow-3xl grayscale-[15%] group-hover:grayscale-0'
                   } bg-slate-900`}
               >
                 <img

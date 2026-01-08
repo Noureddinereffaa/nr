@@ -193,8 +193,14 @@ h6 {
 
 /* Fluid Layout & Spacing */
 .fluid-px {
-    padding-left: clamp(1rem, 5vw, 6rem);
-    padding-right: clamp(1rem, 5vw, 6rem);
+    padding-left: clamp(1.5rem, 6vw, 8rem);
+    padding-right: clamp(1.5rem, 6vw, 8rem);
+}
+
+.dashboard-max-width {
+    max-width: 1600px;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 /* Typography Utilities */
@@ -226,9 +232,16 @@ h6 {
 
 /* Layout Utilities */
 .container-width {
-    max-width: 1400px;
+    max-width: 1440px;
     margin: 0 auto;
     padding: 0 2rem;
+}
+
+@media (min-width: 1536px) {
+    .container-width {
+        max-width: 1600px;
+        padding: 0 4rem;
+    }
 }
 
 @media (max-width: 768px) {

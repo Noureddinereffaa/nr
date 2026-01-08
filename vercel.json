@@ -16,30 +16,15 @@
   ],
   "rewrites": [
     {
-      "source": "/blog/:slug",
+      "source": "/((?!api/.*).*)",
       "has": [
         {
           "type": "header",
           "key": "User-Agent",
-          "value": ".*(Twitterbot|facebookexternalhit|WhatsApp|LinkedInBot|Discordbot).*"
+          "value": ".*(Twitterbot|facebookexternalhit|WhatsApp|LinkedInBot|Discordbot|TelegramBot|Pinterest|Slackbot|Googlebot|AdsBot-Google|Mediapartners-Google).*"
         }
       ],
-      "destination": "/api/seo-resolver?slug=:slug"
-    },
-    {
-      "source": "/",
-      "has": [
-        {
-          "type": "header",
-          "key": "User-Agent",
-          "value": ".*(Twitterbot|facebookexternalhit|WhatsApp|LinkedInBot|Discordbot|TelegramBot).*"
-        },
-        {
-          "type": "query",
-          "key": "article"
-        }
-      ],
-      "destination": "/api/seo-resolver?id=:article"
+      "destination": "/api/seo-resolver?path=/$1"
     },
     {
       "source": "/((?!api/.*).*)",

@@ -48,28 +48,20 @@ const ArticleReader: React.FC<ArticleReaderProps> = ({ article, onClose }) => {
     // Safe access to window/props in render
     const currentUrl = typeof window !== 'undefined' ? window.location.href : '';
 
-    // Construct Proxy Share URL (Server-Side Generator)
-    // This passes metadata to the /api/social-share endpoint which renders the correct meta tags then redirects
-    const getProxyShareUrl = () => {
+    // Construct Direct Share URL
+    // Our Universal Resolver in vercel.json + api/seo-resolver.js will handle the bots
+    const getDirectShareUrl = () => {
         if (typeof window === 'undefined') return '';
         const baseUrl = window.location.origin;
-        // Ensure Image is Absolute URL
-        const absoluteImage = article.image.startsWith('http')
-            ? article.image
-            : `${baseUrl}${article.image.startsWith('/') ? '' : '/'}${article.image}`;
 
-        const params = new URLSearchParams({
-            title: article.title,
-            image: absoluteImage,
-            desc: article.excerpt,
-            url: currentUrl // The destination deep link
-        });
-        return `${baseUrl}/api/social-share?${params.toString()}`;
+        // Use slug if available for prettier links, otherwise fallback to ID
+        if (article.slug) {
+            return `${baseUrl}/blog/${article.slug}`;
+        }
+        return `${baseUrl}/?article=${article.id}`;
     };
 
-    const shareUrl = getProxyShareUrl(); // Use proxy for social sharing
-    // CRITICAL FIX: Use the Proxy URL for clipboard actions too, so users pasting into Facebook get the preview.
-    // The proxy will handle the redirect to the actual article.
+    const shareUrl = getDirectShareUrl();
     const cleanUrl = shareUrl;
     const shareText = encodeURIComponent(article.title || '');
 

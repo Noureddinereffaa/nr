@@ -92,35 +92,37 @@ const DashboardPage: React.FC = () => {
 
           {/* Main Content */}
           <div
-            className="flex-1 overflow-y-auto p-4 sm:p-8 space-y-8 sm:space-y-12 bg-slate-950/50 custom-scrollbar scroll-smooth pb-32"
+            className="flex-1 overflow-y-auto bg-slate-950/50 custom-scrollbar scroll-smooth pb-32"
             dir="rtl"
           >
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={activeTab}
-                initial="initial"
-                animate="animate"
-                exit="exit"
-                variants={variants.fadeInScale}
-                transition={transitions.smooth}
-                className="min-h-full"
-              >
-                <Suspense fallback={<LoadingSpinner />}>
-                  {activeTab === 'overview' && <Overview />}
-                  {activeTab === 'projects' && <Projects />}
-                  {activeTab === 'services' && <ServicesList />}
-                  {activeTab === 'identity' && <SettingsLayout key="identity" initialTab="profile" />}
-                  {activeTab === 'content-manager' && <ContentManager />}
-                  {activeTab === 'branding' && <SettingsLayout key="branding" initialTab="brand" />}
-                  {activeTab === 'system' && <SettingsLayout key="system" initialTab="brand" />}
-                  {activeTab === 'clients' && <CRM />}
-                  {activeTab === 'requests' && <Requests />}
-                  {activeTab === 'financial-hub' && <FinancialHub />}
-                  {activeTab === 'billing' && <Billing />}
-                  {activeTab === 'decision-pages' && <DecisionPages />}
-                </Suspense>
-              </motion.div>
-            </AnimatePresence>
+            <div className="dashboard-max-width p-4 sm:p-8 space-y-8 sm:space-y-12">
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={activeTab}
+                  initial="initial"
+                  animate="animate"
+                  exit="exit"
+                  variants={variants.fadeInScale}
+                  transition={transitions.smooth}
+                  className="min-h-full"
+                >
+                  <Suspense fallback={<LoadingSpinner />}>
+                    {activeTab === 'overview' && <Overview />}
+                    {activeTab === 'projects' && <Projects />}
+                    {activeTab === 'services' && <ServicesList />}
+                    {activeTab === 'identity' && <SettingsLayout key="identity" initialTab="profile" />}
+                    {activeTab === 'content-manager' && <ContentManager />}
+                    {activeTab === 'branding' && <SettingsLayout key="branding" initialTab="brand" />}
+                    {activeTab === 'system' && <SettingsLayout key="system" initialTab="brand" />}
+                    {activeTab === 'clients' && <CRM />}
+                    {activeTab === 'requests' && <Requests />}
+                    {activeTab === 'financial-hub' && <FinancialHub />}
+                    {activeTab === 'billing' && <Billing />}
+                    {activeTab === 'decision-pages' && <DecisionPages />}
+                  </Suspense>
+                </motion.div>
+              </AnimatePresence>
+            </div>
           </div>
         </div>
 
