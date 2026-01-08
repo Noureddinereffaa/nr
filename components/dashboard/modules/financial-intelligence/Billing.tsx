@@ -1,5 +1,6 @@
 import React, { useState, useRef } from 'react';
-import { useData } from '../../../../context/DataContext';
+import { useSystem } from '../../../../context/SystemContext';
+import { useBusiness } from '../../../../context/BusinessContext';
 import { Plus, Trash2, Edit2, Printer, FileText, CheckCircle, Search } from 'lucide-react';
 import InvoiceForm from '../../forms/InvoiceForm';
 import InvoicePrint from '../../billing/InvoicePrint';
@@ -7,7 +8,8 @@ import { Invoice } from '../../../../types';
 import { useReactToPrint } from 'react-to-print';
 
 const Billing: React.FC = () => {
-    const { siteData, deleteInvoice, updateInvoice } = useData();
+    const { siteData } = useSystem();
+    const { invoices, deleteInvoice, updateInvoice, clients } = useBusiness();
     const [isFormOpen, setIsFormOpen] = useState(false);
     const [editingInvoice, setEditingInvoice] = useState<Invoice | undefined>(undefined);
     const [searchTerm, setSearchTerm] = useState('');
@@ -47,13 +49,13 @@ const Billing: React.FC = () => {
         await updateInvoice(invoice.id, { ...invoice, status: nextStatus });
     };
 
-    const invoices = (siteData?.invoices || []).filter(inv =>
+    const filteredInvoices = (invoices || []).filter(inv =>
         inv.invoiceNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
         inv.clientName?.toLowerCase().includes(searchTerm.toLowerCase())
     );
-    const totalRevenue = invoices.filter(inv => inv.status === 'paid').reduce((sum, inv) => sum + inv.total, 0);
-    const pendingAmount = invoices.filter(inv => inv.status === 'pending').reduce((sum, inv) => sum + inv.total, 0);
-    const totalPotential = invoices.filter(inv => inv.status !== 'cancelled').reduce((sum, inv) => sum + inv.total, 0);
+    const totalRevenue = filteredInvoices.filter(inv => inv.status === 'paid').reduce((sum, inv) => sum + inv.total, 0);
+    const pendingAmount = filteredInvoices.filter(inv => inv.status === 'pending').reduce((sum, inv) => sum + inv.total, 0);
+    const totalPotential = filteredInvoices.filter(inv => inv.status !== 'cancelled').reduce((sum, inv) => sum + inv.total, 0);
     const collectionRate = totalPotential > 0 ? Math.round((totalRevenue / totalPotential) * 100) : 0;
 
     return (
@@ -62,6 +64,10 @@ const Billing: React.FC = () => {
                 <div dir="rtl">
                     <h2 className="text-4xl font-black text-white tracking-tighter">الحالة المالية والفواتير</h2>
                     <p className="text-slate-500 mt-2 font-bold text-sm uppercase tracking-widest">Financial OS & Billing Control</p>
+                </div>
+                <div className="text-right">
+                    <p className="text-slate-500 text-[10px] font-black uppercase tracking-widest mb-1">إحصاءات النظام</p>
+                    <p className="text-white text-xs font-bold">إجمالي الفواتير: {invoices.length}</p>
                 </div>
                 <button
                     onClick={handleAddNew}
@@ -95,7 +101,7 @@ const Billing: React.FC = () => {
                 </div>
 
                 <div className="grid gap-4" dir="rtl">
-                    {(siteData?.invoices || []).map((inv: Invoice) => (
+                    {(filteredInvoices || []).map((inv) => (
                         <div key={inv.id} className="p-6 bg-slate-950/50 border border-white/5 rounded-[1.8rem] group hover:border-[rgba(var(--accent-indigo-rgb),0.3)] transition-all backdrop-blur-sm">
                             <div className="flex items-center justify-between">
                                 <div className="flex items-center gap-6">
@@ -104,14 +110,14 @@ const Billing: React.FC = () => {
                                     </div>
                                     <div>
                                         <div className="flex items-center gap-3">
-                                            <h4 className="text-xl font-black text-white tracking-tighter">{inv.invoiceNumber}</h4>
-                                            <span className={`px-3 py-1 rounded-full text-[8px] font-black tracking-widest uppercase border ${inv.status === 'paid' ? 'bg-green-500/10 text-green-400 border-green-500/20' : 'bg-slate-500/10 text-slate-400 border-slate-500/20'}`}>
+                                            <p className="text-white font-black text-sm">{inv.clientName}</p>
+                                        </div>
+                                        <div className="flex items-center gap-2 mt-1">
+                                            <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${inv.status === 'paid' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-amber-500/10 text-amber-400 border border-amber-500/20'}`}>
                                                 {inv.status}
                                             </span>
+                                            <span className="text-[10px] text-slate-500 font-bold">{new Date(inv.date).toLocaleDateString()}</span>
                                         </div>
-                                        <p className="text-slate-500 font-bold text-xs mt-1">
-                                            {siteData.clients.find(c => c.id === inv.clientId)?.name || inv.clientName || 'عميل غير معروف'}
-                                        </p>
                                     </div>
                                 </div>
                                 <div className="flex items-center gap-12">
@@ -153,7 +159,7 @@ const Billing: React.FC = () => {
                             </div>
                         </div>
                     ))}
-                    {(!siteData?.invoices || siteData.invoices.length === 0) && (
+                    {(!invoices || invoices.length === 0) && (
                         <div className="text-slate-600 text-center py-20 border-2 border-dashed border-white/5 rounded-[2.5rem] bg-slate-950/20">
                             <div className="text-sm font-black uppercase tracking-[0.3em] mb-2">No Transactions Found</div>
                             <div className="text-[10px] font-bold">بدء النشاط لإنشاء أول فاتورة نظام</div>

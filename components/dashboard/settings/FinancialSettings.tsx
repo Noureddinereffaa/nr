@@ -1,15 +1,18 @@
 import React from 'react';
-import { useData } from '../../../context/DataContext';
+import { useSystem } from '../../../context/SystemContext';
+import { useBusiness } from '../../../context/BusinessContext';
 import { CreditCard, Landmark } from 'lucide-react';
 
 const FinancialSettings: React.FC = () => {
-    const { siteData, updateSiteData } = useData();
-    const financials = (siteData.financials || {}) as any;
+    const { siteData, updateSiteData } = useSystem();
+    const { invoices, expenses } = useBusiness();
+    const { budgets, updateBudget } = useBusiness();
+    const financials = ((siteData as any).financials || {}) as any;
 
     const handleChange = (field: string, value: any) => {
         updateSiteData({
             financials: { ...financials, [field]: value }
-        });
+        } as any);
     };
 
     const togglePaymentMethod = (method: string) => {

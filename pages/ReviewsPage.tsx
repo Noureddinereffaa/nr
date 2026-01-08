@@ -36,12 +36,14 @@ import {
     ArrowUpRight,
     Quote
 } from 'lucide-react';
-import { useData } from '../context/DataContext';
+import { useBusiness } from '../context/BusinessContext';
+import { useSystem } from '../context/SystemContext';
 
 const ReviewsPage: React.FC = () => {
     const [activeCategory, setActiveCategory] = useState('all');
 
-    const { siteData } = useData();
+    const { serviceRequests } = useBusiness();
+    const { siteData } = useSystem();
     const reviews = siteData.decisionPages || [];
 
     // Animation variants
@@ -171,6 +173,7 @@ const ReviewsPage: React.FC = () => {
         { value: "$2M+", label: "Saved for Readers", icon: CircleDollarSign }
     ];
 
+    const requests = (serviceRequests || []).filter(req => req.status === 'completed');
     const filteredReviews = activeCategory === 'all'
         ? reviews.filter(r => r.status === 'published')
         : reviews.filter(r => r.category === activeCategory && r.status === 'published');

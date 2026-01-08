@@ -29,6 +29,8 @@ interface BusinessContextType {
     serviceRequests: ServiceRequest[];
     updateRequest: (id: string, updates: Partial<ServiceRequest>) => Promise<void>;
     deleteRequest: (id: string) => Promise<void>;
+    budgets: any[];
+    updateBudget: (id: string, updates: any) => Promise<void>;
 }
 
 const BusinessContext = createContext<BusinessContextType | null>(null);
@@ -40,11 +42,17 @@ export const BusinessProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     const [expenses, setExpenses] = useState<Expense[]>([]);
     const [services, setServices] = useState<Service[]>(SERVICES);
     const [serviceRequests, setServiceRequests] = useState<ServiceRequest[]>([]);
+    const [budgets, setBudgets] = useState<any[]>([]);
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
         const fetchBusinessData = async () => {
             if (!isSupabaseConfigured() || !supabase) {
+                // Mock data or development fallback
+                setBudgets([
+                    { id: '1', category: 'Marketing', spent: 12000, limit: 50000, currency: 'DZD' },
+                    { id: '2', category: 'Operations', spent: 45000, limit: 100000, currency: 'DZD' }
+                ]);
                 setIsLoading(false);
                 return;
             }
@@ -187,15 +195,38 @@ export const BusinessProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         if (isSupabaseConfigured() && supabase) await supabase.from('service_requests').delete().eq('id', id);
     };
 
+    const updateBudget = async (id: string, updates: any) => {
+        setBudgets(prev => prev.map(b => b.id === id ? { ...b, ...updates } : b));
+    };
+
     return (
         <BusinessContext.Provider value={{
-            clients, projects, invoices, expenses, services, serviceRequests, isLoading,
-            addClient, updateClient, deleteClient,
-            addProject, updateProject, deleteProject,
-            addInvoice, updateInvoice, deleteInvoice,
-            addExpense, updateExpense, deleteExpense,
-            addService, updateService, deleteService,
-            updateRequest, deleteRequest
+            clients,
+            projects,
+            invoices,
+            expenses,
+            services,
+            isLoading,
+            addClient,
+            updateClient,
+            deleteClient,
+            addProject,
+            updateProject,
+            deleteProject,
+            addInvoice,
+            updateInvoice,
+            deleteInvoice,
+            addExpense,
+            updateExpense,
+            deleteExpense,
+            addService,
+            updateService,
+            deleteService,
+            serviceRequests,
+            updateRequest,
+            deleteRequest,
+            budgets,
+            updateBudget
         }}>
             {children}
         </BusinessContext.Provider>

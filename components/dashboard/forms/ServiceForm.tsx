@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Service } from '../../../types';
 import Modal from '../../ui/Modal';
 import Input from '../../ui/Input';
-import { useData } from '../../../context/DataContext';
+import { useBusiness } from '../../../context/BusinessContext';
 import { Plus, X } from 'lucide-react';
 
 interface ServiceFormProps {
@@ -12,7 +12,7 @@ interface ServiceFormProps {
 }
 
 const ServiceForm: React.FC<ServiceFormProps> = ({ isOpen, onClose, initialData }) => {
-    const { addService, updateService } = useData();
+    const { addService, updateService } = useBusiness();
     const [formData, setFormData] = useState<Partial<Service>>({});
     const [newFeature, setNewFeature] = useState('');
 

@@ -1,31 +1,19 @@
 import React from 'react';
-import { useData } from '../../context/DataContext';
+import { useSystem } from '../../../context/SystemContext';
 
 const ContentExtra: React.FC = () => {
-    const { siteData } = useData();
+    const { siteData, updateSiteData } = useSystem();
+    const resources = (siteData as any).resources || [];
 
     return (
         <div className="space-y-4">
-            <div className="p-4 bg-slate-900 border border-white/5 rounded-lg">
-                <h4 className="text-white font-black">الأسئلة الشائعة</h4>
-                {(siteData?.faqs || []).map((f: any, i: number) => (
-                    <div key={i} className="mt-3">
-                        <div className="text-slate-200 font-bold">{f.q}</div>
-                        <div className="text-slate-400 text-sm mt-1">{f.a}</div>
-                    </div>
-                ))}
-            </div>
-
-            <div className="p-4 bg-slate-900 border border-white/5 rounded-lg">
-                <h4 className="text-white font-black">آراء العملاء</h4>
-                {(siteData?.testimonials || []).map((t: any, i: number) => (
-                    <div key={i} className="mt-3">
-                        <div className="text-slate-200 font-bold">
-                            {t.name} — {t.role}
-                        </div>
-                        <div className="text-slate-400 text-sm mt-1">{t.text}</div>
-                    </div>
-                ))}
+            <h3 className="text-lg font-bold text-white">إحصائيات إضافية</h3>
+            <div className="grid grid-cols-2 gap-4">
+                <div className="bg-slate-900/50 p-4 rounded-xl border border-white/5">
+                    <p className="text-slate-400 text-xs">إجمالي المصادر</p>
+                    <p className="text-xl font-bold text-white">{resources.length}</p>
+                </div>
+                {/* Additional stats can be added here */}
             </div>
         </div>
     );

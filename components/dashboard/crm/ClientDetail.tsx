@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useData } from '../../../context/DataContext';
+import { useBusiness } from '../../../context/BusinessContext';
 import { Client } from '../../../types';
 import { X, Save, Trash2, Phone, Mail, Globe, MapPin, Tag, Calendar, User, DollarSign, FileText } from 'lucide-react';
 
@@ -9,7 +9,8 @@ interface ClientDetailProps {
 }
 
 const ClientDetail: React.FC<ClientDetailProps> = ({ client, onClose }) => {
-    const { updateClient, deleteClient } = useData();
+    const { updateClient, deleteClient, invoices } = useBusiness();
+    const clientInvoices = invoices.filter(i => i.clientId === client.id);
     const [formData, setFormData] = useState<Client>(client);
     const [tagInput, setTagInput] = useState('');
 

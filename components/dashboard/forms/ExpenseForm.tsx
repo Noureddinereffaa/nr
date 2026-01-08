@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Expense } from '../../../types';
 import Modal from '../../ui/Modal';
 import Input from '../../ui/Input';
-import { useData } from '../../../context/DataContext';
+import { useBusiness } from '../../../context/BusinessContext';
 
 interface ExpenseFormProps {
     isOpen: boolean;
@@ -10,7 +10,7 @@ interface ExpenseFormProps {
 }
 
 const ExpenseForm: React.FC<ExpenseFormProps> = ({ isOpen, onClose }) => {
-    const { addExpense } = useData();
+    const { addExpense, updateExpense } = useBusiness();
     const [formData, setFormData] = useState<Partial<Expense>>({
         category: 'tools',
         currency: 'DZD',

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useData } from '../../../context/DataContext';
+import { useSystem } from '../../../context/SystemContext';
 import { useUI } from '../../../context/UIContext';
 import { Palette, Check, Sparkles, Eye, Layout, Upload } from 'lucide-react';
 import ImageUploader from '../../ui/ImageUploader';
@@ -34,7 +34,7 @@ const TEMPLATES = [
 ];
 
 const BrandSettings: React.FC = () => {
-    const { siteData, updateSiteData } = useData();
+    const { siteData, updateSiteData } = useSystem();
     const { themeConfig, updateTheme } = useUI();
     const brand = (siteData.brand || {}) as any;
     const [showPreview, setShowPreview] = useState(true);

@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { Copy, Check, Eye, EyeOff, Terminal, Shield, Globe, Zap, Key, Save, Cpu, Image as ImageIcon } from 'lucide-react';
-import { useData } from '../../../context/DataContext';
+import { useSystem } from '../../../context/SystemContext';
 
 const APISettings: React.FC = () => {
-    const { siteData, updateAIConfig } = useData();
+    const { aiConfig, updateAIConfig, updateSiteData, siteData } = useSystem();
 
     // NR-OS Access Key State
     const [showSovereignKey, setShowSovereignKey] = useState(false);

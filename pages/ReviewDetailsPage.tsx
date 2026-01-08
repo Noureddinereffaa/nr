@@ -30,14 +30,18 @@ import {
     X,
     Mail
 } from 'lucide-react';
-import { useData } from '../context/DataContext';
+import { useBusiness } from '../context/BusinessContext';
+import { useSystem } from '../context/SystemContext';
 import { DecisionPage } from '../types';
 import LoadingSpinner from '../components/ui/LoadingSpinner';
 
 const ReviewDetailsPage: React.FC = () => {
     const { slug } = useParams<{ slug: string }>();
     const navigate = useNavigate();
-    const { siteData, isLoading } = useData();
+    const { serviceRequests, updateRequest } = useBusiness();
+    const { siteData } = useSystem();
+    const isLoading = false;
+    const request = serviceRequests?.find(r => r.id === slug);
     const [page, setPage] = useState<DecisionPage | null>(null);
     const [selectedImage, setSelectedImage] = useState<string | null>(null);
     const [isLeadMagnetOpen, setIsLeadMagnetOpen] = useState(false);

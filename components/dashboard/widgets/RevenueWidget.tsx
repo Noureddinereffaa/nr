@@ -1,10 +1,10 @@
 import React from 'react';
 import { TrendingUp, ArrowUpRight, DollarSign } from 'lucide-react';
-import { useData } from '../../../context/DataContext';
+import { useBusiness } from '../../../context/BusinessContext';
 
 const RevenueWidget: React.FC = () => {
-    const { siteData } = useData();
-    const totalPaid = (siteData.invoices || []).reduce((acc, inv) => inv.status === 'paid' ? acc + inv.total : acc, 0);
+    const { invoices, expenses } = useBusiness();
+    const totalPaid = (invoices || []).reduce((acc, inv) => inv.status === 'paid' ? acc + inv.total : acc, 0);
 
     return (
         <div className="flex flex-col justify-between h-full">

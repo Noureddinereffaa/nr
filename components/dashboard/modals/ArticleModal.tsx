@@ -1,12 +1,14 @@
 import React, { useState } from 'react';
+import { useSystem } from '../../../context/SystemContext';
+import { useContent } from '../../../context/ContentContext';
 import { useUI } from '../../../context/UIContext';
-import { useData } from '../../../context/DataContext';
 import { AIService } from '../../../lib/ai-service';
 import { X, FileText, Plus } from 'lucide-react';
 
 const ArticleModal: React.FC = () => {
     const { isArticleModalOpen, closeArticleModal } = useUI();
-    const { siteData, addArticle } = useData();
+    const { siteData } = useSystem();
+    const { addArticle } = useContent();
 
     const [topic, setTopic] = useState('');
 

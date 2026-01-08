@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Invoice, Client, InvoiceItem } from '../../../types';
 import Modal from '../../ui/Modal';
 import Input from '../../ui/Input';
-import { useData } from '../../../context/DataContext';
+import { useBusiness } from '../../../context/BusinessContext';
+import { useSystem } from '../../../context/SystemContext';
 import { Plus, Trash2, Calculator } from 'lucide-react';
 
 interface InvoiceFormProps {
@@ -12,7 +13,8 @@ interface InvoiceFormProps {
 }
 
 const InvoiceForm: React.FC<InvoiceFormProps> = ({ isOpen, onClose, initialData }) => {
-    const { addInvoice, updateInvoice, siteData } = useData();
+    const { addInvoice, updateInvoice, clients } = useBusiness();
+    const { siteData } = useSystem();
     const [formData, setFormData] = useState<Partial<Invoice>>({
         invoiceNumber: '',
         clientId: '',
@@ -96,7 +98,7 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ isOpen, onClose, initialData 
 
         try {
             // Find client name if needed for snapshot
-            const client = siteData.clients.find(c => (c as any).id === formData.clientId);
+            const client = clients.find(c => (c as any).id === formData.clientId);
             const finalData = {
                 ...formData,
                 clientName: client ? client.name : (formData.clientName || 'Unknown'),
@@ -178,7 +180,7 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ isOpen, onClose, initialData 
                         required
                     >
                         <option value="">اختر عميل...</option>
-                        {siteData.clients.map(c => (
+                        {clients.map(c => (
                             <option key={c.id} value={c.id}>{c.name}</option>
                         ))}
                     </select>

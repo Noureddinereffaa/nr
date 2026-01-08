@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useSystem } from '../../../../context/SystemContext';
+import { useContent } from '../../../../context/ContentContext';
 import { AIService } from '../../../../lib/ai-service';
 import {
     Globe,
@@ -29,14 +30,15 @@ import {
 import { CompetitorData, SocialPost } from '../../../../types';
 
 const MarketingGrowth: React.FC = () => {
-    const { socialPosts, integrations, updateIntegration, addSocialPost, aiConfig } = useSystem();
+    const { socialPosts, integrations, updateIntegration, addSocialPost, aiConfig, autopilot, updateSiteData, siteData } = useSystem();
+    const { articles, addArticle } = useContent();
     const [competitors, setCompetitors] = useState<CompetitorData[]>([]);
     const [isAnalyzing, setIsAnalyzing] = useState(false);
     const [isPlanning, setIsPlanning] = useState(false);
     const [viewMode, setViewMode] = useState<'intel' | 'calendar' | 'autopilot' | 'connections'>('intel');
     const [isSyncing, setIsSyncing] = useState(false);
 
-    const autopilot = siteData.autopilot || {
+    const currentAutopilot = autopilot || {
         enabled: false,
         frequency: 'daily',
         platforms: ['linkedin', 'twitter', 'google'],
@@ -47,16 +49,16 @@ const MarketingGrowth: React.FC = () => {
     useEffect(() => {
         const loadIntel = async () => {
             setIsAnalyzing(true);
-            const data = await AIService.analyzeCompetitors(siteData.aiConfig);
+            const data = await AIService.analyzeCompetitors(aiConfig);
             setCompetitors(data);
             setIsAnalyzing(false);
         };
         loadIntel();
-    }, [siteData.aiConfig]);
+    }, [aiConfig]);
 
     const handleGenerateSocial = async () => {
         setIsPlanning(true);
-        const newPosts = await AIService.generateSocialSchedule(siteData.aiConfig);
+        const newPosts = await AIService.generateSocialSchedule(aiConfig);
         for (const post of newPosts) {
             await addSocialPost(post);
         }
@@ -69,7 +71,7 @@ const MarketingGrowth: React.FC = () => {
             // Import dynamically to avoid circular dependencies if any, 
             // but here we just use it directly since it's a lib
             const { AutomationEngine } = await import('../../../../lib/automation-engine');
-            await AutomationEngine.run(siteData, updateSiteData, addArticle, addSocialPost);
+            await AutomationEngine.run(siteData, updateSiteData, async (a) => { await addArticle(a); }, addSocialPost);
         } catch (error) {
             console.error("Manual Sync Failed", error);
         } finally {
@@ -79,8 +81,8 @@ const MarketingGrowth: React.FC = () => {
 
     const getDailyProgress = () => {
         const today = new Date().toISOString().split('T')[0];
-        const publishedToday = siteData.articles.filter(a => a.date?.startsWith(today)).length;
-        const max = autopilot.maxDailyPosts || 3;
+        const publishedToday = articles.filter(a => a.date?.startsWith(today)).length;
+        const max = currentAutopilot.maxDailyPosts || 3;
         return { count: publishedToday, max, percent: Math.min((publishedToday / max) * 100, 100) };
     };
 
@@ -133,7 +135,7 @@ const MarketingGrowth: React.FC = () => {
                                 <Globe className="text-[var(--accent-indigo)]" size={20} />
                                 استخبارات المنافسين
                             </h4>
-                            <p className="text-slate-500 text-xs mt-1">تتبع أداء أقوى المنافسين في قطاع {siteData.aiConfig.field}</p>
+                            <p className="text-slate-500 text-xs mt-1">تتبع أداء أقوى المنافسين في قطاع {aiConfig.field}</p>
                         </div>
                         <button className="p-2 bg-slate-800 rounded-xl hover:bg-[var(--accent-indigo)] transition-all text-white"><ChevronRight size={18} /></button>
                     </div>
@@ -220,7 +222,7 @@ const MarketingGrowth: React.FC = () => {
                     <div className="flex-1 space-y-4 overflow-y-auto max-h-[500px] no-scrollbar pr-2">
                         {viewMode === 'connections' ? (
                             <div className="grid grid-cols-1 gap-4">
-                                {(siteData.integrations || []).map((integration) => {
+                                {(integrations || []).map((integration) => {
                                     const Icon = integration.id === 'google_business' ? Search : integration.id === 'linkedin' ? Linkedin : integration.id === 'twitter' ? Twitter : integration.id === 'facebook' ? Facebook : Instagram;
                                     const isConnected = integration.status === 'connected';
 
@@ -287,10 +289,10 @@ const MarketingGrowth: React.FC = () => {
                                             </div>
                                         </div>
                                         <button
-                                            onClick={() => updateSiteData({ autopilot: { ...autopilot, enabled: !autopilot.enabled } })}
-                                            className={`px-6 py-2 rounded-xl font-black text-xs transition-all ${autopilot.enabled ? 'bg-red-500/10 text-red-500 border border-red-500/20 hover:bg-red-500/20' : 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 hover:bg-emerald-500/20'}`}
+                                            onClick={() => updateSiteData({ autopilot: { ...currentAutopilot, enabled: !currentAutopilot.enabled } })}
+                                            className={`px-6 py-2 rounded-xl font-black text-xs transition-all ${currentAutopilot.enabled ? 'bg-red-500/10 text-red-500 border border-red-500/20 hover:bg-red-500/20' : 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 hover:bg-emerald-500/20'}`}
                                         >
-                                            {autopilot.enabled ? 'إيقاف مؤقت' : 'تفعيل الآن'}
+                                            {currentAutopilot.enabled ? 'إيقاف مؤقت' : 'تفعيل الآن'}
                                         </button>
                                     </div>
 
@@ -322,7 +324,7 @@ const MarketingGrowth: React.FC = () => {
 
                                     <button
                                         onClick={handleManualSync}
-                                        disabled={isSyncing || !autopilot.enabled}
+                                        disabled={isSyncing || !currentAutopilot.enabled}
                                         className="w-full py-3 bg-white text-slate-900 rounded-xl font-black text-xs flex items-center justify-center gap-2 hover:scale-[1.02] transition-all disabled:opacity-50 disabled:hover:scale-100"
                                     >
                                         {isSyncing ? (
@@ -365,15 +367,15 @@ const MarketingGrowth: React.FC = () => {
                                     </h6>
                                     <div className="flex flex-wrap gap-2">
                                         {['linkedin', 'twitter', 'google', 'facebook', 'instagram'].map(p => {
-                                            const isActive = autopilot.platforms.includes(p as any);
+                                            const isActive = (currentAutopilot.platforms || []).includes(p as any);
                                             return (
                                                 <button
                                                     key={p}
                                                     onClick={() => {
                                                         const newP = isActive
-                                                            ? autopilot.platforms.filter(x => x !== p)
-                                                            : [...autopilot.platforms, p as any];
-                                                        updateSiteData({ autopilot: { ...autopilot, platforms: newP } });
+                                                            ? currentAutopilot.platforms.filter(x => x !== p)
+                                                            : [...currentAutopilot.platforms, p as any];
+                                                        updateSiteData({ autopilot: { ...currentAutopilot, platforms: newP } });
                                                     }}
                                                     className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase transition-all border ${isActive ? 'bg-[var(--accent-indigo)] text-white border-[var(--accent-indigo)]' : 'bg-slate-950 text-slate-600 border-white/5'}`}
                                                 >
@@ -409,13 +411,13 @@ const MarketingGrowth: React.FC = () => {
                                 </div>
                             </div>
                         ) : viewMode === 'intel' ? (
-                            (siteData.socialPosts || []).length === 0 ? (
+                            (socialPosts || []).length === 0 ? (
                                 <div className="flex-1 flex flex-col items-center justify-center py-12 text-center">
                                     <Zap className="text-slate-700 mb-4" size={40} />
                                     <p className="text-slate-500 text-sm max-w-xs">لا يوجد محتوى مجدول حالياً. اضغط على "توليد خطة" للبدء.</p>
                                 </div>
                             ) : (
-                                (siteData.socialPosts || []).slice(0, 8).map(post => {
+                                (socialPosts || []).slice(0, 8).map(post => {
                                     const Icon = post.platform === 'linkedin' ? Linkedin : post.platform === 'twitter' ? Twitter : post.platform === 'facebook' ? Facebook : Instagram;
                                     return (
                                         <div key={post.id} className="p-4 bg-slate-800/20 border border-white/5 rounded-2xl flex gap-4 hover:bg-white/[0.02] transition-all group">
@@ -451,7 +453,7 @@ const MarketingGrowth: React.FC = () => {
                             )
                         ) : (
                             <div className="grid grid-cols-2 gap-4">
-                                {(siteData.socialPosts || []).slice(0, 30).map((post, idx) => (
+                                {(socialPosts || []).slice(0, 30).map((post, idx) => (
                                     <div key={post.id} className="p-3 bg-slate-900 border border-white/5 rounded-xl flex flex-col gap-2">
                                         <div className="flex justify-between items-center">
                                             <div className="w-2 h-2 rounded-full bg-[var(--accent-indigo)]"></div>
@@ -477,14 +479,14 @@ const MarketingGrowth: React.FC = () => {
                 <div className="flex-1 text-center md:text-right">
                     <h4 className="text-xl font-black text-white mb-2 underline decoration-[var(--accent-indigo)] underline-offset-8">تحليل اتجاهات النيش العميق</h4>
                     <p className="text-slate-400 text-sm leading-relaxed">
-                        بناءً على الكلمات المفتاحية <strong>{siteData.aiConfig.field}</strong> و <strong>{siteData.aiConfig.field.split(' ')[0]}</strong>، هناك ارتفاع في الطلب على تقنيات الأتمتة بنسبة 24% هذا الشهر. نوصي بتركيز المحتوى حول "الكفاءة التشغيلية" في الأسبوع القادم.
+                        بناءً على الكلمات المفتاحية <strong>{aiConfig.field}</strong> و <strong>{aiConfig.field.split(' ')[0]}</strong>، هناك ارتفاع في الطلب على تقنيات الأتمتة بنسبة 24% هذا الشهر. نوصي بتركيز المحتوى حول "الكفاءة التشغيلية" في الأسبوع القادم.
                     </p>
                 </div>
                 <button
                     onClick={async () => {
-                        const topic = `الدليل الشامل للسيادة الرقمية في قطاع ${siteData.aiConfig.field} لعام 2025`;
+                        const topic = `الدليل الشامل للسيادة الرقمية في قطاع ${aiConfig.field} لعام 2025`;
                         setIsPlanning(true);
-                        const article = await AIService.generateArticle(topic, siteData.aiConfig, true);
+                        const article = await AIService.generateArticle(topic, aiConfig, true) as any;
                         await addArticle(article);
                         setIsPlanning(false);
                     }}

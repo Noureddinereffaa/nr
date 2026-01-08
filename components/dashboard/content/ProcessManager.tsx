@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
-import { useData } from '../../../context/DataContext';
+import { useSystem } from '../../../context/SystemContext';
 import { ProcessStep } from '../../../types';
 import { Edit2, Save, X, Plus, Trash2, ArrowUp, ArrowDown, GitMerge } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const ProcessManager: React.FC = () => {
-    const { siteData, updateSiteData } = useData();
-    const process = siteData.process || [];
+    const { siteData, updateSiteData } = useSystem();
+    const siteProcess = (siteData as any).process || [];
 
     const [editingIndex, setEditingIndex] = useState<number | null>(null);
     const [editForm, setEditForm] = useState<ProcessStep>({ step: '', title: '', desc: '' });
@@ -23,39 +23,39 @@ const ProcessManager: React.FC = () => {
 
     const saveEdit = () => {
         if (editingIndex !== null) {
-            const newItems = [...process];
+            const newItems = [...siteProcess];
             newItems[editingIndex] = editForm;
-            updateSiteData({ process: newItems });
+            updateSiteData({ process: newItems } as any);
             cancelEdit();
         }
     };
 
     const addItem = () => {
-        const nextStepNum = process.length + 1;
+        const nextStepNum = siteProcess.length + 1;
         const nextStep = nextStepNum.toString().padStart(2, '0');
         const newItem: ProcessStep = {
             step: nextStep,
             title: 'مرحلة جديدة',
             desc: 'صف خطوات هذه المرحلة بوضوح للعملاء...'
         };
-        updateSiteData({ process: [...process, newItem] });
+        updateSiteData({ process: [...siteProcess, newItem] } as any);
     };
 
     const deleteItem = (index: number) => {
         if (window.confirm('هل أنت متأكد من حذف هذه المرحلة؟')) {
-            const newItems = process.filter((_, i) => i !== index);
-            updateSiteData({ process: newItems });
+            const newItems = siteProcess.filter((_: any, i: number) => i !== index);
+            updateSiteData({ process: newItems } as any);
         }
     };
 
     const moveItem = (index: number, direction: 'up' | 'down') => {
         if (direction === 'up' && index === 0) return;
-        if (direction === 'down' && index === process.length - 1) return;
+        if (direction === 'down' && index === siteProcess.length - 1) return;
 
-        const newItems = [...process];
+        const newItems = [...siteProcess];
         const swapIndex = direction === 'up' ? index - 1 : index + 1;
         [newItems[index], newItems[swapIndex]] = [newItems[swapIndex], newItems[index]];
-        updateSiteData({ process: newItems });
+        updateSiteData({ process: newItems } as any);
     };
 
     return (
@@ -83,7 +83,7 @@ const ProcessManager: React.FC = () => {
                 <div className="absolute top-0 bottom-0 left-[2.25rem] w-0.5 bg-gradient-to-b from-[var(--accent-indigo)]/50 via-[var(--accent-indigo)]/20 to-transparent -z-10 hidden md:block"></div>
 
                 <AnimatePresence mode="popLayout">
-                    {process.map((item, index) => (
+                    {siteProcess.map((item: any, index: number) => (
                         <motion.div
                             key={index}
                             layout
@@ -105,9 +105,9 @@ const ProcessManager: React.FC = () => {
                                         <ArrowUp size={16} />
                                     </button>
                                     <button
-                                        disabled={index === process.length - 1}
+                                        disabled={index === siteProcess.length - 1}
                                         onClick={() => moveItem(index, 'down')}
-                                        className={`p-2 transition-colors rounded-xl ${index === process.length - 1 ? 'text-slate-800' : 'text-slate-500 hover:bg-white/5 hover:text-white'}`}
+                                        className={`p-2 transition-colors rounded-xl ${index === siteProcess.length - 1 ? 'text-slate-800' : 'text-slate-500 hover:bg-white/5 hover:text-white'}`}
                                     >
                                         <ArrowDown size={16} />
                                     </button>
@@ -187,7 +187,7 @@ const ProcessManager: React.FC = () => {
                     ))}
                 </AnimatePresence>
 
-                {process.length === 0 && (
+                {siteProcess.length === 0 && (
                     <motion.div
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}

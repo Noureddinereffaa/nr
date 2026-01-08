@@ -10,7 +10,9 @@ import {
     Zap,
     X
 } from 'lucide-react';
-import { useData } from '../../context/DataContext';
+import { useSystem } from '../../context/SystemContext';
+import { useContent } from '../../context/ContentContext';
+import { useBusiness } from '../../context/BusinessContext';
 
 interface CommandBarProps {
     isOpen: boolean;
@@ -19,7 +21,9 @@ interface CommandBarProps {
 }
 
 const CommandBar: React.FC<CommandBarProps> = ({ isOpen, onClose, onNavigate }) => {
-    const { siteData } = useData();
+    const { aiConfig, siteData } = useSystem();
+    const { articles, decisionPages } = useContent();
+    const { clients, projects, invoices } = useBusiness();
     const [query, setQuery] = useState('');
     const inputRef = useRef<HTMLInputElement>(null);
 

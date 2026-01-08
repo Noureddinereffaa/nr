@@ -1,10 +1,10 @@
 import React from 'react';
 import { Briefcase, Clock, CheckCircle2 } from 'lucide-react';
-import { useData } from '../../../context/DataContext';
+import { useBusiness } from '../../../context/BusinessContext';
 
 const ProjectsWidget: React.FC = () => {
-    const { siteData } = useData();
-    const activeProjects = (siteData.projects || []).filter(p => p.status === 'in-progress');
+    const { projects } = useBusiness();
+    const activeProjects = (projects || []).filter(p => p.status === 'in-progress');
 
     return (
         <div className="flex flex-col h-full">
@@ -14,13 +14,14 @@ const ProjectsWidget: React.FC = () => {
                         <Clock size={12} className="text-amber-500" /> قيد التنفيذ
                     </div>
                     <div className="text-2xl font-black text-white">{activeProjects.length}</div>
+                    <span className="text-xs text-slate-500">{projects.length} Total Operating Visionary Projects</span>
                 </div>
                 <div className="p-4 bg-white/5 rounded-2xl border border-white/5">
                     <div className="flex items-center gap-2 text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">
                         <CheckCircle2 size={12} className="text-emerald-500" /> مكتملة
                     </div>
                     <div className="text-2xl font-black text-white">
-                        {(siteData.projects || []).filter(p => p.status === 'completed').length}
+                        {(projects || []).filter(p => p.status === 'completed').length}
                     </div>
                 </div>
             </div>

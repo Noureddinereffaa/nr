@@ -19,6 +19,8 @@ interface SystemContextType {
     faqs: any[];
     process: any[];
     siteTexts: any;
+    autopilot: any;
+    siteData: SiteData;
     updateSiteData: (data: Partial<SiteData>) => Promise<void>;
     updateIntegration: (id: string, updates: Partial<SocialIntegration>) => Promise<void>;
     addSocialPost: (post: Omit<SocialPost, 'id'>) => Promise<void>;
@@ -211,6 +213,8 @@ export const SystemProvider: React.FC<{ children: React.ReactNode }> = ({ childr
             faqs: siteData.faqs || [],
             process: siteData.process || [],
             siteTexts: (siteData as any).siteTexts || {},
+            autopilot: siteData.autopilot || { enabled: false, frequency: 'weekly', platforms: [], strategyFocus: 'growth' },
+            siteData,
             updateSiteData,
             updateIntegration,
             addSocialPost,

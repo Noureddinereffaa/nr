@@ -1,5 +1,5 @@
 import React from 'react';
-import { useData } from '../../../context/DataContext';
+import { useSystem } from '../../../context/SystemContext';
 import {
     Layout,
     Users,
@@ -12,7 +12,7 @@ import {
 } from 'lucide-react';
 
 const ModuleSettings: React.FC = () => {
-    const { siteData, updateSiteData } = useData();
+    const { siteData, updateSiteData } = useSystem();
     const features = siteData.features || {
         crm: true,
         financials: true,

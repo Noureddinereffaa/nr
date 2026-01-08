@@ -1,16 +1,14 @@
 import React, { useState } from 'react';
-import { useData } from '../../../../context/DataContext';
+import { useBusiness } from '../../../../context/BusinessContext';
 import { MessageSquare, Plus, Search, Filter, Clock, CheckCircle, AlertCircle, ArrowRight } from 'lucide-react';
 import { ServiceRequest } from '../../../../types';
 
 const Requests: React.FC = () => {
-    const { siteData, updateRequest, deleteRequest } = useData();
+    const { serviceRequests, updateRequest, deleteRequest } = useBusiness();
     const [searchTerm, setSearchTerm] = useState('');
     const [filterStatus, setFilterStatus] = useState<string>('all');
 
-    const requests = siteData.serviceRequests || [];
-
-    const filteredRequests = requests.filter(req => {
+    const filteredRequests = (serviceRequests || []).filter(req => {
         const matchesSearch =
             (req.clientName?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
             (req.serviceTitle?.toLowerCase() || '').includes(searchTerm.toLowerCase());
@@ -87,8 +85,8 @@ const Requests: React.FC = () => {
                             >
                                 <div className="flex justify-between items-start mb-6">
                                     <div className={`px-4 py-1.5 rounded-full text-[8px] font-black uppercase tracking-widest flex items-center gap-2 border ${req.status === 'new' ? 'bg-amber-500/10 text-amber-400 border-amber-500/20' :
-                                            req.status === 'completed' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' :
-                                                'bg-blue-500/10 text-blue-400 border-blue-500/20'
+                                        req.status === 'completed' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' :
+                                            'bg-blue-500/10 text-blue-400 border-blue-500/20'
                                         }`}>
                                         {getStatusIcon(req.status)}
                                         {req.status}

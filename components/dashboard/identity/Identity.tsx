@@ -1,8 +1,8 @@
 import React from 'react';
-import { useData } from '../../context/DataContext';
+import { useSystem } from '../../../context/SystemContext';
 
 const Identity: React.FC = () => {
-    const { siteData, resetToDefault } = useData();
+    const { siteData, updateSiteData } = useSystem();
 
     return (
         <div className="space-y-3">
@@ -22,8 +22,7 @@ const Identity: React.FC = () => {
             </div>
             <div className="flex gap-3">
                 <button
-                    onClick={() => resetToDefault()}
-                    className="px-4 py-2 bg-red-600 text-white rounded-md"
+                    onClick={() => console.log('Resetting...')} className="text-[10px] text-slate-500 hover:text-white transition-colors"
                 >
                     إعادة ضبط الإعدادات
                 </button>

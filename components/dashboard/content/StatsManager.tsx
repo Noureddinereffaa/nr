@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
-import { useData } from '../../../context/DataContext';
+import { useSystem } from '../../../context/SystemContext';
 import { Stat } from '../../../types';
 import { Edit2, Save, X, ShieldCheck, Users, Briefcase, Zap, Activity } from 'lucide-react';
 import * as LucideIcons from 'lucide-react';
 
 const StatsManager: React.FC = () => {
-    const { siteData, updateSiteData } = useData();
-    const stats = siteData.stats || [];
-    
+    const { siteData, updateSiteData } = useSystem();
+    const stats = (siteData as any).stats || [];
+
     // Edit State
     const [editingIndex, setEditingIndex] = useState<number | null>(null);
     const [editForm, setEditForm] = useState<Stat>({ icon: 'Activity', label: '', val: '' });
@@ -26,7 +26,7 @@ const StatsManager: React.FC = () => {
         if (editingIndex !== null) {
             const newItems = [...stats];
             newItems[editingIndex] = editForm;
-            updateSiteData({ stats: newItems });
+            updateSiteData({ stats: newItems } as any);
             cancelEdit();
         }
     };
@@ -86,8 +86,8 @@ const StatsManager: React.FC = () => {
                                 </div>
                                 <div className="text-2xl font-black text-white mb-1" dir="ltr">{item.val}</div>
                                 <div className="text-sm text-slate-400 font-bold">{item.label}</div>
-                                
-                                <button 
+
+                                <button
                                     onClick={() => startEdit(index, item)}
                                     className="absolute top-2 left-2 p-1.5 text-indigo-400 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-slate-800 rounded-lg"
                                 >

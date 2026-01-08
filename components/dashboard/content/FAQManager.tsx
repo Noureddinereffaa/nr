@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
-import { useData } from '../../../context/DataContext';
+import { useSystem } from '../../../context/SystemContext';
 import { FAQItem } from '../../../types';
 import { Plus, Trash2, Edit2, Save, X } from 'lucide-react';
 
 const FAQManager: React.FC = () => {
-    const { siteData, updateSiteData } = useData();
-    const faqs = siteData.faqs || [];
-    
+    const { siteData, updateSiteData } = useSystem();
+    const faqs = (siteData as any).faqs || [];
+
     // Edit State
     const [editingIndex, setEditingIndex] = useState<number | null>(null);
     const [editForm, setEditForm] = useState<FAQItem>({ q: '', a: '' });
@@ -18,7 +18,7 @@ const FAQManager: React.FC = () => {
     const handleDelete = (index: number) => {
         if (window.confirm('هل أنت متأكد من حذف هذا السؤال؟')) {
             const newFaqs = faqs.filter((_, i) => i !== index);
-            updateSiteData({ faqs: newFaqs });
+            updateSiteData({ faqs: newFaqs } as any);
         }
     };
 
@@ -36,14 +36,14 @@ const FAQManager: React.FC = () => {
         if (editingIndex !== null) {
             const newFaqs = [...faqs];
             newFaqs[editingIndex] = editForm;
-            updateSiteData({ faqs: newFaqs });
+            updateSiteData({ faqs: newFaqs } as any);
             cancelEdit();
         }
     };
 
     const addNew = () => {
         if (newItem.q && newItem.a) {
-            updateSiteData({ faqs: [...faqs, newItem] });
+            updateSiteData({ faqs: [...faqs, newItem] } as any);
             setNewItem({ q: '', a: '' });
             setIsAdding(false);
         }
@@ -53,7 +53,7 @@ const FAQManager: React.FC = () => {
         <div className="space-y-6">
             <div className="flex justify-between items-center">
                 <h3 className="text-xl font-bold text-white">الأسئلة الشائعة ({faqs.length})</h3>
-                <button 
+                <button
                     onClick={() => setIsAdding(true)}
                     className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg transition-colors"
                 >
@@ -78,13 +78,13 @@ const FAQManager: React.FC = () => {
                         className="w-full bg-slate-950 border border-white/10 rounded-lg p-2 text-white h-24"
                     />
                     <div className="flex justify-end gap-2">
-                        <button 
+                        <button
                             onClick={() => setIsAdding(false)}
                             className="text-slate-400 hover:text-white px-3 py-1"
                         >
                             إلغاء
                         </button>
-                        <button 
+                        <button
                             onClick={addNew}
                             className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-1 rounded-lg"
                         >
@@ -126,13 +126,13 @@ const FAQManager: React.FC = () => {
                                     <p className="text-sm text-slate-400">{item.a}</p>
                                 </div>
                                 <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                    <button 
+                                    <button
                                         onClick={() => startEdit(index, item)}
                                         className="p-2 text-indigo-400 hover:bg-slate-800 rounded-lg"
                                     >
                                         <Edit2 size={16} />
                                     </button>
-                                    <button 
+                                    <button
                                         onClick={() => handleDelete(index)}
                                         className="p-2 text-red-400 hover:bg-slate-800 rounded-lg"
                                     >

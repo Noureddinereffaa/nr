@@ -15,12 +15,16 @@ import {
     Newspaper,
     Shield
 } from 'lucide-react';
-import { useData } from '../../../context/DataContext';
+import { useSystem } from '../../../context/SystemContext';
+import { useContent } from '../../../context/ContentContext';
+import { useBusiness } from '../../../context/BusinessContext';
 import { useUI } from '../../../context/UIContext';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const UnifiedCommand: React.FC = () => {
-    const { siteData } = useData();
+    const { siteData } = useSystem();
+    const { articles } = useContent();
+    const { clients, projects, invoices } = useBusiness();
     const { isCommandPaletteOpen, closeCommandPalette, isShieldMode } = useUI();
     const [query, setQuery] = useState('');
     const [selectedIndex, setSelectedIndex] = useState(0);
@@ -61,11 +65,11 @@ const UnifiedCommand: React.FC = () => {
     const results = useMemo(() => {
         const q = query.toLowerCase();
 
-        const articles = (siteData.articles || [])
+        const filteredArticles = (articles || [])
             .filter(a => a.title.toLowerCase().includes(q) || a.excerpt?.toLowerCase().includes(q))
             .map(a => ({ id: a.id, label: a.title, type: 'Article', tab: 'content-manager', icon: Newspaper, subtitle: a.category }));
 
-        const clients = (siteData.clients || [])
+        const filteredClients = (clients || [])
             .filter(c => c.name.toLowerCase().includes(q) || c.company?.toLowerCase().includes(q))
             .map(c => ({
                 id: c.id,
@@ -76,11 +80,11 @@ const UnifiedCommand: React.FC = () => {
                 subtitle: isShieldMode ? '****@****.***' : c.email
             }));
 
-        const projects = (siteData.projects || [])
+        const filteredProjects = (projects || [])
             .filter(p => p.title.toLowerCase().includes(q))
             .map(p => ({ id: p.id, label: p.title, type: 'Project', tab: 'projects', icon: Briefcase, subtitle: p.category }));
 
-        const invoices = (siteData.invoices || [])
+        const filteredInvoices = (invoices || [])
             .filter(i => (`Inv-${i.invoiceNumber}`).toLowerCase().includes(q))
             .map(i => ({
                 id: i.id,
@@ -91,8 +95,8 @@ const UnifiedCommand: React.FC = () => {
                 subtitle: isShieldMode ? '***.*** DZD' : `${i.total} DZD`
             }));
 
-        return { articles, clients, projects, invoices };
-    }, [query, siteData, isShieldMode]);
+        return { articles: filteredArticles, clients: filteredClients, projects: filteredProjects, invoices: filteredInvoices };
+    }, [query, articles, clients, projects, invoices, isShieldMode]);
 
     const allResults = [...results.articles, ...results.clients, ...results.projects, ...results.invoices].slice(0, 10);
     const totalResults = allResults.length;

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useData } from '../../../context/DataContext';
+import { useSystem } from '../../../context/SystemContext';
 import { Type, Save, RotateCcw, ChevronDown, ChevronUp, Navigation, Home, Briefcase, FolderOpen, Cog, MessageSquare, Mail, FileText, BookOpen } from 'lucide-react';
 import { DEFAULT_SITE_TEXTS, SiteTexts } from '../../../types';
 
@@ -70,7 +70,7 @@ const TextField: React.FC<TextFieldProps> = ({ label, value, onChange, placehold
 );
 
 const TextSettings: React.FC = () => {
-    const { siteData, updateSiteData } = useData();
+    const { siteData, updateSiteData } = useSystem();
 
     // Initialize with existing texts or defaults
     const currentTexts: SiteTexts = {
@@ -125,8 +125,8 @@ const TextSettings: React.FC = () => {
                         onClick={handleSave}
                         disabled={!hasChanges}
                         className={`flex items-center gap-2 px-6 py-2 rounded-lg text-xs font-bold transition-all ${hasChanges
-                                ? 'bg-indigo-600 text-white hover:bg-indigo-500'
-                                : 'bg-slate-800 text-slate-500 cursor-not-allowed'
+                            ? 'bg-indigo-600 text-white hover:bg-indigo-500'
+                            : 'bg-slate-800 text-slate-500 cursor-not-allowed'
                             }`}
                     >
                         <Save size={14} />

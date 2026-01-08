@@ -1,10 +1,12 @@
 
 import React from 'react';
-import { useData } from '../context/DataContext';
+import { useSystem } from '../context/SystemContext';
+import { useUI } from '../context/UIContext';
 import { MapPin, ShieldCheck, Verified } from 'lucide-react';
 
 const AutoEntrepreneurCard: React.FC = () => {
-  const { siteData } = useData();
+  const { siteData } = useSystem();
+  const { isShieldMode } = useUI();
   const { profile } = siteData;
 
   return (

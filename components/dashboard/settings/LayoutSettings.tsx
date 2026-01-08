@@ -1,5 +1,5 @@
-import React from 'react';
-import { useData } from '../../../context/DataContext';
+import { useSystem } from '../../../context/SystemContext';
+import { useUI } from '../../../context/UIContext';
 import {
     Layout,
     GripVertical,
@@ -17,7 +17,8 @@ const WIDGET_LABELS = {
 };
 
 const LayoutSettings: React.FC = () => {
-    const { siteData, updateSiteData } = useData();
+    const { siteData, updateSiteData } = useSystem();
+    const { themeConfig, updateTheme } = useUI();
     const layout = siteData.dashboardLayout || [
         { id: 'revenue_stats', visible: true, order: 0, size: 'medium' },
         { id: 'ai_insights', visible: true, order: 1, size: 'medium' },

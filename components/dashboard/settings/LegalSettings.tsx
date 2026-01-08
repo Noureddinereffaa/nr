@@ -1,15 +1,15 @@
 import React from 'react';
-import { useData } from '../../../context/DataContext';
+import { useSystem } from '../../../context/SystemContext';
 import { Scale, FileText } from 'lucide-react';
 
 const LegalSettings: React.FC = () => {
-    const { siteData, updateSiteData } = useData();
-    const legal = (siteData.legal || {}) as any;
+    const { siteData, updateSiteData } = useSystem();
+    const legal = ((siteData as any).legal || {}) as any;
 
     const handleChange = (field: string, value: any) => {
         updateSiteData({
             legal: { ...legal, [field]: value }
-        });
+        } as any);
     };
 
     return (

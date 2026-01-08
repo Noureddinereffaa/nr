@@ -1,9 +1,9 @@
 import React from 'react';
-import { useData } from '../../../context/DataContext';
+import { useSystem } from '../../../context/SystemContext';
 import { User, MapPin, Briefcase, Phone, Mail, MessageCircle, Globe, Linkedin, Facebook, Instagram, Twitter, Youtube, Video } from 'lucide-react';
 
 const ProfileSettings: React.FC = () => {
-    const { siteData, updateSiteData } = useData();
+    const { siteData, updateSiteData } = useSystem();
     const profile = (siteData.profile || {}) as any;
     const contactInfo = siteData.contactInfo || {} as any;
 

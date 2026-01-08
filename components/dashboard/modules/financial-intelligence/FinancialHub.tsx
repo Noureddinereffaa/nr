@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
-import { useData } from '../../../../context/DataContext';
+import { useSystem } from '../../../../context/SystemContext';
+import { useBusiness } from '../../../../context/BusinessContext';
 import {
     TrendingUp,
     TrendingDown,
@@ -16,26 +17,27 @@ import {
 import ExpenseForm from '../../forms/ExpenseForm';
 
 const FinancialHub: React.FC = () => {
-    const { siteData, addExpense, deleteExpense } = useData();
+    const { siteData } = useSystem();
+    const { invoices, expenses, addExpense, deleteExpense } = useBusiness();
     const [isAddingExpense, setIsAddingExpense] = useState(false);
     const [expenseFilter, setExpenseFilter] = useState('all');
 
     // Calculation Logic
     const stats = useMemo(() => {
-        const totalIncome = siteData.invoices
+        const totalIncome = invoices
             .filter(i => i.status === 'paid')
             .reduce((sum, i) => sum + i.total, 0);
 
-        const totalExpenses = (siteData.expenses || []).reduce((sum, e) => sum + e.amount, 0);
+        const totalExpenses = (expenses || []).reduce((sum, e) => sum + e.amount, 0);
         const profit = totalIncome - totalExpenses;
         const profitMargin = totalIncome > 0 ? (profit / totalIncome) * 100 : 0;
 
         return { totalIncome, totalExpenses, profit, profitMargin };
-    }, [siteData]);
+    }, [invoices, expenses]);
 
     const incomeByCurrency = useMemo(() => {
         const currencies = { DZD: 0, EUR: 0, USD: 0 };
-        siteData.invoices
+        invoices
             .filter(i => i.status === 'paid')
             .forEach(i => {
                 if (i.currency in currencies) {
@@ -237,12 +239,12 @@ const FinancialHub: React.FC = () => {
                             </tr>
                         </thead>
                         <tbody className="text-xs">
-                            {(siteData.expenses || []).length === 0 ? (
+                            {(expenses || []).length === 0 ? (
                                 <tr>
                                     <td colSpan={6} className="px-6 py-12 text-center text-slate-600 italic">لا توجد مصاريف مسجلة حالياً. سجل أول عملية شراء لأدواتك.</td>
                                 </tr>
                             ) : (
-                                (siteData.expenses || []).map((e) => (
+                                (expenses || []).map((e) => (
                                     <tr key={e.id} className="border-b border-white/5 hover:bg-white/[0.02] transition-all group">
                                         <td className="px-6 py-4 text-slate-400 font-bold">{new Date(e.date).toLocaleDateString('ar-DZ')}</td>
                                         <td className="px-6 py-4 font-black text-white">{e.title}</td>
