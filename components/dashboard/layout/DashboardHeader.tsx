@@ -4,18 +4,18 @@ import { useNavigate } from 'react-router-dom';
 import NotificationDropdown from './NotificationDropdown';
 import { useAuth } from '../../../context/AuthContext';
 import { useUI } from '../../../context/UIContext';
-import { useData } from '../../../context/DataContext';
+import { useSystem } from '../../../context/SystemContext';
 import { supabase, isSupabaseConfigured } from '../../../lib/supabase';
 
 interface DashboardHeaderProps {
-    onMenuToggle: () => void;
+    onOpenSidebar: () => void;
     isMenuOpen: boolean;
 }
 
-const DashboardHeader: React.FC<DashboardHeaderProps> = ({ onMenuToggle, isMenuOpen }) => {
+const DashboardHeader: React.FC<DashboardHeaderProps> = ({ onOpenSidebar, isMenuOpen }) => {
     const { user, signOut } = useAuth();
     const { isHighContrast, toggleHighContrast, isShieldMode, toggleShieldMode, openCommandPalette } = useUI();
-    const { siteData } = useData();
+    const { siteData } = useSystem() as any;
     const navigate = useNavigate();
     const [showNotifications, setShowNotifications] = useState(false);
     const notifRef = useRef<HTMLDivElement>(null);
@@ -34,7 +34,6 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({ onMenuToggle, isMenuO
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
 
-    // Cloud Sync Function
     const handleSyncToCloud = async () => {
         if (!isSupabaseConfigured() || !supabase) {
             setSyncStatus('error');
@@ -47,7 +46,6 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({ onMenuToggle, isMenuO
         setSyncError(null);
 
         try {
-            // Sync main site data tables using JSONB 'data' column
             const syncTasks = [
                 supabase.from('site_settings').upsert({
                     id: 'main',
@@ -56,19 +54,16 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({ onMenuToggle, isMenuO
                     aiConfig: siteData.aiConfig,
                     features: siteData.features
                 }),
-                supabase.from('services').upsert(siteData.services.map(s => ({ id: s.id, data: s }))),
-                supabase.from('projects').upsert(siteData.projects.map(p => ({ id: p.id, data: p }))),
-                supabase.from('articles').upsert(siteData.articles.map(a => ({ id: a.id, data: a }))),
-                supabase.from('clients').upsert(siteData.clients.map(c => ({ id: c.id, data: c }))),
-                supabase.from('invoices').upsert(siteData.invoices.map(i => ({ id: i.id, data: i })))
+                supabase.from('services').upsert(siteData.services.map((s: any) => ({ id: s.id, data: s }))),
+                supabase.from('projects').upsert(siteData.projects.map((p: any) => ({ id: p.id, data: p }))),
+                supabase.from('articles').upsert(siteData.articles.map((a: any) => ({ id: a.id, data: a }))),
+                supabase.from('clients').upsert(siteData.clients.map((c: any) => ({ id: c.id, data: c }))),
+                supabase.from('invoices').upsert(siteData.invoices.map((i: any) => ({ id: i.id, data: i })))
             ];
 
             const results = await Promise.all(syncTasks);
-
-            // Check for errors
             const errors = results.filter(r => r.error);
             if (errors.length > 0) {
-                console.error('Sync Errors:', errors);
                 setSyncStatus('error');
                 setSyncError(`فشل المزامنة: ${errors[0].error?.message || 'خطأ غير معروف'}`);
                 setTimeout(() => setSyncStatus('idle'), 5000);
@@ -79,7 +74,6 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({ onMenuToggle, isMenuO
             setTimeout(() => setSyncStatus('idle'), 3000);
 
         } catch (err: any) {
-            console.error('Sync Failed:', err);
             setSyncStatus('error');
             setSyncError(err.message || 'فشل الاتصال بالخادم');
             setTimeout(() => setSyncStatus('idle'), 5000);
@@ -89,9 +83,8 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({ onMenuToggle, isMenuO
     return (
         <div className="p-6 border-b border-white/10 flex items-center justify-between glass-morph sticky top-0 z-[var(--z-nav)] backdrop-blur-3xl shadow-xl">
             <div className="flex items-center gap-4 md:gap-8">
-                {/* Mobile Menu Trigger */}
                 <button
-                    onClick={onMenuToggle}
+                    onClick={onOpenSidebar}
                     className="md:hidden p-2 bg-white/5 text-slate-400 hover:text-white rounded-xl transition-all"
                 >
                     {isMenuOpen ? <X size={20} /> : <Menu size={20} />}
@@ -108,12 +101,6 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({ onMenuToggle, isMenuO
                     </div>
                 </div>
 
-                {/* Mobile Search Trigger */}
-                <button className="lg:hidden p-2 text-slate-400 hover:text-white">
-                    <Search size={20} />
-                </button>
-
-                {/* Global Command Bar Trigger */}
                 <button
                     onClick={openCommandPalette}
                     className="hidden lg:flex items-center gap-3 bg-slate-950/50 border border-white/10 rounded-[var(--border-radius-elite)] px-4 py-2 w-96 hover:border-[var(--accent-indigo)] transition-all group text-right"
@@ -130,15 +117,14 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({ onMenuToggle, isMenuO
             </div>
 
             <div className="flex items-center gap-2 md:gap-4">
-                {/* CLOUD SYNC BUTTON */}
                 <div className="relative">
                     <button
                         onClick={handleSyncToCloud}
                         disabled={syncStatus === 'syncing'}
                         className={`flex items-center gap-2 px-4 py-2 rounded-xl font-black text-xs transition-all border ${syncStatus === 'syncing' ? 'bg-blue-500/20 border-blue-500/30 text-blue-400 cursor-wait' :
-                            syncStatus === 'success' ? 'bg-emerald-500/20 border-emerald-500/30 text-emerald-400' :
-                                syncStatus === 'error' ? 'bg-red-500/20 border-red-500/30 text-red-400' :
-                                    'bg-white/5 border-white/10 text-white hover:bg-[var(--accent-indigo)] hover:border-[var(--accent-indigo)]'
+                                syncStatus === 'success' ? 'bg-emerald-500/20 border-emerald-500/30 text-emerald-400' :
+                                    syncStatus === 'error' ? 'bg-red-500/20 border-red-500/30 text-red-400' :
+                                        'bg-white/5 border-white/10 text-white hover:bg-[var(--accent-indigo)] hover:border-[var(--accent-indigo)]'
                             }`}
                         title={syncError || 'نشر التعديلات للسحابة'}
                     >
@@ -153,13 +139,6 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({ onMenuToggle, isMenuO
                                         'نشر للسحابة'}
                         </span>
                     </button>
-
-                    {/* TOASTS (simplified for code space) */}
-                    {syncStatus === 'error' && (
-                        <div className="absolute top-full mt-2 right-0 w-80 bg-red-950/95 border border-red-500/30 rounded-xl p-4 shadow-2xl z-50 backdrop-blur-xl">
-                            <p className="text-xs text-red-300/80 leading-relaxed" dir="ltr">{syncError}</p>
-                        </div>
-                    )}
                 </div>
 
                 <div className="flex items-center gap-3 ml-4 pl-4 border-l border-white/5 relative" ref={notifRef}>
@@ -167,15 +146,6 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({ onMenuToggle, isMenuO
                         <Circle size={8} className="fill-green-500 text-green-500 animate-pulse" />
                         <span className="text-[10px] font-black text-green-400 uppercase tracking-widest">AI Online</span>
                     </div>
-
-                    {user && (
-                        <div className="flex items-center gap-3 px-3 py-1.5 bg-white/5 rounded-xl border border-white/10">
-                            <div className="w-6 h-6 rounded-full bg-[var(--accent-indigo)] flex items-center justify-center text-[10px] font-black text-white uppercase">
-                                {user.email?.charAt(0)}
-                            </div>
-                            <span className="text-[10px] font-black text-slate-300 hidden md:block">{user.email}</span>
-                        </div>
-                    )}
 
                     <button
                         onClick={() => setShowNotifications(!showNotifications)}
@@ -189,15 +159,15 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({ onMenuToggle, isMenuO
                     <button
                         onClick={toggleShieldMode}
                         className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all ${isShieldMode ? 'bg-amber-500 text-slate-950 shadow-[0_0_15px_rgba(245,158,11,0.4)]' : 'bg-white/5 text-slate-500 hover:text-white'}`}
-                        title={isShieldMode ? "تعطيل درع الحماية" : "تفعيل درع الحماية (إخفاء البيانات الحساسة)"}
+                        title={isShieldMode ? "تعطيل درع الحماية" : "تفعيل درع الحماية"}
                     >
-                        <Shield size={16} className={isShieldMode ? "animate-pulse" : ""} />
+                        <Shield size={16} />
                     </button>
 
                     <button
                         onClick={toggleHighContrast}
                         className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all ${isHighContrast ? 'bg-[var(--accent-indigo)] text-white' : 'bg-white/5 text-slate-500 hover:text-white'}`}
-                        title="تبديل وضع التباين العالي"
+                        title="التباين العالي"
                     >
                         <Contrast size={16} />
                     </button>
@@ -205,16 +175,14 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({ onMenuToggle, isMenuO
 
                 <button
                     onClick={() => signOut()}
-                    className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center text-slate-400 hover:bg-red-500 hover:text-white border border-white/10 transition-all group"
-                    title="Logout"
+                    className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center text-slate-400 hover:bg-red-500 hover:text-white border border-white/10 transition-all"
                 >
-                    <LogOut size={20} className="group-hover:translate-x-1 transition-transform" />
+                    <LogOut size={20} />
                 </button>
 
                 <button
                     onClick={() => navigate('/')}
                     className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center text-slate-400 hover:bg-[var(--accent-indigo)] hover:text-white border border-white/10 transition-all"
-                    title="Home"
                 >
                     <X size={20} />
                 </button>

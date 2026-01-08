@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { SERVICES } from '../constants';
-import { Client, Project, Invoice, Expense, Service } from '../types';
+import { Client, Project, Invoice, Expense, Service, ServiceRequest } from '../types';
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
 import Logger from '../lib/logger';
 
@@ -23,6 +23,12 @@ interface BusinessContextType {
     addExpense: (expense: Omit<Expense, 'id' | 'date'>) => Promise<void>;
     updateExpense: (id: string, data: Partial<Expense>) => Promise<void>;
     deleteExpense: (id: string) => Promise<void>;
+    addService: (service: Partial<Service>) => Promise<void>;
+    updateService: (id: string, updates: Partial<Service>) => Promise<void>;
+    deleteService: (id: string) => Promise<void>;
+    serviceRequests: ServiceRequest[];
+    updateRequest: (id: string, updates: Partial<ServiceRequest>) => Promise<void>;
+    deleteRequest: (id: string) => Promise<void>;
 }
 
 const BusinessContext = createContext<BusinessContextType | null>(null);
@@ -33,6 +39,7 @@ export const BusinessProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     const [invoices, setInvoices] = useState<Invoice[]>([]);
     const [expenses, setExpenses] = useState<Expense[]>([]);
     const [services, setServices] = useState<Service[]>(SERVICES);
+    const [serviceRequests, setServiceRequests] = useState<ServiceRequest[]>([]);
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
@@ -56,6 +63,9 @@ export const BusinessProvider: React.FC<{ children: React.ReactNode }> = ({ chil
                 if (invoicesRes.data) setInvoices(invoicesRes.data.map((r: any) => ({ ...r, ...(r.data || {}) })));
                 if (expensesRes.data) setExpenses(expensesRes.data.map((r: any) => ({ ...r, ...(r.data || {}) })));
                 if (servicesRes.data && servicesRes.data.length > 0) setServices(servicesRes.data.map((r: any) => ({ ...r, ...(r.data || {}) })));
+
+                const requestsRes = await supabase.from('service_requests').select('*');
+                if (requestsRes.data) setServiceRequests(requestsRes.data.map((r: any) => ({ ...r, ...(r.data || {}) })));
             } catch (error) {
                 Logger.error("Business Sync Error", error);
             } finally {
@@ -145,13 +155,47 @@ export const BusinessProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         if (isSupabaseConfigured() && supabase) await supabase.from('expenses').delete().eq('id', id);
     };
 
+    const addService = async (service: Partial<Service>) => {
+        const newService = { ...service, id: 's-' + Date.now() } as Service;
+        setServices(prev => [...prev, newService]);
+        if (isSupabaseConfigured() && supabase) await supabase.from('services').insert([{ id: newService.id, data: newService }]);
+    };
+
+    const updateService = async (id: string, updates: Partial<Service>) => {
+        setServices(prev => prev.map(s => s.id === id ? { ...s, ...updates } : s));
+        if (isSupabaseConfigured() && supabase) {
+            const current = services.find(s => s.id === id);
+            await supabase.from('services').update({ data: { ...current, ...updates } }).eq('id', id);
+        }
+    };
+
+    const deleteService = async (id: string) => {
+        setServices(prev => prev.filter(s => s.id !== id));
+        if (isSupabaseConfigured() && supabase) await supabase.from('services').delete().eq('id', id);
+    };
+
+    const updateRequest = async (id: string, updates: Partial<ServiceRequest>) => {
+        setServiceRequests(prev => prev.map(r => r.id === id ? { ...r, ...updates } : r));
+        if (isSupabaseConfigured() && supabase) {
+            const current = serviceRequests.find(r => r.id === id);
+            await supabase.from('service_requests').update({ data: { ...current, ...updates } }).eq('id', id);
+        }
+    };
+
+    const deleteRequest = async (id: string) => {
+        setServiceRequests(prev => prev.filter(r => r.id !== id));
+        if (isSupabaseConfigured() && supabase) await supabase.from('service_requests').delete().eq('id', id);
+    };
+
     return (
         <BusinessContext.Provider value={{
-            clients, projects, invoices, expenses, services, isLoading,
+            clients, projects, invoices, expenses, services, serviceRequests, isLoading,
             addClient, updateClient, deleteClient,
             addProject, updateProject, deleteProject,
             addInvoice, updateInvoice, deleteInvoice,
-            addExpense, updateExpense, deleteExpense
+            addExpense, updateExpense, deleteExpense,
+            addService, updateService, deleteService,
+            updateRequest, deleteRequest
         }}>
             {children}
         </BusinessContext.Provider>

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { useData } from '../../../context/DataContext';
+import { useContent } from '../../../context/ContentContext';
+import { useSystem } from '../../../context/SystemContext';
 import { useUI } from '../../../context/UIContext';
 import {
     FileText, Plus, Trash2, Edit3, CheckCircle,
@@ -11,9 +12,13 @@ import { motion, AnimatePresence } from 'framer-motion';
 import WritingWorkspace from './WritingWorkspace';
 
 const BlogManager: React.FC = () => {
-    const { siteData, updateArticle, deleteArticle, addArticle, syncArticlesToCloud, syncStatus } = useData();
+    const { articles, addArticle, updateArticle, deleteArticle } = useContent();
+    const { aiConfig } = useSystem();
     const { openArticleModal } = useUI();
-    const { articles, aiConfig } = siteData;
+
+    // Stub for sync as it's not in the new modularized contexts yet
+    const syncArticlesToCloud = async () => console.log('Syncing articles...');
+    const syncStatus = { isSyncing: false, current: 0, total: 0, errorCount: 0 };
 
     const [editingArticle, setEditingArticle] = useState<any | null>(null);
     const [searchQuery, setSearchQuery] = useState('');

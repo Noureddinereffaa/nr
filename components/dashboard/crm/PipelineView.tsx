@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { useData } from '../../../context/DataContext';
+import { useBusiness } from '../../../context/BusinessContext';
 import { useUI } from '../../../context/UIContext';
 import { Client } from '../../../types';
 import { MoreHorizontal, Phone, Mail, Calendar, DollarSign, User } from 'lucide-react';
@@ -12,10 +12,9 @@ const COLUMNS = [
     { id: 'lost', title: 'ملغاة / خاسرة', color: 'bg-slate-500/20 text-slate-400 border-slate-500/30' },
 ];
 
-const PipelineView: React.FC<{ onEdit: (client: Client) => void }> = ({ onEdit }) => {
-    const { siteData, updateClient } = useData();
+const PipelineView: React.FC<{ clients: Client[]; onEdit: (client: Client) => void }> = ({ clients, onEdit }) => {
+    const { updateClient } = useBusiness();
     const { isShieldMode } = useUI();
-    const clients = siteData.clients || [];
 
     // Group clients by status
     const groupedClients = useMemo(() => {

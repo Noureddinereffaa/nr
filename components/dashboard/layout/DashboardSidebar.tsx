@@ -1,6 +1,8 @@
 import React from 'react';
 import TabButton from '../shared/TabButton';
-import { useData } from '../../../context/DataContext';
+import { useSystem } from '../../../context/SystemContext';
+import { useContent } from '../../../context/ContentContext';
+import { useBusiness } from '../../../context/BusinessContext';
 import { motion } from 'framer-motion';
 import { haptic } from '../../../lib/motion-config';
 import {
@@ -22,7 +24,7 @@ import {
 interface DashboardSidebarProps {
     activeTab: string;
     mobileMenuOpen: boolean;
-    onTabClick: (id: string) => void;
+    onTabChange: (id: string) => void;
     showDebug: boolean;
     onToggleDebug: () => void;
 }
@@ -30,11 +32,11 @@ interface DashboardSidebarProps {
 const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
     activeTab,
     mobileMenuOpen,
-    onTabClick,
+    onTabChange,
     showDebug,
     onToggleDebug,
 }) => {
-    const { siteData } = useData();
+    const { siteData } = useSystem() as any;
     const features = siteData.features || {
         contentManager: true,
         aiBrain: true,
@@ -70,14 +72,14 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
                             label="لوحة القيادة"
                             icon={LayoutDashboard}
                             isActive={activeTab === 'overview'}
-                            onClick={onTabClick}
+                            onClick={onTabChange}
                         />
                         <TabButton
                             id="system"
                             label="النظام الأساسي"
                             icon={HardDrive}
                             isActive={activeTab === 'system'}
-                            onClick={onTabClick}
+                            onClick={onTabChange}
                         />
                     </div>
                 </div>
@@ -91,14 +93,14 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
                             label="ستوديو المشاريع"
                             icon={Briefcase}
                             isActive={activeTab === 'projects'}
-                            onClick={onTabClick}
+                            onClick={onTabChange}
                         />
                         <TabButton
                             id="services"
                             label="تطوير الخدمات"
                             icon={Terminal}
                             isActive={activeTab === 'services'}
-                            onClick={onTabClick}
+                            onClick={onTabChange}
                         />
                         {features.crm && (
                             <TabButton
@@ -106,7 +108,7 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
                                 label="قاعدة العملاء"
                                 icon={Users}
                                 isActive={activeTab === 'clients'}
-                                onClick={onTabClick}
+                                onClick={onTabChange}
                             />
                         )}
                     </div>
@@ -122,7 +124,7 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
                                 label="العقل الرقمي"
                                 icon={BrainCircuit}
                                 isActive={activeTab === 'aibrain'}
-                                onClick={onTabClick}
+                                onClick={onTabChange}
                             />
                         )}
                         {features.contentManager && (
@@ -131,7 +133,7 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
                                 label="محرك المحتوى"
                                 icon={Settings2}
                                 isActive={activeTab === 'content-manager'}
-                                onClick={onTabClick}
+                                onClick={onTabChange}
                             />
                         )}
                         <TabButton
@@ -139,14 +141,14 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
                             label="وارد المساعدة"
                             icon={MessageSquare}
                             isActive={activeTab === 'requests'}
-                            onClick={onTabClick}
+                            onClick={onTabChange}
                         />
                         <TabButton
                             id="decision-pages"
                             label="صفحات القرار"
                             icon={BrainCircuit}
                             isActive={activeTab === 'decision-pages'}
-                            onClick={onTabClick}
+                            onClick={onTabChange}
                         />
                     </div>
                 </motion.div>
@@ -161,14 +163,14 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
                                 label="المركز المالي"
                                 icon={CreditCard}
                                 isActive={activeTab === 'financial-hub'}
-                                onClick={onTabClick}
+                                onClick={onTabChange}
                             />
                             <TabButton
                                 id="billing"
                                 label="الفواتير الذكية"
                                 icon={FileText}
                                 isActive={activeTab === 'billing'}
-                                onClick={onTabClick}
+                                onClick={onTabChange}
                             />
                         </div>
                     </div>

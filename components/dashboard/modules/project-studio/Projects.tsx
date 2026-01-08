@@ -1,174 +1,136 @@
 import React, { useState } from 'react';
-import { useData } from '../../../../context/DataContext';
+import { useBusiness } from '../../../../context/BusinessContext';
 import { Plus, Filter, Grid, LayoutList, Clock, Activity } from 'lucide-react';
 import ProjectForm from '../../forms/ProjectForm';
 import StudioCard from '../../studio/StudioCard';
-import KanbanBoard from '../../projects/KanbanBoard';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Project } from '../../../../types';
 
 const Projects: React.FC = () => {
-    const { siteData, deleteProject, updateProject } = useData();
+    const { projects: businessProjects, deleteProject, updateProject } = useBusiness();
     const [isFormOpen, setIsFormOpen] = useState(false);
     const [editingProject, setEditingProject] = useState<Project | undefined>(undefined);
     const [filter, setFilter] = useState('all');
-    const [viewMode, setViewMode] = useState<'grid' | 'kanban' | 'timeline'>('kanban');
+    const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
 
-    const projects = (siteData?.projects || []).map(p => ({
+    const projects = (businessProjects || []).map(p => ({
         ...p,
         status: p.status || 'completed',
         featured: p.featured || false,
-        tags: p.tags || p.technologies || []
-    })) as Project[];
+    }));
 
-    const categories = ['all', ...Array.from(new Set(projects.map(p => p.category).filter(Boolean)))];
-
-    const filteredProjects = filter === 'all'
-        ? projects
-        : projects.filter(p => p.category === filter);
+    const filteredProjects = projects.filter(p => {
+        if (filter === 'all') return true;
+        return p.status === filter;
+    });
 
     const handleEdit = (project: Project) => {
         setEditingProject(project);
         setIsFormOpen(true);
     };
 
-    const handleDelete = (id: string) => {
-        if (window.confirm('هل أنت متأكد من حذف هذا المشروع؟')) {
-            deleteProject(id);
-        }
-    };
-
-    const handleAddNew = () => {
+    const handleClose = () => {
+        setIsFormOpen(false);
         setEditingProject(undefined);
-        setIsFormOpen(true);
     };
 
     return (
-        <div className="space-y-6 animate-in fade-in duration-500">
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-                <div dir="rtl">
-                    <h3 className="text-2xl font-black text-white tracking-tighter">استوديو المشاريع العملاق</h3>
-                    <p className="text-slate-400 text-sm font-bold uppercase tracking-widest opacity-60">Project Studio & Operations Hub</p>
+        <div className="space-y-12 animate-in fade-in slide-in-from-bottom-4 duration-700">
+            {/* Header */}
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6" dir="rtl">
+                <div>
+                    <h2 className="text-4xl font-black text-white tracking-widest uppercase italic">Project Studio</h2>
+                    <p className="text-[10px] text-slate-500 font-bold uppercase tracking-[0.4em] mt-2">معمل الابتكار وإدارة المشاريع الرقمية</p>
                 </div>
 
-                <div className="flex items-center gap-3">
-                    <div className="flex bg-slate-950 p-1 rounded-[var(--border-radius-elite)] border border-white/5 overflow-x-auto no-scrollbar">
-                        {categories.map(cat => (
-                            <button
-                                key={cat}
-                                onClick={() => setFilter(cat)}
-                                className={`px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${filter === cat
-                                    ? 'bg-[var(--accent-indigo)] text-white shadow-lg'
-                                    : 'text-slate-500 hover:text-white hover:bg-white/5'
-                                    }`}
-                            >
-                                {cat === 'all' ? 'الكل' : cat}
-                            </button>
-                        ))}
+                <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-1 p-1 bg-slate-900 border border-white/5 rounded-2xl">
+                        <button
+                            onClick={() => setViewMode('grid')}
+                            className={`p-3 rounded-xl transition-all ${viewMode === 'grid' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/20' : 'text-slate-500 hover:text-white hover:bg-white/5'}`}
+                        >
+                            <Grid size={18} />
+                        </button>
+                        <button
+                            onClick={() => setViewMode('list')}
+                            className={`p-3 rounded-xl transition-all ${viewMode === 'list' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/20' : 'text-slate-500 hover:text-white hover:bg-white/5'}`}
+                        >
+                            <LayoutList size={18} />
+                        </button>
                     </div>
 
                     <button
-                        onClick={handleAddNew}
-                        className="flex items-center gap-2 bg-white text-slate-950 px-6 py-2.5 rounded-[var(--border-radius-elite)] text-[10px] font-black uppercase tracking-widest transition-all hover:bg-slate-100 hover:scale-[1.02] active:scale-95 shadow-xl shrink-0"
+                        onClick={() => setIsFormOpen(true)}
+                        className="flex items-center gap-3 px-8 py-4 bg-white text-slate-950 rounded-[1.5rem] font-black text-xs uppercase tracking-widest hover:bg-indigo-50 transition-all shadow-2xl shadow-white/5 active:scale-95"
                     >
-                        <Plus size={16} />
-                        إضافة مشروع
+                        <Plus size={18} />
+                        مشروع جديد
                     </button>
-
-                    <div className="flex bg-slate-950 p-1 rounded-[var(--border-radius-elite)] border border-white/5 mx-2">
-                        <button
-                            onClick={() => setViewMode('grid')}
-                            className={`p-2 rounded-[var(--border-radius-elite)] transition-all ${viewMode === 'grid' ? 'bg-[var(--accent-indigo)] text-white shadow-md' : 'text-slate-500 hover:text-white'}`}
-                        >
-                            <Grid size={16} />
-                        </button>
-                        <button
-                            onClick={() => setViewMode('kanban')}
-                            className={`p-2 rounded-[var(--border-radius-elite)] transition-all ${viewMode === 'kanban' ? 'bg-[var(--accent-indigo)] text-white shadow-md' : 'text-slate-500 hover:text-white'}`}
-                        >
-                            <LayoutList size={16} />
-                        </button>
-                        <button
-                            onClick={() => setViewMode('timeline')}
-                            className={`p-2 rounded-[var(--border-radius-elite)] transition-all ${viewMode === 'timeline' ? 'bg-[var(--accent-indigo)] text-white shadow-md' : 'text-slate-500 hover:text-white'}`}
-                        >
-                            <Clock size={16} />
-                        </button>
-                    </div>
                 </div>
             </div>
 
-            {/* View Mapping */}
-            {viewMode === 'kanban' ? (
-                <KanbanBoard
-                    projects={filteredProjects}
-                    onEdit={handleEdit}
-                    onStatusChange={(id, status) => updateProject(id, { status })}
-                />
-            ) : viewMode === 'timeline' ? (
-                <div className="space-y-4" dir="rtl">
-                    {filteredProjects.map(p => (
-                        <div key={p.id} className="p-6 bg-slate-900/40 border border-white/5 rounded-[var(--border-radius-elite)] flex items-center gap-6 group hover:border-[rgba(var(--accent-indigo-rgb),0.3)] transition-all">
-                            <div className="w-12 h-12 rounded-[var(--border-radius-elite)] bg-slate-950 flex items-center justify-center text-[var(--accent-indigo)] font-black border border-white/5">
-                                {p.title.charAt(0)}
-                            </div>
-                            <div className="flex-1">
-                                <div className="flex justify-between items-center mb-4">
-                                    <h4 className="text-lg font-black text-white">{p.title}</h4>
-                                    <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">{p.category}</span>
-                                </div>
-                                <div className="relative h-2 bg-slate-800 rounded-full overflow-hidden">
-                                    <div
-                                        style={{ width: p.status === 'completed' ? '100%' : p.status === 'in-progress' ? '65%' : '20%' }}
-                                        className={`h-full transition-all duration-1000 ${p.status === 'completed' ? 'bg-emerald-500 shadow-[0_0_10px_#10b981]' : 'bg-[var(--accent-indigo)] shadow-[0_0_10px_rgba(var(--accent-indigo-rgb),0.5)]'}`}
-                                    ></div>
-                                </div>
-                                <div className="flex justify-between mt-3">
-                                    <div className="flex gap-4">
-                                        <div className="flex items-center gap-1.5">
-                                            <Activity size={10} className="text-[var(--accent-indigo)]" />
-                                            <span className="text-[10px] text-slate-400 font-bold">Progress: {p.status === 'completed' ? '100%' : p.status === 'in-progress' ? '65%' : '20%'}</span>
-                                        </div>
-                                    </div>
-                                    <div className="flex items-center gap-1.5 text-slate-500 text-[10px] font-bold">
-                                        <Clock size={10} />
-                                        <span>Deadline: {p.date || 'TBD'}</span>
-                                    </div>
-                                </div>
-                            </div>
-                            <button
-                                onClick={() => handleEdit(p)}
-                                className="px-6 py-2.5 bg-white/5 hover:bg-white/10 rounded-[var(--border-radius-elite)] text-[10px] font-black text-white uppercase tracking-widest transition-all opacity-0 group-hover:opacity-100"
-                            >
-                                تعديل المخطط
-                            </button>
+            {/* Quick Stats */}
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4" dir="rtl">
+                {[
+                    { label: 'نشط', val: projects.filter(p => p.status === 'in-progress').length, icon: Activity, color: 'text-emerald-400' },
+                    { label: 'مكتمل', val: projects.filter(p => p.status === 'completed').length, icon: Clock, color: 'text-indigo-400' },
+                    { label: 'إجمالي القيمة', val: `$${projects.reduce((sum, p) => sum + (p.budget || 0), 0).toLocaleString()}`, icon: Grid, color: 'text-white' },
+                    { label: 'قيد المراجعة', val: '2', icon: Filter, color: 'text-amber-400' }
+                ].map((stat, i) => (
+                    <div key={i} className="p-6 bg-slate-900/50 border border-white/5 rounded-[2rem] flex flex-col gap-2">
+                        <div className="flex items-center gap-2 text-[8px] text-slate-500 font-black uppercase tracking-widest">
+                            <stat.icon size={10} className={stat.color} />
+                            {stat.label}
                         </div>
-                    ))}
-                </div>
-            ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {filteredProjects.map((p) => (
+                        <div className="text-xl font-black text-white">{stat.val}</div>
+                    </div>
+                ))}
+            </div>
+
+            {/* Filter Tabs */}
+            <div className="flex items-center gap-6 border-b border-white/5 pb-2 overflow-x-auto scrollbar-hide" dir="rtl">
+                {['all', 'active', 'completed', 'on-hold'].map(cat => (
+                    <button
+                        key={cat}
+                        onClick={() => setFilter(cat)}
+                        className={`text-[10px] font-black uppercase tracking-[0.2em] pb-4 px-2 transition-all relative ${filter === cat ? 'text-white' : 'text-slate-600 hover:text-slate-400'}`}
+                    >
+                        {cat === 'all' ? 'الكل' : cat === 'active' ? 'نشط' : cat === 'completed' ? 'مكتمل' : 'معلق'}
+                        {filter === cat && (
+                            <motion.div
+                                layoutId="activeFilter"
+                                className="absolute bottom-0 left-0 right-0 h-0.5 bg-indigo-500"
+                            />
+                        )}
+                    </button>
+                ))}
+            </div>
+
+            {/* Projects Display */}
+            <AnimatePresence mode="wait">
+                <motion.div
+                    key={viewMode + filter}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    className={viewMode === 'grid' ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" : "space-y-4"}
+                    dir="rtl"
+                >
+                    {filteredProjects.map((project, idx) => (
                         <StudioCard
-                            key={p.id}
-                            project={p}
-                            onEdit={handleEdit}
-                            onDelete={handleDelete}
+                            key={project.id || idx}
+                            project={project}
+                            onEdit={() => handleEdit(project)}
+                            onDelete={() => deleteProject(project.id)}
+                        // Removed viewMode and onToggleFeatured as they are not in StudioCardProps
                         />
                     ))}
-                </div>
-            )}
-
-            {filteredProjects.length === 0 && (
-                <div className="text-slate-500 text-center py-24 border-2 border-dashed border-white/5 rounded-[var(--border-radius-elite)] bg-slate-950/20">
-                    <div className="flex justify-center mb-6">
-                        <Grid size={64} className="opacity-10" />
-                    </div>
-                    <p className="text-sm font-bold uppercase tracking-widest">لا توجد مشاريع مسجلة حالياً</p>
-                </div>
-            )}
+                </motion.div>
+            </AnimatePresence>
 
             <ProjectForm
                 isOpen={isFormOpen}
-                onClose={() => setIsFormOpen(false)}
+                onClose={handleClose}
                 initialData={editingProject}
             />
         </div>

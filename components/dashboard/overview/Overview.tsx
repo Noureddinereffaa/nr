@@ -1,6 +1,8 @@
 import React, { Suspense } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useData } from '../../../context/DataContext';
+import { useSystem } from '../../../context/SystemContext';
+import { useContent } from '../../../context/ContentContext';
+import { useBusiness } from '../../../context/BusinessContext';
 import { useUI } from '../../../context/UIContext';
 import {
     Zap,
@@ -19,9 +21,11 @@ import LoadingSpinner from '../../ui/LoadingSpinner';
 import { transitions, variants } from '../../../lib/motion-config';
 
 const Overview: React.FC = () => {
-    const { siteData, isLoading } = useData();
+    const { activityLog, aiConfig, isLoading } = useSystem();
+    const { articles } = useContent();
+    const { clients, projects, invoices } = useBusiness();
 
-    const dashboardLayout = siteData.dashboardLayout || [
+    const dashboardLayout = [
         { id: 'revenue_stats', visible: true, order: 0, size: 'medium' },
         { id: 'ai_insights', visible: true, order: 1, size: 'medium' },
         { id: 'quick_actions', visible: true, order: 2, size: 'full' },
@@ -51,7 +55,6 @@ const Overview: React.FC = () => {
             initial="initial"
             animate="animate"
         >
-            {/* Phase 21: The Widget Engine v5.0 */}
             <motion.div
                 className="flex items-center justify-between mb-8"
                 dir="rtl"
@@ -80,7 +83,7 @@ const Overview: React.FC = () => {
                             >
                                 <WidgetWrapper
                                     title={definition.defaultProps.title || 'Widget'}
-                                    size={widget.size}
+                                    size={widget.size as any}
                                 >
                                     <Suspense fallback={<div className="h-full flex items-center justify-center"><LoadingSpinner /></div>}>
                                         <WidgetComponent />
@@ -92,7 +95,6 @@ const Overview: React.FC = () => {
                 </motion.div>
             </AnimatePresence>
 
-            {/* System Metrics Footer */}
             <motion.div
                 className="pt-12 border-t border-white/5"
                 dir="rtl"
@@ -100,9 +102,9 @@ const Overview: React.FC = () => {
             >
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
                     {[
-                        { label: 'إجمالي العملاء', val: (siteData.clients || []).length, icon: UserPlus },
-                        { label: 'المشاريع', val: (siteData.projects || []).length, icon: Briefcase },
-                        { label: 'الفواتير المعلقة', val: (siteData.invoices || []).filter(i => i.status === 'pending').length, icon: FileText },
+                        { label: 'إجمالي العملاء', val: (clients || []).length, icon: UserPlus },
+                        { label: 'المشاريع', val: (projects || []).length, icon: Briefcase },
+                        { label: 'الفواتير المعلقة', val: (invoices || []).filter(i => i.status === 'pending').length, icon: FileText },
                         { label: 'مستوى الأمان', val: '99.9%', icon: ShieldCheck }
                     ].map((s, i) => (
                         <div key={i} className="flex flex-col gap-1">

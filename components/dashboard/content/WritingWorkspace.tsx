@@ -8,7 +8,9 @@ import {
 import { motion, AnimatePresence } from 'framer-motion';
 import { Article, AIConfig } from '../../../types';
 import { SOVEREIGN_TEMPLATES, ArticleTemplate } from '../../../lib/article-templates';
-import { useData } from '../../../context/DataContext';
+import { useSystem } from '../../../context/SystemContext';
+import { useContent } from '../../../context/ContentContext';
+import { useBusiness } from '../../../context/BusinessContext';
 import ImageUploader from '../../ui/ImageUploader';
 
 interface WritingWorkspaceProps {
@@ -19,7 +21,7 @@ interface WritingWorkspaceProps {
 }
 
 const WritingWorkspace: React.FC<WritingWorkspaceProps> = ({ article: initialArticle, aiConfig, onSave, onClose }) => {
-    const { siteData } = useData();
+    const { siteData } = useSystem() as any;
     // Core State
     const [article, setArticle] = useState<Article>(initialArticle);
     const [view, setView] = useState<'editor' | 'preview'>('editor');

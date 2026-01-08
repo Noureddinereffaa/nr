@@ -1,5 +1,5 @@
 
-import { Service, Project, Stat, Testimonial, FAQItem, ProcessStep, Article } from './types';
+import { Service, Project, Stat, Testimonial, FAQItem, ProcessStep, Article, SocialIntegration } from './types';
 import { MASTER_ARTICLE_CONTENT } from './data/master-article';
 import { SYSTEM_ARTICLE_CONTENT, AI_ALGERIA_CONTENT, ECOM_AUTO_CONTENT } from './data/article-templates';
 
@@ -291,4 +291,12 @@ export const ARTICLES: Article[] = [
     readTime: "15 دقيقة",
     seo: { title: "أتمتة التجارة الإلكترونية | دليل التاجر الناجح", description: "كيف تدير متجرك وأنت نائم عبر أنظمة الأتمتة المتقدمة.", focusKeyword: "أتمتة التجارة الإلكترونية" }
   }
+];
+
+export const INTEGRATIONS: SocialIntegration[] = [
+  { id: 'li', provider: 'linkedin', name: 'LinkedIn', icon: 'Linkedin', status: 'disconnected' },
+  { id: 'tw', provider: 'twitter', name: 'Twitter (X)', icon: 'Twitter', status: 'disconnected' },
+  { id: 'fb', provider: 'facebook', name: 'Facebook', icon: 'Facebook', status: 'disconnected' },
+  { id: 'ig', provider: 'instagram', name: 'Instagram', icon: 'Instagram', status: 'disconnected' },
+  { id: 'gb', provider: 'google_business', name: 'Google Business', icon: 'Globe', status: 'disconnected' }
 ];

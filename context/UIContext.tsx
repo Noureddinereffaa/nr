@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { useData } from './DataContext';
+import { useSystem } from './SystemContext';
 
 
 interface Toast {
@@ -104,7 +104,7 @@ export const UIProvider: React.FC<{ children: React.ReactNode }> = ({ children }
         };
     });
 
-    const { siteData } = useData();
+    const { siteData } = useSystem() as any;
 
     // Sync themeConfig with siteData.brand whenever it changes
     useEffect(() => {

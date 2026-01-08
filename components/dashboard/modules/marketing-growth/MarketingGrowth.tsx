@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useData } from '../../../../context/DataContext';
+import { useSystem } from '../../../../context/SystemContext';
 import { AIService } from '../../../../lib/ai-service';
 import {
     Globe,
@@ -29,7 +29,7 @@ import {
 import { CompetitorData, SocialPost } from '../../../../types';
 
 const MarketingGrowth: React.FC = () => {
-    const { siteData, updateSiteData, addSocialPost, addArticle, updateIntegration } = useData();
+    const { socialPosts, integrations, updateIntegration, addSocialPost, aiConfig } = useSystem();
     const [competitors, setCompetitors] = useState<CompetitorData[]>([]);
     const [isAnalyzing, setIsAnalyzing] = useState(false);
     const [isPlanning, setIsPlanning] = useState(false);

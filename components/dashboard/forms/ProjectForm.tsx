@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Project } from '../../../types';
 import Modal from '../../ui/Modal';
 import Input from '../../ui/Input';
-import { useData } from '../../../context/DataContext';
+import { useBusiness } from '../../../context/BusinessContext';
 
 interface ProjectFormProps {
     isOpen: boolean;
@@ -11,7 +11,7 @@ interface ProjectFormProps {
 }
 
 const ProjectForm: React.FC<ProjectFormProps> = ({ isOpen, onClose, initialData }) => {
-    const { addProject, updateProject } = useData();
+    const { addProject, updateProject } = useBusiness();
     const [activeTab, setActiveTab] = useState<'info' | 'study' | 'media' | 'operations'>('info');
     const [formData, setFormData] = useState<Partial<Project>>({});
 

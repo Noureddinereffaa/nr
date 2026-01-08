@@ -1,7 +1,9 @@
 import React, { useState, useEffect, Suspense, lazy } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { variants, transitions } from '../lib/motion-config';
-import { useData } from '../context/DataContext';
+import { useSystem } from '../context/SystemContext';
+import { useContent } from '../context/ContentContext';
+import { useBusiness } from '../context/BusinessContext';
 import { useUI } from '../context/UIContext';
 
 // Layout Components
@@ -33,7 +35,11 @@ const DashboardPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState('overview');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [showDebug, setShowDebug] = useState(false);
-  const { siteData, updateSiteData, addClient, addInvoice, addProject, addArticle } = useData();
+
+  const { activityLog, isLoading } = useSystem();
+  const { articles } = useContent();
+  const { clients, projects, invoices, addClient, addInvoice, addProject } = useBusiness();
+  const { isShieldMode } = useUI();
   const {
     isClientModalOpen, closeClientModal,
     isInvoiceModalOpen, closeInvoiceModal,
@@ -63,7 +69,7 @@ const DashboardPage: React.FC = () => {
       <div className="relative w-full h-full flex flex-col bg-slate-950/40 mesh-gradient backdrop-blur-3xl transition-all duration-500">
 
         <DashboardHeader
-          onMenuToggle={() => setMobileMenuOpen(!mobileMenuOpen)}
+          onOpenSidebar={() => setMobileMenuOpen(!mobileMenuOpen)}
           isMenuOpen={mobileMenuOpen}
         />
 
@@ -85,7 +91,7 @@ const DashboardPage: React.FC = () => {
           <DashboardSidebar
             activeTab={activeTab}
             mobileMenuOpen={mobileMenuOpen}
-            onTabClick={handleTabClick}
+            onTabChange={handleTabClick}
             showDebug={showDebug}
             onToggleDebug={() => setShowDebug(!showDebug)}
           />
@@ -155,7 +161,7 @@ const DashboardPage: React.FC = () => {
             >
               <h3 className="font-black mb-2">DEBUG: siteData</h3>
               <pre className="text-xs whitespace-pre-wrap">
-                {JSON.stringify(siteData, null, 2)}
+                {JSON.stringify({ activityLog, articles, clients, projects, invoices }, null, 2)}
               </pre>
             </div>
           </div>

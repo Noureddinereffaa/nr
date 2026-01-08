@@ -1,152 +1,145 @@
 import React, { useState } from 'react';
-import { useData } from '../../../../context/DataContext';
-import ClientForm from '../../forms/ClientForm';
+import { useBusiness } from '../../../../context/BusinessContext';
+import { useSystem } from '../../../../context/SystemContext';
+import { useUI } from '../../../../context/UIContext';
 import PipelineView from '../../crm/PipelineView';
 import ClientDetail from '../../crm/ClientDetail';
 import { Users, Plus, Search, Filter, Columns, List, Zap } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Client } from '../../../../types';
-import { AIService } from '../../../../lib/ai-service';
 
 const CRM: React.FC = () => {
-    const { siteData, addClient } = useData();
+    const { clients, deleteClient } = useBusiness();
+    const { aiConfig } = useSystem();
+    const { openClientModal } = useUI();
     const [viewMode, setViewMode] = useState<'pipeline' | 'list'>('pipeline');
-    const [showAddForm, setShowAddForm] = useState(false);
     const [selectedClient, setSelectedClient] = useState<Client | null>(null);
     const [searchTerm, setSearchTerm] = useState('');
-
-    const clients = siteData.clients || [];
 
     const filteredClients = clients.filter(c =>
         (c.name?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
         (c.company?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
-        (c.phone || '').includes(searchTerm)
+        (c.email?.toLowerCase() || '').includes(searchTerm.toLowerCase())
     );
 
     return (
-        <div className="h-full flex flex-col space-y-8 animate-in fade-in slide-in-from-top-4 duration-500">
-            {/* Header */}
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
-                <div dir="rtl">
-                    <h2 className="text-4xl font-black text-white flex items-center gap-4 tracking-tighter">
-                        <div className="p-3 bg-[rgba(var(--accent-indigo-rgb),0.2)] rounded-[var(--border-radius-elite)] border border-[rgba(var(--accent-indigo-rgb),0.3)]">
-                            <Users className="text-[var(--accent-indigo)]" size={32} />
-                        </div>
-                        إدارة العملاء الذكية
-                    </h2>
-                    <p className="text-slate-500 mt-2 font-bold text-sm uppercase tracking-widest">CRM & Relationships Engine</p>
+        <div className="space-y-8 animate-in fade-in duration-500">
+            {/* Header Section */}
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6" dir="rtl">
+                <div>
+                    <h2 className="text-4xl font-black text-white tracking-widest uppercase">CRM Intelligence</h2>
+                    <p className="text-[10px] text-slate-500 font-bold uppercase tracking-[0.4em] mt-2">نظام إدارة العلاقات المدعوم بالذكاء الاصطناعي</p>
                 </div>
 
-                <div className="flex gap-4 bg-slate-900/40 p-1.5 rounded-[var(--border-radius-elite)] border border-white/5 backdrop-blur-md">
+                <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-1 p-1 bg-slate-900 border border-white/5 rounded-2xl">
+                        <button
+                            onClick={() => setViewMode('pipeline')}
+                            className={`p-3 rounded-xl transition-all ${viewMode === 'pipeline' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/20' : 'text-slate-500 hover:text-white hover:bg-white/5'}`}
+                        >
+                            <Columns size={18} />
+                        </button>
+                        <button
+                            onClick={() => setViewMode('list')}
+                            className={`p-3 rounded-xl transition-all ${viewMode === 'list' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/20' : 'text-slate-500 hover:text-white hover:bg-white/5'}`}
+                        >
+                            <List size={18} />
+                        </button>
+                    </div>
+
                     <button
-                        onClick={() => setViewMode('pipeline')}
-                        className={`flex items-center gap-2 px-6 py-2.5 rounded-[var(--border-radius-elite)] font-black transition-all ${viewMode === 'pipeline' ? 'bg-[var(--accent-indigo)] text-white shadow-lg shadow-[rgba(var(--accent-indigo-rgb),0.2)]' : 'text-slate-500 hover:text-white hover:bg-white/5'}`}
-                    >
-                        <Columns size={18} />
-                        <span className="text-[10px] uppercase tracking-widest font-black">Pipeline</span>
-                    </button>
-                    <button
-                        onClick={() => setViewMode('list')}
-                        className={`flex items-center gap-2 px-6 py-2.5 rounded-[var(--border-radius-elite)] font-black transition-all ${viewMode === 'list' ? 'bg-[var(--accent-indigo)] text-white shadow-lg shadow-[rgba(var(--accent-indigo-rgb),0.2)]' : 'text-slate-500 hover:text-white hover:bg-white/5'}`}
-                    >
-                        <List size={18} />
-                        <span className="text-[10px] uppercase tracking-widest font-black">List View</span>
-                    </button>
-                    <div className="w-[1px] h-10 bg-white/5 mx-2 self-center"></div>
-                    <button
-                        onClick={() => setShowAddForm(true)}
-                        className="flex items-center gap-2 bg-white text-slate-950 px-6 py-2.5 rounded-[var(--border-radius-elite)] font-black transition-all hover:bg-slate-100 hover:scale-[1.02] active:scale-95 shadow-xl"
+                        onClick={openClientModal}
+                        className="flex items-center gap-3 px-6 py-3.5 bg-white text-slate-950 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-indigo-50 transition-all shadow-xl shadow-white/5 active:scale-95 translate-y-0 hover:-translate-y-1"
                     >
                         <Plus size={18} />
-                        <span className="text-[10px] uppercase tracking-widest">Add Client</span>
+                        إضافة عميل
                     </button>
                 </div>
             </div>
 
-            {/* Search Bar */}
-            <div className="relative group">
-                <div className="absolute inset-y-0 right-6 flex items-center pointer-events-none">
-                    <Search className="text-slate-500 group-focus-within:text-[var(--accent-indigo)] transition-colors" size={20} />
+            {/* Search and Filters */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4" dir="rtl">
+                <div className="md:col-span-3 relative">
+                    <Search className="absolute right-5 top-1/2 -translate-y-1/2 text-slate-500" size={18} />
+                    <input
+                        type="text"
+                        placeholder="ابحث في قاعدة بيانات العملاء..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        className="w-full bg-slate-900 border border-white/5 rounded-2xl pr-14 pl-6 py-4 text-white placeholder:text-slate-700 outline-none focus:border-indigo-500 transition-all shadow-inner"
+                    />
                 </div>
-                <input
-                    type="text"
-                    placeholder="ابحث عن عميل بالاسم، الشركة أو الهاتف..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    dir="rtl"
-                    className="w-full bg-slate-900/50 border border-white/5 p-5 pr-14 rounded-[var(--border-radius-elite)] text-white outline-none focus:border-[rgba(var(--accent-indigo-rgb),0.5)] focus:bg-slate-900 transition-all font-bold placeholder:text-slate-600 shadow-inner"
-                />
+                <button className="flex items-center justify-center gap-3 p-4 bg-slate-900 border border-white/5 rounded-2xl text-slate-400 hover:text-white hover:bg-slate-800 transition-all">
+                    <Filter size={18} />
+                    <span>تصفية متقدمة</span>
+                </button>
             </div>
 
-            {/* Content View */}
-            <div className="flex-1 overflow-hidden">
+            {/* Main Content Area */}
+            <AnimatePresence mode="wait">
                 {viewMode === 'pipeline' ? (
-                    <PipelineView onEdit={setSelectedClient} />
+                    <motion.div
+                        key="pipeline"
+                        initial={{ opacity: 0, x: 20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        exit={{ opacity: 0, x: -20 }}
+                    >
+                        <PipelineView
+                            clients={filteredClients}
+                            onEdit={setSelectedClient}
+                        />
+                    </motion.div>
                 ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 overflow-y-auto custom-scrollbar h-full pb-10 pr-2">
-                        {filteredClients.map(client => (
-                            <div
-                                key={client.id}
-                                onClick={() => setSelectedClient(client)}
-                                className="bg-slate-900/30 border border-white/5 backdrop-blur-md p-6 rounded-[var(--border-radius-elite)] hover:border-[rgba(var(--accent-indigo-rgb),0.3)] cursor-pointer transition-all group relative overflow-hidden"
-                            >
-                                <div className="absolute top-0 right-0 w-24 h-24 bg-[rgba(var(--accent-indigo-rgb),0.05)] blur-[40px] -mr-12 -mt-12 group-hover:bg-[rgba(var(--accent-indigo-rgb),0.1)] transition-colors"></div>
-
-                                <div className="relative z-10">
-                                    <div className="flex justify-between items-start mb-6">
-                                        <div className="w-14 h-14 rounded-[var(--border-radius-elite)] bg-slate-800/50 flex items-center justify-center text-2xl font-black text-[var(--accent-indigo)] border border-white/10 group-hover:border-[rgba(var(--accent-indigo-rgb),0.3)] transition-all">
-                                            {client.name?.charAt(0) || '?'}
+                    <motion.div
+                        key="list"
+                        initial={{ opacity: 0, x: 20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        exit={{ opacity: 0, x: -20 }}
+                        className="bg-slate-900/50 border border-white/5 rounded-[2.5rem] p-8 backdrop-blur-xl"
+                    >
+                        <div className="space-y-4">
+                            {filteredClients.map(client => (
+                                <div
+                                    key={client.id}
+                                    onClick={() => setSelectedClient(client)}
+                                    className="group flex flex-col md:flex-row items-center justify-between p-6 bg-slate-950/50 border border-white/5 rounded-2xl hover:border-indigo-500/50 transition-all cursor-pointer"
+                                    dir="rtl"
+                                >
+                                    <div className="flex items-center gap-4">
+                                        <div className="w-12 h-12 rounded-xl bg-indigo-500/10 flex items-center justify-center text-indigo-400 font-bold">
+                                            {client.name?.charAt(0)}
                                         </div>
-                                        <div className="flex flex-col items-end gap-2">
-                                            <span className={`px-4 py-1.5 rounded-full text-[8px] font-black tracking-widest uppercase border ${client.status === 'lead' ? 'bg-blue-500/10 text-blue-400 border-blue-500/20' :
-                                                client.status === 'active' ? 'bg-[var(--accent-indigo)]/10 text-[var(--accent-indigo)] border-[var(--accent-indigo)]/20' :
-                                                    client.status === 'completed' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' :
-                                                        'bg-slate-500/10 text-slate-400 border-slate-500/20'
-                                                }`}>
-                                                {client.status}
-                                            </span>
-                                            <div className="flex items-center gap-1 bg-[var(--accent-indigo)]/5 text-[var(--accent-indigo)]/70 text-[7px] font-black px-2 py-0.5 rounded border border-[var(--accent-indigo)]/10">
-                                                <Zap size={8} />
-                                                AI SCORE: {AIService.scoreLead(client)}%
-                                            </div>
+                                        <div>
+                                            <h4 className="text-white font-bold">{client.name}</h4>
+                                            <p className="text-[10px] text-slate-500 uppercase tracking-widest">{client.company}</p>
                                         </div>
                                     </div>
 
-                                    <div dir="rtl">
-                                        <h3 className="text-2xl font-black text-white mb-1 group-hover:text-[var(--accent-indigo)] transition-colors tracking-tighter">
-                                            {client.name}
-                                        </h3>
-                                        <p className="text-slate-500 font-bold text-xs mb-6 uppercase tracking-widest">
-                                            {client.company || 'مستقل'}
-                                        </p>
-
-                                        <div className="space-y-3 pt-6 border-t border-white/5">
-                                            <div className="flex items-center gap-3 text-xs text-slate-400 font-bold">
-                                                <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-lg shadow-emerald-500/50"></div>
-                                                {client.phone || 'N/A'}
-                                            </div>
-                                            <div className="flex items-center gap-3 text-xs text-slate-500 font-bold uppercase tracking-widest">
-                                                <div className="w-1.5 h-1.5 rounded-full bg-slate-600"></div>
-                                                Last Contact: {client.lastContact ? new Date(client.lastContact).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : 'N/A'}
-                                            </div>
+                                    <div className="flex items-center gap-6 mt-4 md:mt-0">
+                                        <div className="text-left">
+                                            <p className="text-[10px] text-slate-600 font-black uppercase tracking-widest text-right">قيمة الصفقة</p>
+                                            <p className="text-white font-mono">${client.value?.toLocaleString() || '0'}</p>
                                         </div>
+                                        <div className={`px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest border ${client.status === 'lead' ? 'bg-amber-500/10 text-amber-500 border-amber-500/20' : 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20'}`}>
+                                            {client.status}
+                                        </div>
+                                        <Zap size={14} className="text-slate-700 group-hover:text-indigo-400 transition-colors" />
                                     </div>
                                 </div>
-                            </div>
-                        ))}
-                    </div>
+                            ))}
+                        </div>
+                    </motion.div>
                 )}
-            </div>
+            </AnimatePresence>
 
-            {/* Modals */}
-            <ClientForm
-                isOpen={showAddForm}
-                onClose={() => setShowAddForm(false)}
-                onSave={(data) => {
-                    addClient(data);
-                    setShowAddForm(false);
-                }}
-            />
-            {selectedClient && <ClientDetail client={selectedClient} onClose={() => setSelectedClient(null)} />}
+            {/* Client Detail Modal/Sidebar */}
+            {selectedClient && (
+                <ClientDetail
+                    client={selectedClient}
+                    onClose={() => setSelectedClient(null)}
+                // Removed onDelete as it's not in ClientDetailProps
+                />
+            )}
         </div>
     );
 };

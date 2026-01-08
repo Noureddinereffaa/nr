@@ -1,14 +1,17 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { NOUREDDINE_DATA } from '../constants';
-import { SiteData, SystemActivity, AIConfig, BrandIdentity, ContactInfo } from '../types';
+import { SiteData, SystemActivity, AIConfig, BrandIdentity, ContactInfo, SocialPost, SocialIntegration } from '../types';
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
 import Logger from '../lib/logger';
+import { INTEGRATIONS } from '../constants';
 
 interface SystemContextType {
     brand: BrandIdentity;
     contactInfo: ContactInfo;
     aiConfig: AIConfig;
     activityLog: SystemActivity[];
+    socialPosts: SocialPost[];
+    integrations: SocialIntegration[];
     isLoading: boolean;
     updateBrand: (brand: Partial<BrandIdentity>) => Promise<void>;
     updateContact: (contact: Partial<ContactInfo>) => Promise<void>;
@@ -17,6 +20,8 @@ interface SystemContextType {
     process: any[];
     siteTexts: any;
     updateSiteData: (data: Partial<SiteData>) => Promise<void>;
+    updateIntegration: (id: string, updates: Partial<SocialIntegration>) => Promise<void>;
+    addSocialPost: (post: Omit<SocialPost, 'id'>) => Promise<void>;
     logActivity: (label: string, type: string, status?: string, metadata?: any) => Promise<void>;
 }
 
@@ -95,6 +100,8 @@ export const SystemProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         siteTexts: {}
     });
     const [activityLog, setActivityLog] = useState<SystemActivity[]>([]);
+    const [socialPosts, setSocialPosts] = useState<SocialPost[]>([]);
+    const [integrations, setIntegrations] = useState<SocialIntegration[]>([]);
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
@@ -121,6 +128,8 @@ export const SystemProvider: React.FC<{ children: React.ReactNode }> = ({ childr
                         process: s.process || prev.process,
                         siteTexts: s.siteTexts || prev.siteTexts
                     }));
+                    if (s.integrations) setIntegrations(s.integrations);
+                    if (s.socialPosts) setSocialPosts(s.socialPosts);
                 }
 
                 if (activityRes.data) {
@@ -179,14 +188,32 @@ export const SystemProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         }
     };
 
+    const updateIntegration = async (id: string, updates: Partial<SocialIntegration>) => {
+        setIntegrations(prev => prev.map(i => i.id === id ? { ...i, ...updates } : i));
+        // Persistence logic for integrations in site_data table usually
+        if (isSupabaseConfigured() && supabase) {
+            await supabase.from('site_settings').upsert({ id: 'main', integrations: integrations.map(i => i.id === id ? { ...i, ...updates } : i) });
+        }
+    };
+
+    const addSocialPost = async (post: Omit<SocialPost, 'id'>) => {
+        const newPost = { ...post, id: crypto.randomUUID() } as SocialPost;
+        setSocialPosts(prev => [newPost, ...prev]);
+        if (isSupabaseConfigured() && supabase) {
+            await supabase.from('site_settings').upsert({ id: 'main', socialPosts: [newPost, ...socialPosts] });
+        }
+    };
+
     return (
         <SystemContext.Provider value={{
-            brand, contactInfo, aiConfig, activityLog, isLoading,
+            brand, contactInfo, aiConfig, activityLog, socialPosts, integrations, isLoading,
             updateBrand, updateContact, updateAIConfig,
             faqs: siteData.faqs || [],
             process: siteData.process || [],
             siteTexts: (siteData as any).siteTexts || {},
             updateSiteData,
+            updateIntegration,
+            addSocialPost,
             logActivity
         }}>
             {children}
