@@ -35,7 +35,7 @@ export const DigitalCouncil = {
         generatePlatformPosts: async () => []
     },
     ChiefEditor: {
-        draftSection: async () => ""
+        draftSection: async (...args: any[]) => ""
     },
     VisualDirector: {
         generateHeaderImage: async () => ""

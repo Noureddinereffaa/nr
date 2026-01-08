@@ -731,7 +731,7 @@ const DecisionPageForm: React.FC<DecisionPageFormProps> = ({ isOpen, onClose, on
                 {/* Helper Components & Styles */}
                 <style>{`
                     .input-primary {
-                        @apply w-full px-4 py-3 bg-black/20 border border-white/10 rounded-xl text-white focus:outline-none focus:border-indigo-500 focus:bg-black/40 transition-all placeholder:text-slate-600;
+                        @apply w-full px-4 py-3 bg-black/20 border border-white/10 rounded-xl text-white text-base focus:outline-none focus:border-indigo-500 focus:bg-black/40 transition-all placeholder:text-slate-600;
                     }
                     .input-ghost {
                         @apply bg-transparent border-none focus:outline-none focus:ring-0 px-0;

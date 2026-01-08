@@ -7,7 +7,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 const ProjectDetail: React.FC<{ project: any; onClose: () => void }> = ({ project, onClose }) => {
   return (
-    <div className="fixed inset-0 z-[10000] flex items-center justify-center p-4 md:p-10">
+    <div className="fixed inset-0 z-[10000] flex items-center justify-center p-3 sm:p-4 md:p-10">
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
@@ -20,7 +20,7 @@ const ProjectDetail: React.FC<{ project: any; onClose: () => void }> = ({ projec
         initial={{ opacity: 0, scale: 0.95, y: 30 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.95, y: 30 }}
-        className="relative w-full max-w-6xl bg-slate-900 border border-white/10 rounded-[3rem] md:rounded-[4rem] shadow-[0_50px_150px_rgba(0,0,0,0.8)] flex flex-col h-[90vh] overflow-hidden overflow-y-auto no-scrollbar"
+        className="relative w-full max-w-6xl bg-slate-900 border border-white/10 rounded-2xl sm:rounded-3xl md:rounded-[4rem] shadow-[0_50px_150px_rgba(0,0,0,0.8)] flex flex-col h-[90vh] overflow-hidden overflow-y-auto no-scrollbar"
       >
         <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-indigo-600 via-purple-600 to-indigo-600"></div>
 
@@ -31,12 +31,12 @@ const ProjectDetail: React.FC<{ project: any; onClose: () => void }> = ({ projec
 
           <button
             onClick={onClose}
-            className="absolute top-8 left-8 md:top-12 md:left-12 w-14 h-14 md:w-16 md:h-16 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center text-white hover:bg-indigo-600 hover:border-indigo-500 transition-all z-20 group"
+            className="absolute top-4 right-4 sm:top-8 sm:left-8 md:top-12 md:left-12 w-10 h-10 sm:w-14 sm:h-14 md:w-16 md:h-16 rounded-xl sm:rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center text-white hover:bg-indigo-600 hover:border-indigo-500 transition-all z-20 group"
           >
-            <X size={28} className="group-hover:rotate-90 transition-transform duration-500" />
+            <X size={20} className="sm:w-[28px] sm:h-[28px] group-hover:rotate-90 transition-transform duration-500" />
           </button>
 
-          <div className="absolute bottom-10 right-10 left-10 md:bottom-20 md:right-20 md:left-20 text-right" dir="rtl">
+          <div className="absolute bottom-6 right-6 left-6 sm:bottom-10 sm:right-10 sm:left-10 md:bottom-20 md:right-20 md:left-20 text-right" dir="rtl">
             <motion.div
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
@@ -50,7 +50,7 @@ const ProjectDetail: React.FC<{ project: any; onClose: () => void }> = ({ projec
               initial={{ opacity: 0, x: 30 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.3 }}
-              className="text-4xl md:text-7xl font-black text-white mb-6 tracking-tighter"
+              className="text-3xl sm:text-4xl md:text-5xl lg:text-7xl font-black text-white mb-4 sm:mb-6 tracking-tighter"
             >
               {project.title}
             </motion.h2>
@@ -67,25 +67,25 @@ const ProjectDetail: React.FC<{ project: any; onClose: () => void }> = ({ projec
         </div>
 
         {/* Content Strategic Layout */}
-        <div className="p-8 md:p-24 grid lg:grid-cols-12 gap-16 md:gap-24 text-right" dir="rtl">
+        <div className="p-5 sm:p-8 md:p-24 grid lg:grid-cols-12 gap-8 sm:gap-12 md:gap-24 text-right" dir="rtl">
           {/* Narrative Core */}
           <div className="lg:col-span-8 space-y-20">
             <div>
               <h3 className="text-3xl md:text-4xl font-black text-white mb-8 flex items-center gap-4">
                 <ChevronLeft className="text-indigo-500" size={32} /> استراتيجية المشروع
               </h3>
-              <p className="text-slate-400 text-lg md:text-2xl leading-relaxed font-medium">
+              <p className="text-slate-400 text-base sm:text-lg md:text-2xl leading-relaxed font-medium">
                 {project.fullDescription}
               </p>
             </div>
 
-            <div className="grid md:grid-cols-2 gap-8 md:gap-12">
-              <div className="p-10 rounded-[3rem] bg-slate-950/50 border border-white/5 relative overflow-hidden group">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-8 md:gap-12">
+              <div className="p-6 sm:p-10 rounded-2xl sm:rounded-[3rem] bg-slate-950/50 border border-white/5 relative overflow-hidden group">
                 <div className="absolute -top-10 -left-10 w-32 h-32 bg-red-600/5 blur-3xl group-hover:bg-red-600/10 transition-colors"></div>
                 <h4 className="text-red-400 font-black text-xl mb-6 flex items-center gap-3">تحديات التنفيذ <Zap size={20} /></h4>
                 <p className="text-slate-400 text-lg leading-relaxed">{project.challenges || project.caseStudy?.problem || 'تم تجاوز التحديات التقنية بنجاح.'}</p>
               </div>
-              <div className="p-10 rounded-[3rem] bg-indigo-600/5 border border-indigo-600/20 relative overflow-hidden group">
+              <div className="p-6 sm:p-10 rounded-2xl sm:rounded-[3rem] bg-indigo-600/5 border border-indigo-600/20 relative overflow-hidden group">
                 <div className="absolute -top-10 -left-10 w-32 h-32 bg-indigo-600/5 blur-3xl group-hover:bg-indigo-600/10 transition-colors"></div>
                 <h4 className="text-indigo-400 font-black text-xl mb-6 flex items-center gap-3">الحلول الهندسية <ArrowRight size={20} /></h4>
                 <p className="text-slate-400 text-lg leading-relaxed">{project.solutions || project.caseStudy?.solution || 'تطوير بنية تحتية رقمية قوية ومستدامة.'}</p>
@@ -141,7 +141,7 @@ const ProjectDetail: React.FC<{ project: any; onClose: () => void }> = ({ projec
               </div>
             </div>
 
-            <button className="group relative w-full py-6 rounded-3xl bg-white text-slate-950 font-black text-lg overflow-hidden transition-all shadow-2xl active:scale-95">
+            <button className="group relative w-full py-5 sm:py-6 rounded-2xl sm:rounded-3xl bg-white text-slate-950 font-black text-base sm:text-lg overflow-hidden transition-all shadow-2xl active:scale-95 min-h-[56px]">
               <div className="absolute inset-0 bg-indigo-600 translate-x-[-101%] group-hover:translate-x-0 transition-transform duration-500"></div>
               <span className="relative z-10 group-hover:text-white flex items-center justify-center gap-4 transition-colors">
                 زيارة المشروع
@@ -165,13 +165,13 @@ const Portfolio: React.FC = () => {
   const isMinimalist = templateId === 'minimalist-pro';
 
   return (
-    <section id="portfolio" className={`py-12 md:py-16 relative overflow-hidden ${isMinimalist ? 'bg-slate-50' : ''}`}>
+    <section id="portfolio" className={`py-8 sm:py-12 md:py-16 relative overflow-hidden px-4 sm:px-6 ${isMinimalist ? 'bg-slate-50' : ''}`}>
       {!isMinimalist && (
         <div className="absolute top-0 right-1/4 w-[600px] h-[600px] bg-indigo-600/5 blur-[150px] rounded-full pointer-events-none"></div>
       )}
 
-      <div className="container mx-auto px-6 relative z-10">
-        <div className="max-w-3xl mx-auto text-center mb-12">
+      <div className="container mx-auto relative z-10">
+        <div className="max-w-3xl mx-auto text-center mb-8 sm:mb-12">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -202,7 +202,7 @@ const Portfolio: React.FC = () => {
           </motion.p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
           {projects.map((project: any, i: number) => (
             <motion.div
               key={project.id || i}
@@ -210,7 +210,7 @@ const Portfolio: React.FC = () => {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: i * 0.1 }}
-              className="group relative glass-card rounded-[3.5rem] overflow-hidden transition-all duration-700 hover:-translate-y-3"
+              className="group relative glass-card rounded-2xl sm:rounded-[3.5rem] overflow-hidden transition-all duration-700 hover:-translate-y-3"
             >
               <div className="aspect-[4/3] relative overflow-hidden">
                 <img
@@ -227,7 +227,7 @@ const Portfolio: React.FC = () => {
                 </div>
               </div>
 
-              <div className="p-10 text-right" dir="rtl">
+              <div className="p-6 sm:p-10 text-right" dir="rtl">
                 <h3 className="text-2xl font-black text-white mb-4 group-hover:text-indigo-400 transition-colors uppercase tracking-tight">{project.title}</h3>
                 <div className="flex items-center gap-3 text-indigo-400 mb-8 font-black">
                   <BarChart3 size={20} className="text-indigo-500" />
@@ -235,7 +235,7 @@ const Portfolio: React.FC = () => {
                 </div>
                 <button
                   onClick={() => setSelectedProject(project)}
-                  className="w-full py-4 rounded-2xl bg-white/5 border border-white/10 text-white text-xs font-black uppercase tracking-[0.2em] hover:bg-indigo-600 hover:border-indigo-500 transition-all flex items-center justify-center gap-3 shadow-xl group/btn"
+                  className="w-full py-3 sm:py-4 rounded-xl sm:rounded-2xl bg-white/5 border border-white/10 text-white text-xs font-black uppercase tracking-[0.2em] hover:bg-indigo-600 hover:border-indigo-500 transition-all flex items-center justify-center gap-3 shadow-xl group/btn min-h-[48px]"
                 >
                   استكشف تفاصيل المشروع
                   <ArrowRight size={18} className="group-hover/btn:translate-x-2 transition-transform" />

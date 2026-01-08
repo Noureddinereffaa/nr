@@ -38,7 +38,7 @@ const StrategicBlog: React.FC = () => {
     if (displayArticles.length === 0) return null;
 
     return (
-        <section id="blog" className={`py-16 md:py-24 relative overflow-hidden ${isMinimalist ? 'bg-white' : 'bg-slate-950/40'}`}>
+        <section id="blog" className={`py-8 sm:py-16 md:py-24 relative overflow-hidden px-4 sm:px-6 ${isMinimalist ? 'bg-white' : 'bg-slate-950/40'}`}>
             {/* Ambient Background Elements */}
             {!isMinimalist && (
                 <>
@@ -47,27 +47,27 @@ const StrategicBlog: React.FC = () => {
                 </>
             )}
 
-            <div className="container mx-auto px-6 relative z-10">
-                <div className="max-w-4xl mx-auto text-center mb-16 md:mb-24">
+            <div className="container mx-auto relative z-10">
+                <div className="max-w-4xl mx-auto text-center mb-8 sm:mb-16 md:mb-24">
                     <div className={`inline-flex items-center gap-3 px-6 py-2.5 rounded-full border text-[11px] font-black uppercase tracking-[0.4em] mb-8 ${isCyber ? 'bg-green-500/10 border-green-500/20 text-green-500' : isMinimalist ? 'bg-slate-100 border-slate-200 text-slate-900' : 'bg-[rgba(var(--accent-indigo-rgb),0.1)] border-[rgba(var(--accent-indigo-rgb),0.2)] text-[var(--accent-indigo)]'
                         }`}>
                         <Sparkles size={14} className="animate-pulse" />
                         Intelligence Insights
                     </div>
-                    <h2 className={`text-5xl md:text-8xl font-black mb-8 tracking-tighter leading-[1.1] ${isMinimalist ? 'text-slate-950' : 'text-white'}`}>
+                    <h2 className={`text-3xl sm:text-5xl md:text-6xl lg:text-8xl font-black mb-4 sm:mb-8 tracking-tighter leading-[1.1] ${isMinimalist ? 'text-slate-950' : 'text-white'}`}>
                         المدونة <span className={isMinimalist ? 'text-indigo-600' : 'gradient-text'}>الاستراتيجية</span> <br /> لعصر الذكاء الاصطناعي
                     </h2>
-                    <p className={`text-lg md:text-2xl leading-relaxed max-w-2xl mx-auto font-medium opacity-80 ${isMinimalist ? 'text-slate-600' : 'text-slate-400'}`}>
+                    <p className={`text-base md:text-2xl leading-relaxed max-w-2xl mx-auto font-medium opacity-80 ${isMinimalist ? 'text-slate-600' : 'text-slate-400'}`}>
                         حلول، رؤى، وتحليلات عميقة لتمكين مشروعك الرقمي من السيادة الكاملة في السوق.
                     </p>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-8">
                     {displayArticles.map((article, i) => (
                         <article
                             key={article.id}
                             onClick={() => setSelectedArticle(article)}
-                            className="group relative bg-slate-900/40 border border-white/5 rounded-[2rem] md:rounded-[var(--border-radius-elite)] overflow-hidden hover:border-indigo-500/50 transition-all duration-700 hover:-translate-y-2 flex flex-col h-full cursor-pointer glass-morph"
+                            className="group relative bg-slate-900/40 border border-white/5 rounded-2xl sm:rounded-[2rem] md:rounded-[var(--border-radius-elite)] overflow-hidden hover:border-indigo-500/50 transition-all duration-700 hover:-translate-y-2 flex flex-col h-full cursor-pointer glass-morph"
                         >
                             {article.featured && (
                                 <div className="absolute top-0 right-0 z-20">
@@ -92,14 +92,14 @@ const StrategicBlog: React.FC = () => {
                             </div>
 
                             {/* Card Content */}
-                            <div className="p-6 md:p-10 flex-1 flex flex-col text-right" dir="rtl">
+                            <div className="p-5 sm:p-6 md:p-10 flex-1 flex flex-col text-right" dir="rtl">
                                 <div className="flex items-center gap-4 text-slate-500 text-[9px] md:text-[10px] font-black uppercase tracking-widest mb-6">
                                     <div className="flex items-center gap-1.5"><Calendar size={12} /> {new Date(article.date).toLocaleDateString('ar-EG')}</div>
                                     <span className="w-1 h-1 rounded-full bg-slate-800"></span>
                                     <div className="flex items-center gap-1.5"><Clock size={12} /> {article.readTime}</div>
                                 </div>
 
-                                <h3 className="text-xl md:text-2xl font-black text-white mb-4 leading-tight group-hover:text-[var(--accent-indigo)] transition-colors">
+                                <h3 className="text-lg sm:text-xl md:text-2xl font-black text-white mb-3 sm:mb-4 leading-tight group-hover:text-[var(--accent-indigo)] transition-colors">
                                     {article.title}
                                 </h3>
 
@@ -107,13 +107,13 @@ const StrategicBlog: React.FC = () => {
                                     {article.excerpt}
                                 </p>
 
-                                <div className="mt-auto pt-8 border-t border-white/5 flex items-center justify-between">
+                                <div className="mt-auto pt-6 sm:pt-8 border-t border-white/5 flex items-center justify-between">
                                     <button
                                         onClick={(e) => {
                                             e.stopPropagation();
                                             setSelectedArticle(article);
                                         }}
-                                        className="flex items-center gap-3 text-white font-black text-sm group/btn hover:text-[var(--accent-indigo)] transition-colors"
+                                        className="flex items-center gap-3 text-white font-black text-xs sm:text-sm group/btn hover:text-[var(--accent-indigo)] transition-colors min-h-[44px]"
                                     >
                                         <ArrowLeft size={18} className="transition-transform group-hover/btn:-translate-x-2" />
                                         اقرأ المقال الكامل
@@ -133,7 +133,7 @@ const StrategicBlog: React.FC = () => {
                 <div className="mt-20 text-center">
                     <button
                         onClick={() => window.location.href = '/blog'}
-                        className="bg-white/5 hover:bg-white/10 text-white px-10 py-5 rounded-2xl font-black text-lg border border-white/10 transition-all active:scale-95 glass-effect flex items-center justify-center gap-3 mx-auto"
+                        className="bg-white/5 hover:bg-white/10 text-white px-6 sm:px-10 py-4 sm:py-5 rounded-xl sm:rounded-2xl font-black text-base sm:text-lg border border-white/10 transition-all active:scale-95 glass-effect flex items-center justify-center gap-3 mx-auto min-h-[56px]"
                     >
                         <BookOpen size={20} className="text-indigo-400" />
                         تصفح جميع المقالات الاستراتيجية

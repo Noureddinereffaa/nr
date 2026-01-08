@@ -150,6 +150,14 @@ const DecisionPages: React.FC = () => {
                 isOpen={isEditorOpen}
                 onClose={handleClose}
                 initialData={editingPage}
+                onSave={async (data) => {
+                    if (editingPage) {
+                        await updateDecisionPage(editingPage.id, data as any);
+                    } else {
+                        await addDecisionPage(data as any);
+                    }
+                    handleClose();
+                }}
             />
         </div>
     );

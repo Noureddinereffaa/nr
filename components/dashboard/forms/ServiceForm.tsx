@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Service } from '../../../types';
 import Modal from '../../ui/Modal';
-import Input from '../../ui/Input';
+import { Input } from '../../ui/Input';
 import { useBusiness } from '../../../context/BusinessContext';
 import { Plus, X } from 'lucide-react';
 

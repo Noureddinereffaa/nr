@@ -8,6 +8,15 @@ interface Toast {
     type: 'success' | 'error' | 'info';
 }
 
+export interface SystemNotification {
+    id: string;
+    title: string;
+    message: string;
+    time: string;
+    type: 'info' | 'success' | 'warning' | 'error';
+    read: boolean;
+}
+
 interface UIContextType {
     // ... existing
     isClientModalOpen: boolean;
@@ -42,6 +51,7 @@ interface UIContextType {
 
     isShieldMode: boolean;
     toggleShieldMode: () => void;
+    mask: (text: string, type?: 'email' | 'phone' | 'currency' | 'text') => string;
 
     // Toast System
     toasts: Toast[];
@@ -58,6 +68,12 @@ interface UIContextType {
         fontFamily: string;
     };
     updateTheme: (config: Partial<UIContextType['themeConfig']>) => void;
+
+    // Notification System
+    notifications: SystemNotification[];
+    addNotification: (notif: Omit<SystemNotification, 'id' | 'time' | 'read'>) => void;
+    markNotificationAsRead: (id: string) => void;
+    clearNotifications: () => void;
 }
 
 const UIContext = createContext<UIContextType | null>(null);
@@ -84,6 +100,36 @@ export const UIProvider: React.FC<{ children: React.ReactNode }> = ({ children }
 
     const removeToast = (id: string) => {
         setToasts(prev => prev.filter(t => t.id !== id));
+    };
+
+    // Notification State
+    const [notifications, setNotifications] = useState<SystemNotification[]>(() => {
+        const saved = localStorage.getItem('nr_notifications');
+        return saved ? JSON.parse(saved) : [
+            { id: '1', title: 'ترحيب بالنظام', message: 'مرحباً بك في NR-OS السيادي. نظام الإشعارات جاهز للعمل.', time: new Date().toISOString(), type: 'info', read: false }
+        ];
+    });
+
+    useEffect(() => {
+        localStorage.setItem('nr_notifications', JSON.stringify(notifications));
+    }, [notifications]);
+
+    const addNotification = (notif: Omit<SystemNotification, 'id' | 'time' | 'read'>) => {
+        const newNotif: SystemNotification = {
+            ...notif,
+            id: Math.random().toString(36).substr(2, 9),
+            time: new Date().toISOString(),
+            read: false
+        };
+        setNotifications(prev => [newNotif, ...prev].slice(0, 50));
+    };
+
+    const markNotificationAsRead = (id: string) => {
+        setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n));
+    };
+
+    const clearNotifications = () => {
+        setNotifications([]);
     };
 
     // Helper for RGB conversion (for transparency support)
@@ -130,6 +176,30 @@ export const UIProvider: React.FC<{ children: React.ReactNode }> = ({ children }
         }
     }, [siteData.brand]);
 
+    // Listen for global system activities to trigger notifications
+    useEffect(() => {
+        const handleActivity = (e: any) => {
+            const activity = e.detail;
+            if (activity) {
+                addNotification({
+                    title: activity.label,
+                    message: activity.metadata?.message || 'تم تحديث حالة النظام بنجاح',
+                    type: activity.status === 'success' ? 'success' :
+                        activity.status === 'error' ? 'error' :
+                            activity.status === 'warning' ? 'warning' : 'info'
+                });
+
+                // Also show a toast for high-priority successes/errors
+                if (activity.status === 'success' || activity.status === 'error') {
+                    addToast(activity.label, activity.status);
+                }
+            }
+        };
+
+        window.addEventListener('system-activity', handleActivity);
+        return () => window.removeEventListener('system-activity', handleActivity);
+    }, []);
+
     // Apply theme on mount and when config changes
     React.useEffect(() => {
         if (themeConfig.accentColor) {
@@ -153,6 +223,24 @@ export const UIProvider: React.FC<{ children: React.ReactNode }> = ({ children }
             localStorage.setItem('nr_shield_mode', String(next));
             return next;
         });
+    };
+
+    const mask = (text: string, type: 'email' | 'phone' | 'currency' | 'text' = 'text'): string => {
+        if (!isShieldMode || !text) return text;
+
+        switch (type) {
+            case 'email':
+                const [user, domain] = text.split('@');
+                if (!domain) return '***@***.***';
+                return `${user.substring(0, 2)}***@${domain}`;
+            case 'phone':
+                return text.replace(/(\d{3})\d+(\d{2})/, '$1-XXXX-$2');
+            case 'currency':
+                return '***.**';
+            default:
+                if (text.length <= 4) return '****';
+                return text.substring(0, 4) + '...';
+        }
     };
 
     const toggleHighContrast = () => {
@@ -209,6 +297,7 @@ export const UIProvider: React.FC<{ children: React.ReactNode }> = ({ children }
 
             isShieldMode,
             toggleShieldMode,
+            mask,
 
             toasts,
             addToast,
@@ -216,7 +305,11 @@ export const UIProvider: React.FC<{ children: React.ReactNode }> = ({ children }
             isHighContrast,
             toggleHighContrast,
             themeConfig,
-            updateTheme
+            updateTheme,
+            notifications,
+            addNotification,
+            markNotificationAsRead,
+            clearNotifications
         }}>
             {children}
             {/* Toast Container */}

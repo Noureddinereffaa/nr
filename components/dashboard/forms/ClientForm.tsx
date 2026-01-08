@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Modal from '../../ui/Modal';
-import Input from '../../ui/Input';
+import { Input } from '../../ui/Input';
 import { Client } from '../../../types';
 import { useUI } from '../../../context/UIContext'; // Import useUI
 

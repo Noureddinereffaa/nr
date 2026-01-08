@@ -2,10 +2,10 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Shield, X, Search, Bell, Circle, CloudUpload, CheckCircle2, AlertCircle, Loader2, Menu, LogOut, Contrast } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import NotificationDropdown from './NotificationDropdown';
+import { ThemeToggle } from './ThemeToggle';
 import { useAuth } from '../../../context/AuthContext';
 import { useUI } from '../../../context/UIContext';
-import { useSystem } from '../../../context/SystemContext';
-import { supabase, isSupabaseConfigured } from '../../../lib/supabase';
+import { GlobalSyncButton } from './GlobalSyncButton';
 
 interface DashboardHeaderProps {
     onOpenSidebar: () => void;
@@ -15,14 +15,10 @@ interface DashboardHeaderProps {
 const DashboardHeader: React.FC<DashboardHeaderProps> = ({ onOpenSidebar, isMenuOpen }) => {
     const { user, signOut } = useAuth();
     const { isHighContrast, toggleHighContrast, isShieldMode, toggleShieldMode, openCommandPalette } = useUI();
-    const { siteData } = useSystem() as any;
+
     const navigate = useNavigate();
     const [showNotifications, setShowNotifications] = useState(false);
     const notifRef = useRef<HTMLDivElement>(null);
-
-    // Cloud Sync State
-    const [syncStatus, setSyncStatus] = useState<'idle' | 'syncing' | 'success' | 'error'>('idle');
-    const [syncError, setSyncError] = useState<string | null>(null);
 
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
@@ -34,51 +30,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({ onOpenSidebar, isMenu
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
 
-    const handleSyncToCloud = async () => {
-        if (!isSupabaseConfigured() || !supabase) {
-            setSyncStatus('error');
-            setSyncError('Supabase غير مكوّن. تأكد من إضافة المتغيرات البيئية.');
-            setTimeout(() => setSyncStatus('idle'), 4000);
-            return;
-        }
 
-        setSyncStatus('syncing');
-        setSyncError(null);
-
-        try {
-            const syncTasks = [
-                supabase.from('site_settings').upsert({
-                    id: 'main',
-                    brand: siteData.brand,
-                    contactInfo: siteData.contactInfo,
-                    aiConfig: siteData.aiConfig,
-                    features: siteData.features
-                }),
-                supabase.from('services').upsert(siteData.services.map((s: any) => ({ id: s.id, data: s }))),
-                supabase.from('projects').upsert(siteData.projects.map((p: any) => ({ id: p.id, data: p }))),
-                supabase.from('articles').upsert(siteData.articles.map((a: any) => ({ id: a.id, data: a }))),
-                supabase.from('clients').upsert(siteData.clients.map((c: any) => ({ id: c.id, data: c }))),
-                supabase.from('invoices').upsert(siteData.invoices.map((i: any) => ({ id: i.id, data: i })))
-            ];
-
-            const results = await Promise.all(syncTasks);
-            const errors = results.filter(r => r.error);
-            if (errors.length > 0) {
-                setSyncStatus('error');
-                setSyncError(`فشل المزامنة: ${errors[0].error?.message || 'خطأ غير معروف'}`);
-                setTimeout(() => setSyncStatus('idle'), 5000);
-                return;
-            }
-
-            setSyncStatus('success');
-            setTimeout(() => setSyncStatus('idle'), 3000);
-
-        } catch (err: any) {
-            setSyncStatus('error');
-            setSyncError(err.message || 'فشل الاتصال بالخادم');
-            setTimeout(() => setSyncStatus('idle'), 5000);
-        }
-    };
 
     return (
         <div className="p-6 border-b border-white/10 flex items-center justify-between glass-morph sticky top-0 z-[var(--z-nav)] backdrop-blur-3xl shadow-xl">
@@ -118,29 +70,8 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({ onOpenSidebar, isMenu
 
             <div className="flex items-center gap-2 md:gap-4">
                 <div className="relative">
-                    <button
-                        onClick={handleSyncToCloud}
-                        disabled={syncStatus === 'syncing'}
-                        className={`flex items-center gap-2 px-4 py-2 rounded-xl font-black text-xs transition-all border ${syncStatus === 'syncing' ? 'bg-blue-500/20 border-blue-500/30 text-blue-400 cursor-wait' :
-                                syncStatus === 'success' ? 'bg-emerald-500/20 border-emerald-500/30 text-emerald-400' :
-                                    syncStatus === 'error' ? 'bg-red-500/20 border-red-500/30 text-red-400' :
-                                        'bg-white/5 border-white/10 text-white hover:bg-[var(--accent-indigo)] hover:border-[var(--accent-indigo)]'
-                            }`}
-                        title={syncError || 'نشر التعديلات للسحابة'}
-                    >
-                        {syncStatus === 'syncing' && <Loader2 size={16} className="animate-spin" />}
-                        {syncStatus === 'success' && <CheckCircle2 size={16} />}
-                        {syncStatus === 'error' && <AlertCircle size={16} />}
-                        {syncStatus === 'idle' && <CloudUpload size={16} />}
-                        <span className="hidden sm:inline">
-                            {syncStatus === 'syncing' ? 'جاري النشر...' :
-                                syncStatus === 'success' ? 'تم النشر ✓' :
-                                    syncStatus === 'error' ? 'خطأ!' :
-                                        'نشر للسحابة'}
-                        </span>
-                    </button>
+                    <GlobalSyncButton />
                 </div>
-
                 <div className="flex items-center gap-3 ml-4 pl-4 border-l border-white/5 relative" ref={notifRef}>
                     <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 bg-green-500/10 rounded-full border border-green-500/20">
                         <Circle size={8} className="fill-green-500 text-green-500 animate-pulse" />
@@ -171,6 +102,8 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({ onOpenSidebar, isMenu
                     >
                         <Contrast size={16} />
                     </button>
+
+                    <ThemeToggle />
                 </div>
 
                 <button

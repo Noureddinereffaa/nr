@@ -5,15 +5,16 @@ import { ArrowLeft, Sparkles, Shield, Layout as LayoutIcon, Zap, Globe, MousePoi
 import { motion } from 'framer-motion';
 
 const Hero: React.FC = () => {
-  const { brand, contactInfo, aiConfig } = useSystem();
+  const { brand, contactInfo, aiConfig, siteData } = useSystem();
   const { openChat } = useUI();
 
-  // Create a profile object for compatibility if needed, or use brand/aiConfig directly
+  // DERIVE profile with multi-layer fallback for precision
+  const p = (siteData?.profile || {}) as any;
   const profile = {
-    name: brand.siteName,
-    primaryTitle: aiConfig.field || "Strategic Digital Architecture",
-    bio: aiConfig.mission,
-    photoUrl: "https://images.unsplash.com/photo-1542435503-956c469947f6?auto=format&fit=crop&q=80"
+    name: p.name || brand.siteName || "نورالدين رفعة",
+    primaryTitle: p.primaryTitle || aiConfig.field || "مهندس نمو المشاريع الرقمية",
+    bio: p.bio || aiConfig.mission || "تطوير الأنظمة الرقمية الاستراتيجية لتحقيق الهيمنة على السوق.",
+    photoUrl: p.photoUrl || "https://www2.0zz0.com/2025/12/17/16/907136235.jpg"
   };
 
   const scrollToSection = (e: React.MouseEvent, id: string) => {
@@ -31,7 +32,7 @@ const Hero: React.FC = () => {
   const isMinimalist = templateId === 'minimalist-pro';
 
   return (
-    <section id="hero" className="relative min-h-[85vh] flex items-center pt-20 pb-12 md:py-0 overflow-hidden">
+    <section id="hero" className="relative min-h-screen sm:min-h-[85vh] flex items-center px-4 sm:px-6 pt-24 sm:pt-20 pb-12 md:py-0 overflow-hidden">
 
       {/* Cinematic Background Architecture */}
       <div className="absolute inset-0 z-0 overflow-hidden">
@@ -46,8 +47,8 @@ const Hero: React.FC = () => {
         {isCyber && <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-green-500/50 to-transparent"></div>}
       </div>
 
-      <div className="container mx-auto px-6 relative z-10">
-        <div className="flex flex-col lg:grid lg:grid-cols-12 gap-16 lg:gap-24 items-center">
+      <div className="container mx-auto relative z-10">
+        <div className="flex flex-col lg:grid lg:grid-cols-12 gap-8 sm:gap-12 lg:gap-24 items-center">
 
           {/* Strategic Narrative Side */}
           <div className="lg:col-span-7 text-center lg:text-right order-2 lg:order-1">
@@ -69,7 +70,7 @@ const Hero: React.FC = () => {
               initial={{ opacity: 0, x: 50 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.2, type: 'spring', damping: 20 }}
-              className={`text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black mb-6 leading-[0.95] tracking-tighter ${isMinimalist ? 'text-slate-950' : 'text-white'}`}
+              className={`text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-black mb-4 sm:mb-6 leading-[0.95] tracking-tighter ${isMinimalist ? 'text-slate-950' : 'text-white'}`}
             >
               {profile.primaryTitle.split(' ').slice(0, -1).join(' ')} <br />
               <span className={isMinimalist ? 'text-indigo-600' : 'gradient-text'}>{profile.primaryTitle.split(' ').pop()}</span>
@@ -79,7 +80,7 @@ const Hero: React.FC = () => {
               initial={{ opacity: 0, x: 30 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.4 }}
-              className={`text-base md:text-lg mb-8 max-w-xl mx-auto lg:mr-0 lg:ml-auto leading-relaxed font-medium ${isMinimalist ? 'text-slate-600' : 'text-slate-400'}`}
+              className={`text-sm sm:text-base md:text-lg mb-6 sm:mb-8 max-w-xl mx-auto lg:mr-0 lg:ml-auto leading-relaxed font-medium ${isMinimalist ? 'text-slate-600' : 'text-slate-400'}`}
             >
               أنا <span className={`font-black border-b-4 pb-1 ${isMinimalist ? 'text-slate-950 border-indigo-600' : 'text-white border-indigo-600/40'}`}>{profile.name}</span>. {profile.bio}
             </motion.p>
@@ -88,11 +89,11 @@ const Hero: React.FC = () => {
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.6 }}
-              className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-end mb-12"
+              className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center lg:justify-end mb-8 sm:mb-12"
             >
               <button
                 onClick={(e) => scrollToSection(e, '#services')}
-                className={`group relative px-10 py-5 rounded-2xl font-black text-xl overflow-hidden active:scale-95 transition-all shadow-2xl ${isCyber
+                className={`group relative px-6 sm:px-8 md:px-10 py-4 sm:py-5 rounded-xl sm:rounded-2xl font-black text-base sm:text-lg md:text-xl overflow-hidden active:scale-95 transition-all shadow-2xl min-h-[56px] ${isCyber
                   ? 'bg-green-600 text-black border-2 border-green-400'
                   : isMinimalist
                     ? 'bg-slate-950 text-white'
@@ -100,22 +101,22 @@ const Hero: React.FC = () => {
                   }`}
               >
                 <div className={`absolute inset-0 translate-y-[101%] group-hover:translate-y-0 transition-transform duration-500 ${isCyber ? 'bg-green-400' : 'bg-indigo-600'}`}></div>
-                <span className={`relative z-10 group-hover:text-white flex items-center justify-center gap-4 transition-colors ${isCyber ? 'group-hover:text-black' : ''}`}>
+                <span className={`relative z-10 group-hover:text-white flex items-center justify-center gap-2 sm:gap-3 md:gap-4 transition-colors ${isCyber ? 'group-hover:text-black' : ''}`}>
                   اكتشف خدماتنا النخبوية
-                  <ArrowLeft size={24} className="group-hover:-translate-x-2 transition-transform" />
+                  <ArrowLeft size={20} className="sm:w-[24px] sm:h-[24px] group-hover:-translate-x-2 transition-transform" />
                 </span>
               </button>
 
               <button
                 onClick={(e) => { e.preventDefault(); openChat(); }}
-                className={`px-10 py-5 rounded-2xl font-black text-xl active:scale-95 transition-all flex items-center justify-center gap-4 ${isCyber
+                className={`px-6 sm:px-8 md:px-10 py-4 sm:py-5 rounded-xl sm:rounded-2xl font-black text-base sm:text-lg md:text-xl active:scale-95 transition-all flex items-center justify-center gap-2 sm:gap-3 md:gap-4 min-h-[56px] ${isCyber
                   ? 'bg-black text-green-500 border border-green-500/30'
                   : isMinimalist
                     ? 'bg-white text-slate-950 border border-slate-200'
                     : 'glass-card text-white hover:bg-white/5'
                   }`}
               >
-                <Bot size={24} className={isCyber ? 'text-green-500' : 'text-indigo-500'} />
+                <Bot size={20} className={`sm:w-[24px] sm:h-[24px] ${isCyber ? 'text-green-500' : 'text-indigo-500'}`} />
                 حلول ذكاء اصطناعي
               </button>
             </motion.div>
@@ -125,7 +126,7 @@ const Hero: React.FC = () => {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 1 }}
-              className={`grid grid-cols-3 gap-6 border-t pt-8 max-w-lg mx-auto lg:mr-0 lg:ml-auto ${isMinimalist ? 'border-slate-100' : 'border-white/5'}`}
+              className={`grid grid-cols-3 gap-4 sm:gap-6 border-t pt-6 sm:pt-8 max-w-lg mx-auto lg:mr-0 lg:ml-auto ${isMinimalist ? 'border-slate-100' : 'border-white/5'}`}
             >
               {[
                 { label: "دقة الأتمتة", val: "100%", icon: Zap },
@@ -133,17 +134,17 @@ const Hero: React.FC = () => {
                 { label: "خبرة دولية", val: "05+", icon: Globe }
               ].map((item, i) => (
                 <div key={i} className="flex flex-col items-center lg:items-end gap-2 group cursor-default">
-                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-500 shadow-xl ${isCyber
+                  <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl flex items-center justify-center transition-all duration-500 shadow-xl ${isCyber
                     ? 'bg-green-500/10 text-green-500 group-hover:bg-green-500 group-hover:text-black'
                     : isMinimalist
                       ? 'bg-slate-100 text-slate-900 group-hover:bg-slate-950 group-hover:text-white'
                       : 'bg-white/5 text-indigo-400 group-hover:bg-indigo-600 group-hover:text-white'
                     }`}>
-                    <item.icon size={20} />
+                    <item.icon size={16} className="sm:w-[20px] sm:h-[20px]" />
                   </div>
-                  <span className={`text-2xl sm:text-4xl font-black tracking-tighter transition-colors ${isCyber ? 'text-green-400 group-hover:text-green-500' : isMinimalist ? 'text-slate-950' : 'text-white group-hover:text-indigo-400'
+                  <span className={`text-xl sm:text-2xl md:text-3xl lg:text-4xl font-black tracking-tighter transition-colors ${isCyber ? 'text-green-400 group-hover:text-green-500' : isMinimalist ? 'text-slate-950' : 'text-white group-hover:text-indigo-400'
                     }`}>{item.val}</span>
-                  <span className={`text-[10px] font-black uppercase tracking-[0.2em] ${isMinimalist ? 'text-slate-400' : 'text-slate-500'}`}>{item.label}</span>
+                  <span className={`text-[9px] sm:text-[10px] font-black uppercase tracking-[0.15em] sm:tracking-[0.2em] ${isMinimalist ? 'text-slate-400' : 'text-slate-500'}`}>{item.label}</span>
                 </div>
               ))}
             </motion.div>
@@ -171,8 +172,11 @@ const Hero: React.FC = () => {
                 <img
                   src={profile.photoUrl}
                   alt={profile.name}
-                  className="w-full h-full object-cover transition-all duration-1000 scale-105 group-hover:scale-100"
+                  className="w-full h-full object-cover transition-all duration-1000 scale-105 group-hover:scale-110"
                 />
+
+                {/* Sovereign Scanning Effect */}
+                <div className="absolute inset-0 bg-gradient-to-b from-transparent via-indigo-500/20 to-transparent h-[10%] w-full top-[-10%] group-hover:animate-scan pointer-events-none"></div>
 
                 {/* Advanced Overlay */}
                 {!isMinimalist && <div className={`absolute inset-0 bg-gradient-to-t via-transparent to-transparent ${isCyber ? 'from-green-950/80' : 'from-slate-950'}`}></div>}

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Expense } from '../../../types';
 import Modal from '../../ui/Modal';
-import Input from '../../ui/Input';
+import { Input } from '../../ui/Input';
 import { useBusiness } from '../../../context/BusinessContext';
 
 interface ExpenseFormProps {

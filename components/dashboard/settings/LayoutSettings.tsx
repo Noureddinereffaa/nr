@@ -39,7 +39,7 @@ const LayoutSettings: React.FC = () => {
     };
 
     const moveWidget = (id: string, direction: 'up' | 'down') => {
-        const index = layout.findIndex(w => w.id === id);
+        const index = layout.findIndex((w: any) => (w.id || w.i) === id);
         if (direction === 'up' && index === 0) return;
         if (direction === 'down' && index === layout.length - 1) return;
 
@@ -47,9 +47,22 @@ const LayoutSettings: React.FC = () => {
         const swapIndex = direction === 'up' ? index - 1 : index + 1;
         [newLayout[index], newLayout[swapIndex]] = [newLayout[swapIndex], newLayout[index]];
 
-        // Update orders
-        const finalLayout = newLayout.map((w, i) => ({ ...w, order: i }));
-        updateSiteData({ dashboardLayout: finalLayout });
+        // Update orders and ensure type compatibility
+        const finalLayout = newLayout.map((w: any, i) => ({
+            i: w.id || w.i,
+            x: 0,
+            y: i,
+            w: w.size === 'full' ? 12 : w.size === 'large' ? 8 : 4,
+            h: 4,
+            ...w // Keep original properties for local state
+        }));
+
+        // Only save the grid-layout compatible properties to siteData if that's what strict mode wants, 
+        // OR cast it if we are storing mixed data. 
+        // Given the error: Type is not assignable to { i: string; x: number... }[]
+        // We need to conform to React-Grid-Layout structure or update the type.
+        // Let's cast for now to preserve the 'visible' and 'size' logic which seems custom.
+        updateSiteData({ dashboardLayout: finalLayout as any });
     };
 
     return (
@@ -64,12 +77,13 @@ const LayoutSettings: React.FC = () => {
             </p>
 
             <div className="space-y-3">
-                {layout.sort((a, b) => a.order - b.order).map((w, index) => {
-                    const info = WIDGET_LABELS[w.id as keyof typeof WIDGET_LABELS] || { label: w.id, icon: '📦' };
+                {(layout as any[]).sort((a, b) => (a.order || 0) - (b.order || 0)).map((w, index) => {
+                    const id = w.id || w.i;
+                    const info = WIDGET_LABELS[id as keyof typeof WIDGET_LABELS] || { label: id, icon: '📦' };
 
                     return (
                         <div
-                            key={w.id}
+                            key={id}
                             className={`
                                 group flex items-center gap-4 p-4 rounded-xl border transition-all
                                 ${w.visible ? 'bg-slate-900 border-white/5' : 'bg-slate-950 border-white/5 opacity-50'}
@@ -93,7 +107,7 @@ const LayoutSettings: React.FC = () => {
                                     {['medium', 'large', 'full'].map(s => (
                                         <button
                                             key={s}
-                                            onClick={() => changeSize(w.id, s)}
+                                            onClick={() => changeSize(id, s)}
                                             className={`p-1.5 rounded-md transition-all ${w.size === s ? 'bg-indigo-600 text-white' : 'text-slate-600 hover:text-slate-400'}`}
                                             title={`Size: ${s}`}
                                         >
@@ -106,7 +120,7 @@ const LayoutSettings: React.FC = () => {
 
                                 {/* Visibility Toggle */}
                                 <button
-                                    onClick={() => toggleVisibility(w.id)}
+                                    onClick={() => toggleVisibility(id)}
                                     className={`
                                         p-2 rounded-lg border transition-all
                                         ${w.visible ? 'border-emerald-500/30 text-emerald-400 bg-emerald-500/5' : 'border-red-500/30 text-red-400 bg-red-500/5'}
@@ -118,14 +132,14 @@ const LayoutSettings: React.FC = () => {
                                 {/* Order Controls (Simple buttons for now instead of Drag-n-Drop for robustness) */}
                                 <div className="flex flex-col gap-1">
                                     <button
-                                        onClick={() => moveWidget(w.id, 'up')}
+                                        onClick={() => moveWidget(id, 'up')}
                                         disabled={index === 0}
                                         className="text-[10px] bg-slate-800 hover:bg-slate-700 disabled:opacity-20 px-1 rounded"
                                     >
                                         ▲
                                     </button>
                                     <button
-                                        onClick={() => moveWidget(w.id, 'down')}
+                                        onClick={() => moveWidget(id, 'down')}
                                         disabled={index === layout.length - 1}
                                         className="text-[10px] bg-slate-800 hover:bg-slate-700 disabled:opacity-20 px-1 rounded"
                                     >

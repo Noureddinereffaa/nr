@@ -62,7 +62,7 @@ const ServicesList: React.FC = () => {
             <ServiceForm
                 isOpen={isFormOpen}
                 onClose={handleClose}
-                service={editingService}
+                initialData={editingService}
             />
         </div>
     );

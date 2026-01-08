@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { NOUREDDINE_DATA } from '../constants';
-import { SiteData, SystemActivity, AIConfig, BrandIdentity, ContactInfo, SocialPost, SocialIntegration } from '../types';
+import { LogService } from '../lib/log-service';
+import { SiteData, SystemActivity, AIConfig, BrandIdentity, ContactInfo, SocialPost, SocialIntegration, DEFAULT_SITE_TEXTS } from '../types';
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
 import Logger from '../lib/logger';
 import { INTEGRATIONS } from '../constants';
@@ -99,8 +100,15 @@ export const SystemProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         },
         faqs: [],
         process: [],
-        siteTexts: {},
-        profile: NOUREDDINE_DATA
+        stats: [],
+        siteTexts: DEFAULT_SITE_TEXTS,
+        profile: {
+            name: NOUREDDINE_DATA.name,
+            primaryTitle: NOUREDDINE_DATA.primaryTitle,
+            photoUrl: NOUREDDINE_DATA.photoUrl,
+            bio: NOUREDDINE_DATA.bio,
+            address: NOUREDDINE_DATA.address
+        }
     });
     const [activityLog, setActivityLog] = useState<SystemActivity[]>([]);
     const [socialPosts, setSocialPosts] = useState<SocialPost[]>([]);
@@ -134,6 +142,8 @@ export const SystemProvider: React.FC<{ children: React.ReactNode }> = ({ childr
                     }));
                     if (s.integrations) setIntegrations(s.integrations);
                     if (s.socialPosts) setSocialPosts(s.socialPosts);
+
+                    LogService.success("System Data Synchronized", "sync");
                 }
 
                 if (activityRes.data) {
@@ -171,10 +181,16 @@ export const SystemProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     };
 
     const updateSiteData = async (updates: Partial<SiteData>) => {
-        setSiteData(prev => ({ ...prev, ...updates }));
-        if (isSupabaseConfigured() && supabase) {
-            await supabase.from('site_settings').upsert({ id: 'main', ...siteData, ...updates });
-        }
+        setSiteData(prev => {
+            const next = { ...prev, ...updates };
+            if (isSupabaseConfigured() && supabase) {
+                supabase.from('site_settings').upsert({ id: 'main', ...next }).then(({ error }) => {
+                    if (error) Logger.error("Failed to sync updated site data", error);
+                    else LogService.success("Data change synced", "sync");
+                });
+            }
+            return next;
+        });
     };
 
     const logActivity = async (label: string, type: SystemActivity['type'], status: SystemActivity['status'] = 'info', metadata?: any) => {

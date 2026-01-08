@@ -18,7 +18,9 @@ import {
     Users,
     CreditCard,
     FileText,
-    Shield
+    Shield,
+    TrendingUp,
+    Globe
 } from 'lucide-react';
 
 interface DashboardSidebarProps {
@@ -55,11 +57,19 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
                 overflow-y-auto px-8 py-10 flex flex-col gap-10
             `}
         >
-            <div className="flex items-center gap-3 mb-4 md:hidden" dir="rtl">
-                <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center text-white">
-                    <Shield size={16} />
+            <div className="flex items-center gap-4 mb-4" dir="rtl">
+                <div className="relative group">
+                    <div className="absolute -inset-1 bg-indigo-500/20 rounded-xl blur group-hover:opacity-100 transition duration-1000 group-hover:duration-200"></div>
+                    <img
+                        src={siteData.profile?.photoUrl || "https://www2.0zz0.com/2025/12/17/16/907136235.jpg"}
+                        className="relative w-12 h-12 rounded-xl object-cover border border-white/10"
+                        alt="Profile"
+                    />
                 </div>
-                <h2 className="text-sm font-black text-white uppercase tracking-wider">NR OS Dashboard</h2>
+                <div className="flex flex-col text-right">
+                    <h2 className="text-sm font-black text-white leading-tight">{siteData.profile?.name || siteData.brand?.siteName}</h2>
+                    <span className="text-[10px] font-bold text-indigo-400 uppercase tracking-widest">Sovereign Admin</span>
+                </div>
             </div>
 
             <div className="space-y-8">
@@ -137,6 +147,13 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
                             />
                         )}
                         <TabButton
+                            id="analytics"
+                            label="التحليلات المتقدمة"
+                            icon={TrendingUp}
+                            isActive={activeTab === 'analytics'}
+                            onClick={onTabChange}
+                        />
+                        <TabButton
                             id="requests"
                             label="وارد المساعدة"
                             icon={MessageSquare}
@@ -148,6 +165,13 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
                             label="صفحات القرار"
                             icon={BrainCircuit}
                             isActive={activeTab === 'decision-pages'}
+                            onClick={onTabChange}
+                        />
+                        <TabButton
+                            id="seo-master"
+                            label="الوصول السيادي (SEO)"
+                            icon={Globe}
+                            isActive={activeTab === 'seo-master'}
                             onClick={onTabChange}
                         />
                     </div>

@@ -70,6 +70,21 @@ export default async function handler(req) {
             
             WRITE ONLY THE CONTENT FOR THIS SPECIFIC SECTION.
             `;
+        } else if (stage === 'summarize') {
+            prompt = `
+            You are the Sovereign Editorial AI. Provide a professional, high-impact summary for the following strategic article in Arabic.
+            
+            Article Title: ${payload.title}
+            Content: ${payload.content.substring(0, 4000)} // Truncated to fit
+            
+            Requirements:
+            - Language: Formal Arabic.
+            - Format: Return exactly 3 powerful bullet points using <li> tags.
+            - Focus: Highlight the core value proposition and key takeaways.
+            - Length: Keep each bullet point concise (maximum 25 words).
+            
+            RETURN ONLY THE 3 <li> TAGS.
+            `;
         } else {
             return new Response(JSON.stringify({ error: "Invalid stage" }), { status: 400 });
         }

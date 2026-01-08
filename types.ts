@@ -13,7 +13,7 @@ export interface SiteSection {
   type: 'hero' | 'services' | 'projects' | 'testimonials' | 'contact' | 'about';
   title: string;
   subtitle?: string;
-  content?: any;
+  content?: Record<string, any>;
   visible: boolean;
 }
 
@@ -118,13 +118,16 @@ export interface ServiceRequest {
   clientPhone: string;
   clientEmail: string;
   company?: string;
-  projectDetails: string;
-  priority: 'low' | 'medium' | 'high';
+  projectDetails?: string;
+  details?: string; // Added for Services.tsx
+  priority?: 'low' | 'medium' | 'high';
   budget?: string;
   timeline?: string;
   status: 'new' | 'review' | 'proposal' | 'negotiation' | 'accepted' | 'rejected' | 'completed';
   date: string;
-  messages: RequestMessage[];
+  messages?: RequestMessage[];
+  value?: number;
+  message?: string;
 }
 
 export interface ProjectTask {
@@ -178,7 +181,7 @@ export interface SystemActivity {
   label: string;
   type: 'ai_forge' | 'sync' | 'crm' | 'finance' | 'system' | 'project' | 'content' | 'security';
   status: 'success' | 'info' | 'error' | 'warning';
-  metadata?: any;
+  metadata?: Record<string, any>;
 }
 
 export interface Project {
@@ -211,6 +214,7 @@ export interface Project {
   stats?: string;
   challenges?: string;
   solutions?: string;
+  priority?: 'low' | 'normal' | 'high'; // Added for KanbanBoard
 }
 
 export interface AIConfig {
@@ -229,6 +233,8 @@ export interface AIConfig {
   huggingFaceModel?: string;
   enabledAgents?: string[]; // IDs of active Council members
 }
+
+
 
 export interface Article {
   id: string;
@@ -284,7 +290,7 @@ export interface BrandIdentity {
   borderRadius: string;
   glassOpacity: string;
   templateId?: 'premium-glass' | 'minimalist-pro' | 'cyber-command';
-  testimonials?: any[];
+  testimonials?: Testimonial[];
 }
 
 export interface ContactInfo {
@@ -443,15 +449,35 @@ export interface SiteData {
   integrations?: SocialIntegration[];
   contentPlan?: ContentPlanItem[];
   decisionPages?: DecisionPage[];
-  siteTexts?: any;
+  siteTexts?: SiteTexts;
   autopilot?: AutopilotConfig;
   activityLog?: SystemActivity[];
   // UI/Legacy compatibility
-  profile?: any;
-  faqs?: any;
-  process?: any;
-  stats?: any;
-  dashboardLayout?: any[];
+  profile: {
+    name: string;
+    nameEn?: string; // Added for InvoicePrint
+    primaryTitle: string;
+    photoUrl: string;
+    bio: string;
+    address?: string;
+    phone?: string;  // Added for InvoicePrint
+    email?: string;  // Added for InvoicePrint
+  };
+  legal?: {          // Added for InvoicePrint
+    address: string;
+    rc?: string;
+    nif?: string;
+    art?: string;
+  };
+  financials?: {     // Added for InvoicePrint
+    rip?: string;
+    ccp?: string;
+    bankName?: string;
+  };
+  faqs: FAQItem[];
+  process: ProcessStep[];
+  stats: Stat[];
+  dashboardLayout?: { i: string; x: number; y: number; w: number; h: number }[];
   hiddenIds?: string[];
 }
 

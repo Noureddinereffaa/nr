@@ -3,11 +3,20 @@ import React from 'react';
 import { useSystem } from '../context/SystemContext';
 import { useUI } from '../context/UIContext';
 import { MapPin, ShieldCheck, Verified } from 'lucide-react';
+import { NOUREDDINE_DATA } from '../constants';
 
 const AutoEntrepreneurCard: React.FC = () => {
   const { siteData } = useSystem();
   const { isShieldMode } = useUI();
-  const profile = siteData?.profile || {};
+  const p = (siteData?.profile || {}) as any;
+  const profile = {
+    name: p.name || NOUREDDINE_DATA.name,
+    photoUrl: p.photoUrl || NOUREDDINE_DATA.photoUrl,
+    cardId: p.cardId || NOUREDDINE_DATA.cardId,
+    expiry: p.expiry || NOUREDDINE_DATA.expiry,
+    address: p.address || NOUREDDINE_DATA.address,
+    secondaryTitle: p.primaryTitle || NOUREDDINE_DATA.primaryTitle
+  };
 
   return (
     <section id="about" className="py-12 relative overflow-hidden bg-slate-950/20">

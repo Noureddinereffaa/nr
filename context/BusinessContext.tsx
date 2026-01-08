@@ -27,6 +27,7 @@ interface BusinessContextType {
     updateService: (id: string, updates: Partial<Service>) => Promise<void>;
     deleteService: (id: string) => Promise<void>;
     serviceRequests: ServiceRequest[];
+    addRequest: (request: Omit<ServiceRequest, 'id' | 'date'>) => Promise<void>;
     updateRequest: (id: string, updates: Partial<ServiceRequest>) => Promise<void>;
     deleteRequest: (id: string) => Promise<void>;
     budgets: any[];
@@ -182,6 +183,29 @@ export const BusinessProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         if (isSupabaseConfigured() && supabase) await supabase.from('services').delete().eq('id', id);
     };
 
+    const addRequest = async (request: Omit<ServiceRequest, 'id' | 'date'>) => {
+        const newRequest = {
+            ...request,
+            id: 'req-' + Date.now(),
+            date: new Date().toISOString(),
+            status: request.status || 'pending'
+        } as ServiceRequest;
+
+        setServiceRequests(prev => [newRequest, ...prev]);
+
+        if (isSupabaseConfigured() && supabase) {
+            await supabase.from('service_requests').insert([{ id: newRequest.id, data: newRequest }]);
+        }
+
+        // Trigger notification via LogService
+        import('../lib/log-service').then(({ LogService }) => {
+            LogService.info(`طلب خدمة جديد: ${newRequest.serviceTitle}`, 'crm', {
+                message: `تم استلام طلب من ${newRequest.clientName}`,
+                client: newRequest.clientName
+            });
+        });
+    };
+
     const updateRequest = async (id: string, updates: Partial<ServiceRequest>) => {
         setServiceRequests(prev => prev.map(r => r.id === id ? { ...r, ...updates } : r));
         if (isSupabaseConfigured() && supabase) {
@@ -223,6 +247,7 @@ export const BusinessProvider: React.FC<{ children: React.ReactNode }> = ({ chil
             updateService,
             deleteService,
             serviceRequests,
+            addRequest,
             updateRequest,
             deleteRequest,
             budgets,

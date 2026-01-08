@@ -89,10 +89,10 @@ const BlogPage: React.FC = () => {
                     <div className="absolute inset-0 bg-gradient-to-b from-transparent via-slate-950/80 to-slate-950"></div>
                 </div>
 
-                <div className="container mx-auto px-6 relative z-10">
+                <div className="container mx-auto relative z-10 px-4 sm:px-6">
 
                     {/* Magazine Header Section */}
-                    <div className="flex flex-col md:flex-row justify-between items-end gap-6 mb-12" dir="rtl">
+                    <div className="flex flex-col md:flex-row justify-between items-end gap-6 mb-8 sm:mb-12" dir="rtl">
                         <div className="max-w-4xl">
                             <motion.div
                                 initial={{ opacity: 0, x: 20 }}
@@ -106,7 +106,7 @@ const BlogPage: React.FC = () => {
                                 initial={{ opacity: 0, y: 30 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ delay: 0.1 }}
-                                className="text-4xl md:text-6xl font-black text-white mb-4 tracking-tighter leading-[0.9] uppercase"
+                                className="text-3xl sm:text-4xl md:text-6xl font-black text-white mb-4 tracking-tighter leading-[0.9] uppercase"
                             >
                                 {siteTexts.blog.title} <span className="gradient-text drop-shadow-[0_10px_40px_rgba(79,70,229,0.4)]">{siteTexts.blog.titleHighlight}</span>
                             </motion.h1>
@@ -114,7 +114,7 @@ const BlogPage: React.FC = () => {
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ delay: 0.2 }}
-                                className="text-lg md:text-xl text-slate-300 font-medium leading-relaxed max-w-2xl border-r-4 border-indigo-600 pr-4"
+                                className="text-base sm:text-lg md:text-xl text-slate-300 font-medium leading-relaxed max-w-2xl border-r-4 border-indigo-600 pr-4"
                             >
                                 {siteTexts.blog.subtitle}
                             </motion.p>
@@ -128,7 +128,7 @@ const BlogPage: React.FC = () => {
                                     value={filter}
                                     onChange={(e) => setFilter(e.target.value)}
                                     placeholder={siteTexts.blog.searchPlaceholder}
-                                    className="w-full md:w-96 bg-slate-900 border border-white/10 rounded-2xl px-10 py-5 pr-14 text-white focus:border-indigo-600 outline-none transition-all shadow-2xl placeholder:opacity-50"
+                                    className="w-full md:w-96 bg-slate-900 border border-white/10 rounded-2xl px-6 sm:px-10 py-4 sm:py-5 pr-12 sm:pr-14 text-white focus:border-indigo-600 outline-none transition-all shadow-2xl placeholder:opacity-50 text-base min-h-[56px]"
                                 />
                             </div>
                         </div>
@@ -140,7 +140,7 @@ const BlogPage: React.FC = () => {
                             initial={{ opacity: 0, y: 40 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: 0.3 }}
-                            className="relative aspect-video md:aspect-[2.4/1] rounded-3xl md:rounded-[3.5rem] overflow-hidden mb-12 group cursor-pointer border border-white/10 shadow-2xl premium-border"
+                            className="relative aspect-video md:aspect-[2.4/1] rounded-2xl sm:rounded-3xl md:rounded-[3.5rem] overflow-hidden mb-8 sm:mb-12 group cursor-pointer border border-white/10 shadow-2xl premium-border"
                             onClick={() => handleOpenArticle(featuredArticle)}
                         >
                             <img
@@ -150,24 +150,24 @@ const BlogPage: React.FC = () => {
                             />
                             <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/40 to-transparent"></div>
 
-                            <div className="absolute bottom-0 inset-x-0 p-10 md:p-20 flex flex-col items-end text-right" dir="rtl">
+                            <div className="absolute bottom-0 inset-x-0 p-5 sm:p-10 md:p-20 flex flex-col items-end text-right" dir="rtl">
                                 <motion.span
                                     whileHover={{ scale: 1.05 }}
                                     className="bg-indigo-600 text-white px-6 py-2 rounded-2xl text-[10px] md:text-xs font-black uppercase tracking-[0.2em] shadow-2xl mb-8"
                                 >
                                     {siteTexts.blog.trendingTitle}
                                 </motion.span>
-                                <h2 className="text-3xl md:text-7xl font-black text-white mb-8 max-w-5xl leading-[1.05] group-hover:text-indigo-400 transition-colors tracking-tighter">
+                                <h2 className="text-2xl sm:text-3xl md:text-7xl font-black text-white mb-4 sm:mb-8 max-w-5xl leading-[1.05] group-hover:text-indigo-400 transition-colors tracking-tighter">
                                     {featuredArticle.title}
                                 </h2>
-                                <p className="text-slate-300 text-lg md:text-2xl max-w-3xl mb-10 opacity-80 line-clamp-2 md:line-clamp-3 font-medium">
+                                <p className="text-slate-300 text-sm sm:text-lg md:text-2xl max-w-3xl mb-6 sm:mb-10 opacity-80 line-clamp-2 md:line-clamp-3 font-medium">
                                     {featuredArticle.excerpt}
                                 </p>
                                 <div className="flex items-center gap-6 md:gap-10 text-slate-400 font-black text-[10px] md:text-sm mb-10">
                                     <span className="flex items-center gap-2 md:gap-3"><Calendar size={18} className="text-indigo-500" /> {new Date(featuredArticle.date).toLocaleDateString('ar-EG')}</span>
                                     <span className="flex items-center gap-2 md:gap-3"><Clock size={18} className="text-indigo-500" /> {featuredArticle.readTime}</span>
                                 </div>
-                                <button className="group px-6 md:px-12 py-3.5 md:py-5 bg-white text-slate-950 rounded-xl md:rounded-2xl font-black text-base md:text-xl flex items-center gap-4 hover:bg-indigo-600 hover:text-white transition-all shadow-3xl active:scale-95">
+                                <button className="group px-6 md:px-12 py-3.5 md:py-5 bg-white text-slate-950 rounded-xl md:rounded-2xl font-black text-sm sm:text-base md:text-xl flex items-center gap-4 hover:bg-indigo-600 hover:text-white transition-all shadow-3xl active:scale-95 min-h-[48px]">
                                     {siteTexts.blog.readMore}
                                     <ArrowRight size={24} className="rotate-180 group-hover:translate-x-[-8px] transition-transform" />
                                 </button>
@@ -215,7 +215,7 @@ const BlogPage: React.FC = () => {
                                     <Sparkles size={32} className="mb-6 opacity-40" />
                                     <h4 className="text-2xl font-black mb-4 leading-tight">{siteTexts.blog.newsletterTitle}</h4>
                                     <p className="text-indigo-100 text-sm mb-8 font-medium">{siteTexts.blog.newsletterSubtitle}</p>
-                                    <button className="w-full py-4 bg-white text-slate-950 rounded-2xl font-black text-sm hover:scale-105 active:scale-95 transition-all shadow-xl">
+                                    <button className="w-full py-4 bg-white text-slate-950 rounded-2xl font-black text-sm hover:scale-105 active:scale-95 transition-all shadow-xl min-h-[56px]">
                                         {siteTexts.blog.subscribeButton}
                                     </button>
                                 </div>
@@ -235,7 +235,7 @@ const BlogPage: React.FC = () => {
                                     <button
                                         key={cat}
                                         onClick={() => setActiveCategory(cat)}
-                                        className={`px-6 py-2.5 rounded-2xl text-[10px] md:text-xs font-black transition-all border ${activeCategory === cat
+                                        className={`px-4 sm:px-6 py-2.5 rounded-2xl text-[10px] md:text-xs font-black transition-all border min-h-[44px] ${activeCategory === cat
                                             ? 'bg-indigo-600 border-indigo-500 text-white shadow-3xl'
                                             : 'bg-white/5 border-white/10 text-slate-400 hover:bg-white/10 hover:text-white'
                                             }`}
@@ -276,7 +276,7 @@ const BlogPage: React.FC = () => {
                                                 )}
                                             </div>
 
-                                            <div className="p-8 md:p-10 text-right flex-1 flex flex-col bg-slate-900/60" dir="rtl">
+                                            <div className="p-5 sm:p-8 md:p-10 text-right flex-1 flex flex-col bg-slate-900/60" dir="rtl">
                                                 <div className="flex items-center gap-4 md:gap-6 text-indigo-400/80 text-[9px] md:text-xs font-black uppercase tracking-widest mb-4 md:mb-6">
                                                     <span className="flex items-center gap-2"><Calendar size={12} className="text-indigo-500 md:w-3.5" /> {new Date(article.date).toLocaleDateString('ar-EG')}</span>
                                                     <span className="flex items-center gap-2"><Clock size={12} className="text-indigo-500 md:w-3.5" /> {article.readTime}</span>

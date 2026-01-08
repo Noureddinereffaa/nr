@@ -15,9 +15,21 @@
     --font-body: 'Plus Jakarta Sans', 'Cairo', sans-serif;
     --font-arabic: 'Cairo', sans-serif;
 
+    /* Theme Variables - Dark Mode (Default) */
+    --bg-primary: #0f172a;
+    --bg-secondary: #1e293b;
+    --bg-tertiary: #334155;
+    --bg-card: rgba(17, 25, 40, 0.75);
+    --text-primary: #f1f5f9;
+    --text-secondary: #cbd5e1;
+    --text-tertiary: #94a3b8;
+    --accent-primary: #6366f1;
+    --accent-secondary: #8b5cf6;
+    --border-color: #334155;
+    --border-subtle: rgba(255, 255, 255, 0.05);
+
     /* Color Palette - Deep Universe */
     --bg-deep: #030014;
-    --bg-card: rgba(17, 25, 40, 0.75);
 
     /* Aurora Gradients */
     --aurora-1: #4f46e5;
@@ -28,16 +40,33 @@
     --ease-out-expo: cubic-bezier(0.19, 1, 0.22, 1);
 }
 
+/* Light Theme */
+.light {
+    --bg-primary: #ffffff;
+    --bg-secondary: #f8fafc;
+    --bg-tertiary: #f1f5f9;
+    --bg-card: rgba(248, 250, 252, 0.95);
+    --text-primary: #0f172a;
+    --text-secondary: #475569;
+    --text-tertiary: #64748b;
+    --accent-primary: #6366f1;
+    --accent-secondary: #8b5cf6;
+    --border-color: #e2e8f0;
+    --border-subtle: rgba(0, 0, 0, 0.05);
+    --bg-deep: #f8fafc;
+}
+
 html {
     scroll-behavior: smooth;
     font-family: var(--font-body);
 }
 
 body {
-    background-color: var(--bg-deep);
-    color: #e2e8f0;
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
     overflow-x: hidden;
     -webkit-font-smoothing: antialiased;
+    transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 h1,
@@ -230,6 +259,20 @@ h6 {
     to {
         background-position: 200% center;
     }
+}
+
+@keyframes scan {
+    0% {
+        top: -10%;
+    }
+
+    100% {
+        top: 110%;
+    }
+}
+
+.animate-scan {
+    animation: scan 3s linear infinite;
 }
 
 /* Layout Utilities */

@@ -30,6 +30,8 @@ const Requests = React.lazy(() => import('../components/dashboard/modules/crm-in
 const Billing = React.lazy(() => import('../components/dashboard/modules/financial-intelligence/Billing'));
 const FinancialHub = React.lazy(() => import('../components/dashboard/modules/financial-intelligence/FinancialHub'));
 const DecisionPages = React.lazy(() => import('../components/dashboard/modules/decision-pages/DecisionPages'));
+const AnalyticsDashboard = React.lazy(() => import('../components/dashboard/analytics/AnalyticsDashboard'));
+const SEOMaster = React.lazy(() => import('../components/dashboard/modules/seo-master/SEOMaster'));
 
 const DashboardPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState('overview');
@@ -59,8 +61,16 @@ const DashboardPage: React.FC = () => {
         toggleCommandPalette();
       }
     };
+    const handleNav = (e: any) => {
+      if (e.detail) handleTabClick(e.detail);
+    };
+
     window.addEventListener('keydown', handleGlobalK);
-    return () => window.removeEventListener('keydown', handleGlobalK);
+    window.addEventListener('dashboard-nav', handleNav);
+    return () => {
+      window.removeEventListener('keydown', handleGlobalK);
+      window.removeEventListener('dashboard-nav', handleNav);
+    };
   }, []);
 
 
@@ -125,6 +135,8 @@ const DashboardPage: React.FC = () => {
                     {activeTab === 'financial-hub' && <FinancialHub />}
                     {activeTab === 'billing' && <Billing />}
                     {activeTab === 'decision-pages' && <DecisionPages />}
+                    {activeTab === 'seo-master' && <SEOMaster />}
+                    {activeTab === 'analytics' && <AnalyticsDashboard />}
                   </Suspense>
                 </motion.div>
               </AnimatePresence>

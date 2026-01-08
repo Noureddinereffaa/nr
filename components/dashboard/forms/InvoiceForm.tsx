@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Invoice, Client, InvoiceItem } from '../../../types';
 import Modal from '../../ui/Modal';
-import Input from '../../ui/Input';
+import { Input } from '../../ui/Input';
 import { useBusiness } from '../../../context/BusinessContext';
 import { useSystem } from '../../../context/SystemContext';
 import { Plus, Trash2, Calculator } from 'lucide-react';

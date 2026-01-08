@@ -1,6 +1,8 @@
 import React from 'react';
 import { useSystem } from '../../../context/SystemContext';
 import { User, MapPin, Briefcase, Phone, Mail, MessageCircle, Globe, Linkedin, Facebook, Instagram, Twitter, Youtube, Video } from 'lucide-react';
+import { AvatarUpload } from '../profile/AvatarUpload';
+import { ProfileHistory } from '../profile/ProfileHistory';
 
 const ProfileSettings: React.FC = () => {
     const { siteData, updateSiteData } = useSystem();
@@ -67,29 +69,29 @@ const ProfileSettings: React.FC = () => {
                     </div>
 
                     {/* Avatar */}
-                    <div className="bg-slate-900 border border-white/5 p-4 rounded-xl space-y-4">
-                        <h4 className="font-bold text-slate-300 mb-2">الصورة الشخصية</h4>
-                        <div className="flex gap-4 items-start">
-                            <div className="w-20 h-20 rounded-xl bg-slate-800 border-2 border-white/10 overflow-hidden shrink-0">
-                                {profile?.photoUrl ? (
-                                    <img src={profile.photoUrl} alt="Profile" className="w-full h-full object-cover" />
-                                ) : (
-                                    <div className="w-full h-full flex items-center justify-center text-slate-600">
-                                        <User size={32} />
-                                    </div>
-                                )}
-                            </div>
-                            <div className="flex-1 space-y-2">
-                                <label className="text-xs font-bold text-slate-400 block">رابط الصورة (Square Image URL)</label>
-                                <input
-                                    type="text"
-                                    value={profile?.photoUrl || ''}
-                                    onChange={(e) => handleProfileChange('photoUrl', e.target.value)}
-                                    className="w-full bg-slate-950 border border-white/10 rounded-lg p-2 text-white text-sm font-mono"
-                                    dir="ltr"
-                                    placeholder="https://..."
-                                />
-                            </div>
+                    <div className="bg-slate-900 border border-white/5 p-6 rounded-xl space-y-4 flex flex-col items-center justify-center">
+                        <AvatarUpload
+                            currentAvatar={profile?.photoUrl || ''}
+                            onUploadComplete={(url) => handleProfileChange('photoUrl', url)}
+                        />
+
+                        {/* Fallback Manual Input (Hidden by default, optional) */}
+                        <div className="w-full pt-4 border-t border-white/5 mt-4">
+                            <details className="group">
+                                <summary className="text-xs text-slate-500 cursor-pointer list-none flex items-center justify-center gap-2 hover:text-indigo-400 transition-colors">
+                                    <span>خيارات متقدمة: رابط مباشر</span>
+                                </summary>
+                                <div className="mt-3">
+                                    <input
+                                        type="text"
+                                        value={profile?.photoUrl || ''}
+                                        onChange={(e) => handleProfileChange('photoUrl', e.target.value)}
+                                        className="w-full bg-slate-950 border border-white/10 rounded-lg p-2 text-white text-sm font-mono text-center"
+                                        dir="ltr"
+                                        placeholder="https://..."
+                                    />
+                                </div>
+                            </details>
                         </div>
                     </div>
                 </div>
@@ -217,6 +219,9 @@ const ProfileSettings: React.FC = () => {
                         </div>
                     </div>
                 </div>
+
+                {/* Audit Log Section */}
+                <ProfileHistory />
             </div>
         </div>
     );

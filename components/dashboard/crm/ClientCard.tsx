@@ -1,7 +1,8 @@
 import React from 'react';
 import { Client } from '../../../types';
-import { Phone, Mail, DollarSign, Calendar, Clock } from 'lucide-react';
+import { Phone, Mail, DollarSign, Calendar, Clock, Zap } from 'lucide-react';
 import { useUI } from '../../../context/UIContext';
+import { BusinessIntelligence } from '../../../lib/business-intelligence';
 
 interface ClientCardProps {
     client: Client;
@@ -10,13 +11,14 @@ interface ClientCardProps {
 }
 
 const ClientCard: React.FC<ClientCardProps> = ({ client, onEdit, onMove }) => {
-    const { isShieldMode } = useUI();
-    const statusColors = {
-        lead: 'bg-blue-500/10 border-blue-500/20 text-blue-400',
-        negotiation: 'bg-amber-500/10 border-amber-500/20 text-amber-400',
-        active: 'bg-indigo-500/10 border-indigo-500/20 text-indigo-400',
-        completed: 'bg-green-500/10 border-green-500/20 text-green-400',
-        lost: 'bg-slate-500/10 border-slate-500/20 text-slate-400'
+    const { mask } = useUI();
+    const { score, level } = BusinessIntelligence.calculateLeadScore(client);
+
+    const levelColors = {
+        boiling: 'text-red-500 bg-red-500/10 border-red-500/20',
+        hot: 'text-orange-500 bg-orange-500/10 border-orange-500/20',
+        warm: 'text-indigo-500 bg-indigo-500/10 border-indigo-500/20',
+        cold: 'text-slate-500 bg-slate-500/10 border-slate-500/20'
     };
 
     return (
@@ -25,18 +27,24 @@ const ClientCard: React.FC<ClientCardProps> = ({ client, onEdit, onMove }) => {
             className="p-4 bg-slate-900 border border-white/5 rounded-xl hover:border-indigo-500/30 transition-all cursor-pointer group"
         >
             <div className="flex justify-between items-start mb-3">
-                <div>
-                    <h5 className="font-bold text-white text-sm">
-                        {isShieldMode ? 'SOVEREIGN_ENTITY' : client.name}
-                    </h5>
+                <div className="space-y-1">
+                    <div className="flex items-center gap-2">
+                        <h5 className="font-bold text-white text-sm">
+                            {mask(client.name, 'text')}
+                        </h5>
+                        <div className={`px-1.5 py-0.5 rounded text-[8px] font-black uppercase flex items-center gap-1 border ${levelColors[level]}`}>
+                            <Zap size={8} className="fill-current" />
+                            {level}
+                        </div>
+                    </div>
                     <span className="text-xs text-slate-500">
-                        {isShieldMode ? 'COMPANY_PROTECTED' : client.company}
+                        {mask(client.company || '', 'text')}
                     </span>
                 </div>
                 {client.value > 0 && (
-                    <div className={`px-2 py-1 rounded text-xs font-bold border flex items-center gap-1 ${isShieldMode ? 'bg-slate-800 text-slate-500 border-white/5 italic' : 'bg-green-900/20 text-green-400 border-green-500/10'}`}>
+                    <div className={`px-2 py-1 rounded text-xs font-bold border flex items-center gap-1 bg-green-900/20 text-green-400 border-green-500/10`}>
                         <DollarSign size={10} />
-                        {isShieldMode ? 'HIDDEN' : client.value.toLocaleString()}
+                        {mask(client.value.toLocaleString(), 'currency')}
                     </div>
                 )}
             </div>
@@ -44,11 +52,11 @@ const ClientCard: React.FC<ClientCardProps> = ({ client, onEdit, onMove }) => {
             <div className="space-y-1 mb-3">
                 <div className="flex items-center gap-2 text-xs text-slate-400">
                     <Mail size={12} />
-                    <span className="truncate max-w-[150px]">{isShieldMode ? '****@****.***' : client.email}</span>
+                    <span className="truncate max-w-[150px]">{mask(client.email, 'email')}</span>
                 </div>
                 <div className="flex items-center gap-2 text-xs text-slate-400">
                     <Phone size={12} />
-                    <span>{isShieldMode ? '+213 ** ** ** **' : client.phone}</span>
+                    <span>{mask(client.phone, 'phone')}</span>
                 </div>
                 <div className="flex items-center gap-2 text-xs text-slate-500 mt-2 pt-2 border-t border-white/5">
                     <Clock size={12} />

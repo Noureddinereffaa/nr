@@ -24,9 +24,38 @@ export default defineConfig(({ mode }) => {
       rollupOptions: {
         output: {
           manualChunks: {
-            vendor: ['react', 'react-dom', 'react-router-dom'],
-            icons: ['lucide-react']
+            // Core React libraries
+            'vendor-react': ['react', 'react-dom', 'react-router-dom'],
+
+            // UI & Animation libraries
+            'vendor-ui': ['framer-motion', 'lucide-react'],
+
+            // Contexts (lazy load)
+            'contexts': [
+              './context/SystemContext',
+              './context/BusinessContext',
+              './context/ContentContext',
+              './context/UIContext'
+            ],
+
+            // Dashboard modules (separate chunks)
+            'dashboard-crm': ['./components/dashboard/modules/crm-intelligence/CRM'],
+            'dashboard-finance': ['./components/dashboard/modules/financial-intelligence/FinancialHub'],
+            'dashboard-content': ['./components/dashboard/content/WritingWorkspace'],
+            'dashboard-marketing': ['./components/dashboard/modules/marketing-growth/MarketingGrowth'],
+
+            // AI & Heavy libraries
+            // AI & Heavy libraries
+            'markdown': ['react-markdown', 'remark-gfm']
           }
+        }
+      },
+      chunkSizeWarningLimit: 1000,
+      minify: 'terser',
+      terserOptions: {
+        compress: {
+          drop_console: true,
+          drop_debugger: true
         }
       }
     },

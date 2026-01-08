@@ -1,59 +1,57 @@
-import React, { Suspense } from 'react';
-import { Routes, Route } from 'react-router-dom';
+import React, { lazy, Suspense } from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { SystemProvider } from './context/SystemContext';
 import { ContentProvider } from './context/ContentContext';
 import { BusinessProvider } from './context/BusinessContext';
 import { UIProvider } from './context/UIContext';
 import { AuthProvider } from './context/AuthContext';
+import { SyncProvider } from './context/SyncContext';
 
-import LoadingSpinner from './components/ui/LoadingSpinner';
-import ProtectedRoute from './components/dashboard/auth/ProtectedRoute';
-import ScrollToTop from './components/ui/ScrollToTop';
+// Lazy load all pages for better performance
+const HomePage = lazy(() => import('./pages/HomePage'));
+const DashboardPage = lazy(() => import('./pages/DashboardPage'));
+const BlogPage = lazy(() => import('./pages/BlogPage'));
+const ArticlePage = lazy(() => import('./pages/ArticlePage'));
+const ReviewsPage = lazy(() => import('./pages/ReviewsPage'));
+const ReviewDetailsPage = lazy(() => import('./pages/ReviewDetailsPage'));
 
-// Lazy Load Pages
-const HomePage = React.lazy(() => import('./pages/HomePage'));
-const Dashboard = React.lazy(() => import('./pages/DashboardPage'));
-const ServicesPage = React.lazy(() => import('./pages/ServicesPage'));
-const PortfolioPage = React.lazy(() => import('./pages/PortfolioPage'));
-const FaqPage = React.lazy(() => import('./pages/FaqPage'));
-const ContactPage = React.lazy(() => import('./pages/ContactPage'));
-const ResetData = React.lazy(() => import('./pages/ResetData'));
-const BlogPage = React.lazy(() => import('./pages/BlogPage'));
-const ReviewsPage = React.lazy(() => import('./pages/ReviewsPage'));
-const ReviewDetailsPage = React.lazy(() => import('./pages/ReviewDetailsPage'));
+// Loading fallback component
+const LoadingFallback = () => (
+  <div className="min-h-screen bg-slate-950 flex items-center justify-center">
+    <div className="text-center">
+      <div className="w-16 h-16 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+      <p className="text-slate-400 font-bold text-sm">جاري التحميل...</p>
+    </div>
+  </div>
+);
 
-const App: React.FC = () => {
+function App() {
   return (
     <AuthProvider>
       <SystemProvider>
         <ContentProvider>
           <BusinessProvider>
             <UIProvider>
-              <Suspense fallback={<div className="h-screen w-full flex items-center justify-center bg-slate-950"><LoadingSpinner /></div>}>
-                <ScrollToTop />
-                <Routes>
-                  <Route path="/" element={<HomePage />} />
-                  <Route path="/en/reviews" element={<ReviewsPage />} />
-                  <Route path="/en/reviews/:slug" element={<ReviewDetailsPage />} />
-                  <Route path="/dashboard/*" element={
-                    <ProtectedRoute>
-                      <Dashboard />
-                    </ProtectedRoute>
-                  } />
-                  <Route path="/services" element={<ServicesPage />} />
-                  <Route path="/portfolio" element={<PortfolioPage />} />
-                  <Route path="/blog" element={<BlogPage />} />
-                  <Route path="/faq" element={<FaqPage />} />
-                  <Route path="/contact" element={<ContactPage />} />
-                  <Route path="/reset-data" element={<ResetData />} />
-                </Routes>
-              </Suspense>
+              <SyncProvider>
+                <Router>
+                  <Suspense fallback={<LoadingFallback />}>
+                    <Routes>
+                      <Route path="/" element={<HomePage />} />
+                      <Route path="/dashboard/*" element={<DashboardPage />} />
+                      <Route path="/blog" element={<BlogPage />} />
+                      <Route path="/blog/:slug" element={<ArticlePage />} />
+                      <Route path="/reviews" element={<ReviewsPage />} />
+                      <Route path="/reviews/:id" element={<ReviewDetailsPage />} />
+                    </Routes>
+                  </Suspense>
+                </Router>
+              </SyncProvider>
             </UIProvider>
           </BusinessProvider>
         </ContentProvider>
       </SystemProvider>
     </AuthProvider>
   );
-};
+}
 
 export default App;

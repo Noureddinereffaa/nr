@@ -1,32 +1,33 @@
-import React, { useState } from 'react';
-import { Bell, Check, X } from 'lucide-react';
-
-interface Notification {
-    id: string;
-    title: string;
-    message: string;
-    time: string;
-    type: 'info' | 'success' | 'warning' | 'error';
-    read: boolean;
-}
+import React from 'react';
+import { Bell, Check, X, Info, AlertTriangle, AlertCircle, CheckCircle } from 'lucide-react';
+import { useUI } from '../../../context/UIContext';
 
 const NotificationDropdown: React.FC<{ onClose: () => void }> = ({ onClose }) => {
-    const [notifications, setNotifications] = useState<Notification[]>([
-        { id: '1', title: 'تم استلام طلب جديد', message: 'طلب خدمة "تطوير موقع" من شركة TechCorp', time: 'منذ دقيقتين', type: 'success', read: false },
-        { id: '2', title: 'تنبيه النظام', message: 'يرجى مراجعة إعدادات الدفع الخاصة بك.', time: 'منذ ساعة', type: 'warning', read: false },
-        { id: '3', title: 'تحديث المحتوى', message: 'تم نشر مقالك الجديد بنجاح.', time: 'منذ ساعتين', type: 'info', read: true },
-    ]);
+    const { notifications, markNotificationAsRead, clearNotifications } = useUI();
 
-    const markAsRead = (id: string) => {
-        setNotifications(notifications.map(n => n.id === id ? { ...n, read: true } : n));
+    const getIcon = (type: string) => {
+        switch (type) {
+            case 'success': return <CheckCircle size={16} className="text-green-500" />;
+            case 'warning': return <AlertTriangle size={16} className="text-amber-500" />;
+            case 'error': return <AlertCircle size={16} className="text-red-500" />;
+            default: return <Info size={16} className="text-blue-500" />;
+        }
     };
 
-    const deleteNotification = (id: string) => {
-        setNotifications(notifications.filter(n => n.id !== id));
-    };
-
-    const markAllRead = () => {
-        setNotifications(notifications.map(n => ({ ...n, read: true })));
+    const formatTime = (dateString: string) => {
+        try {
+            const date = new Date(dateString);
+            const now = new Date();
+            const diff = now.getTime() - date.getTime();
+            const minutes = Math.floor(diff / 60000);
+            if (minutes < 1) return 'الآن';
+            if (minutes < 60) return `منذ ${minutes} د`;
+            const hours = Math.floor(minutes / 60);
+            if (hours < 24) return `منذ ${hours} سا`;
+            return date.toLocaleDateString('ar-DZ');
+        } catch (e) {
+            return dateString;
+        }
     };
 
     return (
@@ -34,10 +35,10 @@ const NotificationDropdown: React.FC<{ onClose: () => void }> = ({ onClose }) =>
             <div className="p-4 border-b border-white/5 flex items-center justify-between bg-slate-950/50">
                 <h3 className="font-black text-white text-sm">الإشعارات</h3>
                 <button
-                    onClick={markAllRead}
+                    onClick={clearNotifications}
                     className="text-[10px] text-indigo-400 hover:text-white transition-colors font-bold uppercase tracking-widest"
                 >
-                    تحديد الكل كمقروء
+                    مسح الكل
                 </button>
             </div>
 
@@ -55,24 +56,26 @@ const NotificationDropdown: React.FC<{ onClose: () => void }> = ({ onClose }) =>
                                 dir="rtl"
                             >
                                 <div className="flex justify-between items-start gap-3">
-                                    <div className={`w-2 h-2 rounded-full mt-1.5 shrink-0 ${notif.type === 'success' ? 'bg-green-500' :
-                                            notif.type === 'warning' ? 'bg-amber-500' :
-                                                notif.type === 'error' ? 'bg-red-500' : 'bg-blue-500'
-                                        }`} />
-                                    <div className="flex-1">
+                                    <div className="mt-1.5 shrink-0">
+                                        {getIcon(notif.type)}
+                                    </div>
+                                    <div className="flex-1 text-right">
                                         <h4 className={`text-sm font-bold ${notif.read ? 'text-slate-400' : 'text-white'}`}>{notif.title}</h4>
                                         <p className="text-xs text-slate-500 mt-1 leading-relaxed">{notif.message}</p>
-                                        <span className="text-[10px] text-slate-600 mt-2 block font-mono">{notif.time}</span>
+                                        <span className="text-[10px] text-slate-600 mt-2 block font-mono">
+                                            {formatTime(notif.time)}
+                                        </span>
                                     </div>
                                     <div className="absolute left-2 top-2 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1 bg-slate-900/80 rounded-lg p-1">
                                         {!notif.read && (
-                                            <button onClick={() => markAsRead(notif.id)} className="p-1 hover:text-green-400 text-slate-400" title="مقروء">
+                                            <button
+                                                onClick={() => markNotificationAsRead(notif.id)}
+                                                className="p-1 hover:text-green-400 text-slate-400"
+                                                title="تحديد كمقروء"
+                                            >
                                                 <Check size={14} />
                                             </button>
                                         )}
-                                        <button onClick={() => deleteNotification(notif.id)} className="p-1 hover:text-red-400 text-slate-400" title="حذف">
-                                            <X size={14} />
-                                        </button>
                                     </div>
                                 </div>
                             </div>

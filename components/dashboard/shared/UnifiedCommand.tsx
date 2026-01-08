@@ -25,7 +25,7 @@ const UnifiedCommand: React.FC = () => {
     const { siteData } = useSystem();
     const { articles } = useContent();
     const { clients, projects, invoices } = useBusiness();
-    const { isCommandPaletteOpen, closeCommandPalette, isShieldMode } = useUI();
+    const { isCommandPaletteOpen, closeCommandPalette, mask, isShieldMode } = useUI();
     const [query, setQuery] = useState('');
     const [selectedIndex, setSelectedIndex] = useState(0);
     const inputRef = useRef<HTMLInputElement>(null);
@@ -73,11 +73,11 @@ const UnifiedCommand: React.FC = () => {
             .filter(c => c.name.toLowerCase().includes(q) || c.company?.toLowerCase().includes(q))
             .map(c => ({
                 id: c.id,
-                label: isShieldMode ? 'PROTECTED CUSTOMER' : c.name,
+                label: mask(c.name, 'text'),
                 type: 'Client',
                 tab: 'clients',
                 icon: User,
-                subtitle: isShieldMode ? '****@****.***' : c.email
+                subtitle: mask(c.email, 'email')
             }));
 
         const filteredProjects = (projects || [])
@@ -92,20 +92,18 @@ const UnifiedCommand: React.FC = () => {
                 type: 'Invoice',
                 tab: 'billing',
                 icon: FileText,
-                subtitle: isShieldMode ? '***.*** DZD' : `${i.total} DZD`
+                subtitle: mask(i.total.toString(), 'currency') + ' DZD'
             }));
 
         return { articles: filteredArticles, clients: filteredClients, projects: filteredProjects, invoices: filteredInvoices };
-    }, [query, articles, clients, projects, invoices, isShieldMode]);
+    }, [query, articles, clients, projects, invoices, mask]);
 
     const allResults = [...results.articles, ...results.clients, ...results.projects, ...results.invoices].slice(0, 10);
     const totalResults = allResults.length;
 
     const handleSelect = (item: any) => {
-        // Here you would trigger navigation or open specific modal
-        // For now, let's assume we navigate to the tab
-        // We might need an onNavigate prop passed down or use a global navigation state
-        console.log("Selected:", item);
+        const event = new CustomEvent('dashboard-nav', { detail: item.tab });
+        window.dispatchEvent(event);
         closeCommandPalette();
     };
 
