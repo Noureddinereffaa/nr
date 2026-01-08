@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { Article, DEFAULT_SITE_TEXTS, SiteTexts } from '../types';
-import { X, Clock, User, Calendar, Share2, Bookmark, ArrowRight, Sparkles, Tag, Target, Globe, Shield, Zap, CheckCircle, TrendingUp } from 'lucide-react';
+import { X, Clock, User, Calendar, Share2, Bookmark, ArrowRight, Layout, Tag, Target, Globe, Shield, Zap, CheckCircle, TrendingUp } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useContent } from '../context/ContentContext';
 import { useSystem } from '../context/SystemContext';
@@ -21,8 +21,6 @@ const ArticleReader: React.FC<ArticleReaderProps> = ({ article: propArticle, onC
     const [scrollProgress, setScrollProgress] = useState(0);
     const [toc, setToc] = useState<{ id: string, text: string, level: number }[]>([]);
     const [activeSection, setActiveSection] = useState<string>('');
-    const [isAiLoading, setIsAiLoading] = useState(false);
-    const [aiSummary, setAiSummary] = useState<string | null>(null);
     const [showMobileMenu, setShowMobileMenu] = useState(false);
 
     const siteTexts: SiteTexts = {
@@ -30,30 +28,7 @@ const ArticleReader: React.FC<ArticleReaderProps> = ({ article: propArticle, onC
         ...(siteData as any).siteTexts
     };
 
-    const generateAiSummary = async () => {
-        if (aiSummary || isAiLoading) return;
-        setIsAiLoading(true);
-        try {
-            const resp = await fetch('/api/ai/forge', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    stage: 'summarize',
-                    apiKey: siteData.aiConfig.apiKey,
-                    payload: {
-                        title: article.title,
-                        content: article.content
-                    }
-                })
-            });
-            const data = await resp.json();
-            if (resp.ok) setAiSummary(data.result);
-        } catch (error) {
-            console.error("AI Summary Error:", error);
-        } finally {
-            setIsAiLoading(false);
-        }
-    };
+
 
     const handleShare = async () => {
         const baseUrl = typeof window !== 'undefined' ? window.location.origin : '';
@@ -170,47 +145,12 @@ const ArticleReader: React.FC<ArticleReaderProps> = ({ article: propArticle, onC
                 </header>
 
                 <div id="reader-content" className="flex-1 overflow-y-auto scroll-smooth custom-scrollbar relative">
-                    <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-12 py-6 sm:py-12 md:py-24">
+                    <div className="max-w-7xl mx-auto px-4 md:px-12 py-3 md:py-24">
                         <div className="grid lg:grid-cols-12 gap-8 md:gap-16 lg:gap-24">
 
                             {/* Sticky Sidebar / Table of Contents */}
                             <aside className="lg:col-span-4 order-2 lg:order-1 hidden lg:block">
                                 <div className="sticky top-32 space-y-12 text-right" dir="rtl">
-                                    {/* AI Summary Box */}
-                                    <div className="p-8 rounded-[2rem] bg-indigo-600/5 border border-indigo-600/20 relative overflow-hidden group">
-                                        <div className="absolute -top-10 -left-10 w-32 h-32 bg-indigo-600/10 blur-3xl group-hover:bg-indigo-600/20 transition-all"></div>
-                                        <div className="flex items-center justify-between mb-6">
-                                            <Sparkles size={20} className="text-indigo-400 animate-pulse" />
-                                            <h5 className="text-[11px] font-black text-indigo-400 uppercase tracking-[0.3em]">Sovereign AI Summary</h5>
-                                        </div>
-
-                                        {!aiSummary && !isAiLoading && (
-                                            <button
-                                                onClick={generateAiSummary}
-                                                className="w-full py-4 rounded-xl bg-indigo-600 text-white font-black text-xs uppercase tracking-widest hover:shadow-[0_10px_30px_rgba(79,70,229,0.3)] transition-all flex items-center justify-center gap-3 active:scale-95"
-                                            >
-                                                لخص المقال رقمياً <Zap size={14} />
-                                            </button>
-                                        )}
-
-                                        {isAiLoading && (
-                                            <div className="space-y-3 animate-pulse">
-                                                <div className="h-2 bg-indigo-600/20 rounded-full w-full"></div>
-                                                <div className="h-2 bg-indigo-600/20 rounded-full w-3/4 mr-auto"></div>
-                                                <div className="h-2 bg-indigo-600/20 rounded-full w-5/6"></div>
-                                            </div>
-                                        )}
-
-                                        {aiSummary && (
-                                            <motion.ul
-                                                initial={{ opacity: 0 }}
-                                                animate={{ opacity: 1 }}
-                                                className="space-y-4 text-slate-300 text-sm font-medium leading-relaxed"
-                                                dangerouslySetInnerHTML={{ __html: aiSummary }}
-                                            />
-                                        )}
-                                    </div>
-
                                     {/* TOC Section */}
                                     <div className="space-y-6">
                                         <h5 className="text-[11px] font-black text-slate-500 uppercase tracking-[0.4em] mr-4 border-r-2 border-indigo-600 pr-4">فهرس الاستراتيجية</h5>
@@ -248,17 +188,17 @@ const ArticleReader: React.FC<ArticleReaderProps> = ({ article: propArticle, onC
                             <main className="lg:col-span-8 order-1 lg:order-2">
                                 <div className="space-y-8 sm:space-y-12 md:space-y-16">
                                     {/* Cover Image & Intro Row */}
-                                    <div className="space-y-6 sm:space-y-8 md:space-y-12">
-                                        <div className="relative aspect-video rounded-2xl sm:rounded-3xl md:rounded-[3rem] overflow-hidden border border-white/10 shadow-3xl">
+                                    <div className="space-y-4 md:space-y-12">
+                                        <div className="relative aspect-video rounded-lg sm:rounded-3xl md:rounded-[3rem] overflow-hidden border border-white/10 shadow-3xl">
                                             <img src={article.image} alt={article.title} className="w-full h-full object-cover" />
                                             <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent to-transparent opacity-60"></div>
                                         </div>
 
                                         <div className="text-right" dir="rtl">
-                                            <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-6xl font-black text-white leading-[1.1] tracking-tighter mb-4 sm:mb-6 md:mb-8">
+                                            <h1 className="text-xl sm:text-3xl md:text-5xl lg:text-6xl font-black text-white leading-tight md:leading-[1.1] tracking-tighter mb-3">
                                                 {article.title}
                                             </h1>
-                                            <p className="text-base sm:text-lg md:text-2xl text-slate-400 font-medium leading-relaxed italic border-r-2 sm:border-r-4 border-indigo-600 pr-4 sm:pr-6 md:pr-8">
+                                            <p className="text-xs sm:text-lg md:text-2xl text-slate-400 font-medium leading-relaxed italic border-r-2 sm:border-r-4 border-indigo-600 pr-3 sm:pr-8">
                                                 {article.excerpt}
                                             </p>
                                         </div>
@@ -276,8 +216,8 @@ const ArticleReader: React.FC<ArticleReaderProps> = ({ article: propArticle, onC
                                     </motion.article>
 
                                     {/* Author Signature & Tags */}
-                                    <footer className="pt-12 sm:pt-16 md:pt-20 border-t border-white/5 space-y-8 sm:space-y-10 md:space-y-12" dir="rtl">
-                                        <div className="flex flex-col md:flex-row items-center justify-between gap-6 sm:gap-8 bg-slate-900/50 p-6 sm:p-8 md:p-10 rounded-2xl sm:rounded-3xl md:rounded-[3rem] border border-white/5">
+                                    <footer className="pt-8 sm:pt-20 border-t border-white/5 space-y-6 sm:space-y-12" dir="rtl">
+                                        <div className="flex flex-col md:flex-row items-center justify-between gap-4 sm:gap-8 bg-slate-900/50 p-5 sm:p-10 rounded-xl sm:rounded-[3rem] border border-white/5">
                                             <div className="flex items-center gap-4 sm:gap-6">
                                                 <div className="w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 rounded-xl sm:rounded-2xl bg-indigo-600 flex items-center justify-center text-white shadow-2xl">
                                                     <User size={24} className="sm:hidden" />
@@ -316,13 +256,12 @@ const ArticleReader: React.FC<ArticleReaderProps> = ({ article: propArticle, onC
                     </div>
                 </div>
 
-                {/* Mobile Quick Navigation Button */}
                 <div className="lg:hidden fixed bottom-6 left-6 z-[250]">
                     <button
                         onClick={() => setShowMobileMenu(true)}
                         className="w-14 h-14 rounded-2xl bg-indigo-600 text-white shadow-2xl shadow-indigo-600/40 flex items-center justify-center active:scale-90 transition-all border border-white/10"
                     >
-                        <Sparkles size={24} />
+                        <Layout size={24} />
                     </button>
                 </div>
 
@@ -344,51 +283,27 @@ const ArticleReader: React.FC<ArticleReaderProps> = ({ article: propArticle, onC
                                 transition={{ type: 'spring', damping: 25, stiffness: 200 }}
                                 className="fixed bottom-0 left-0 right-0 bg-slate-900 border-t border-white/10 rounded-t-[2.5rem] z-[310] max-h-[85vh] overflow-y-auto"
                             >
-                                <div className="p-8 space-y-10" dir="rtl">
-                                    <div className="w-12 h-1.5 bg-white/10 rounded-full mx-auto -mt-2 mb-6"></div>
+                                <div className="p-5 sm:p-8 space-y-6 sm:space-y-10" dir="rtl">
+                                    <div className="w-10 h-1 bg-white/10 rounded-full mx-auto -mt-2 mb-2"></div>
 
-                                    {/* AI Summary Section Mobile */}
-                                    <div className="space-y-6">
-                                        <div className="flex items-center justify-between">
-                                            <div className="flex items-center gap-3">
-                                                <Sparkles className="text-indigo-400" size={20} />
-                                                <h5 className="text-lg font-black text-white">الملخص الذكي</h5>
-                                            </div>
-                                            <button onClick={() => setShowMobileMenu(false)} className="text-slate-500"><X size={20} /></button>
-                                        </div>
-
-                                        {!aiSummary && !isAiLoading && (
+                                    <div className="flex items-center justify-between">
+                                        <h5 className="text-xl font-black text-white">فهرس المحتوى</h5>
+                                        <button onClick={() => setShowMobileMenu(false)} className="p-2 bg-white/5 rounded-lg text-slate-500"><X size={20} /></button>
+                                    </div>
+                                    <nav className="grid gap-3">
+                                        {toc.map((item) => (
                                             <button
-                                                onClick={generateAiSummary}
-                                                className="w-full py-4 rounded-xl bg-indigo-600 text-white font-black text-sm transition-all"
+                                                key={item.id}
+                                                onClick={() => {
+                                                    setShowMobileMenu(false);
+                                                    document.getElementById(item.id)?.scrollIntoView({ behavior: 'smooth' });
+                                                }}
+                                                className={`text-right p-4 rounded-xl text-sm font-bold transition-all ${activeSection === item.id ? 'bg-indigo-600/20 text-indigo-400' : 'bg-white/5 text-slate-400'}`}
                                             >
-                                                توليد الملخص الآن
+                                                {item.text}
                                             </button>
-                                        )}
-                                        {isAiLoading && <div className="h-20 bg-white/5 rounded-xl animate-pulse"></div>}
-                                        {aiSummary && (
-                                            <div className="text-slate-300 text-sm leading-relaxed bg-white/5 p-6 rounded-2xl" dangerouslySetInnerHTML={{ __html: aiSummary }} />
-                                        )}
-                                    </div>
-
-                                    {/* Index Section Mobile */}
-                                    <div className="space-y-6">
-                                        <h5 className="text-lg font-black text-white border-r-4 border-indigo-600 pr-4">فهرس المحتوى</h5>
-                                        <nav className="grid gap-3">
-                                            {toc.map((item) => (
-                                                <button
-                                                    key={item.id}
-                                                    onClick={() => {
-                                                        setShowMobileMenu(false);
-                                                        document.getElementById(item.id)?.scrollIntoView({ behavior: 'smooth' });
-                                                    }}
-                                                    className={`text-right p-4 rounded-xl text-sm font-bold transition-all ${activeSection === item.id ? 'bg-indigo-600/20 text-indigo-400' : 'bg-white/5 text-slate-400'}`}
-                                                >
-                                                    {item.text}
-                                                </button>
-                                            ))}
-                                        </nav>
-                                    </div>
+                                        ))}
+                                    </nav>
                                 </div>
                             </motion.div>
                         </>
@@ -456,16 +371,32 @@ const ArticleReader: React.FC<ArticleReaderProps> = ({ article: propArticle, onC
                 }
                 @media (max-width: 640px) {
                     .article-body-professional {
-                        font-size: 17px;
-                        line-height: 1.8;
+                        font-size: 16px;
+                        line-height: 1.7;
                     }
                     .article-body-professional h2 {
-                        font-size: 1.5rem;
-                        margin-top: 2.5rem;
-                        margin-bottom: 1rem;
+                        font-size: 1.35rem;
+                        margin-top: 2rem;
+                        margin-bottom: 0.75rem;
+                        line-height: 1.3;
+                    }
+                    .article-body-professional h3 {
+                        font-size: 1.15rem;
+                        margin-top: 1.5rem;
+                        margin-bottom: 0.5rem;
                     }
                     .article-body-professional p {
-                        margin-bottom: 1.5rem;
+                        margin-bottom: 1.25rem;
+                        word-break: break-word; /* Prevent overflow */
+                    }
+                    .article-body-professional img {
+                        border-radius: 1rem !important;
+                        margin: 1.5rem 0 !important;
+                    }
+                    .article-body-professional blockquote {
+                        font-size: 1.15rem;
+                        padding: 1.25rem;
+                        margin: 1.5rem 0;
                     }
                 }
             `}</style>
