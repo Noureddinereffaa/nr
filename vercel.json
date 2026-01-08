@@ -27,6 +27,21 @@
       "destination": "/api/seo-resolver?slug=:slug"
     },
     {
+      "source": "/",
+      "has": [
+        {
+          "type": "header",
+          "key": "User-Agent",
+          "value": ".*(Twitterbot|facebookexternalhit|WhatsApp|LinkedInBot|Discordbot|TelegramBot).*"
+        },
+        {
+          "type": "query",
+          "key": "article"
+        }
+      ],
+      "destination": "/api/seo-resolver?id=:article"
+    },
+    {
       "source": "/((?!api/.*).*)",
       "destination": "/index.html"
     }

@@ -26,19 +26,21 @@ export default async function handler(req) {
             Template Base: ${payload.templateTitle}
             Topic: ${payload.topic}
             Tone: ${payload.tone || 'Professional, Authoritative, Strategic'}
+            Primary Keyword: ${payload.primaryKeyword || 'Not specified'}
+            Long-tail Targets: ${(payload.longTail || []).join(', ')}
             
             Return ONLY a valid JSON object with this structure:
             {
               "title": "Final Catchy Title in Arabic",
-              "excerpt": "A powerful 2-sentence summary in Arabic",
+              "excerpt": "A powerful 2-sentence summary in Arabic incorporating keywords",
               "keywords": ["keyword1", "keyword2"],
               "sections": [
                 {
                   "id": "intro",
                   "title": "Section Title in Arabic",
-                  "goal": "What this section should achieve (Arabic)",
+                  "goal": "Explain how to integrate ${payload.primaryKeyword} and specific long-tail targets here (Arabic)",
                   "keywords": ["specific", "keywords"],
-                  "targetWordCount": 300
+                  "targetWordCount": 350
                 }
                 // ... 8 to 12 more sections to total 2500+ words
               ]
@@ -51,6 +53,8 @@ export default async function handler(req) {
             You are the Sovereign Writer AI. Write a high-authority, detailed section for a strategic article in Arabic.
             
             Article Topic: ${payload.topic}
+            Primary Keyword: ${payload.primaryKeyword}
+            Long-tail Targets: ${(payload.longTail || []).join(', ')}
             Section Title: ${payload.section.title}
             Section Goal: ${payload.section.goal}
             Section Keywords: ${payload.section.keywords.join(', ')}
@@ -58,10 +62,11 @@ export default async function handler(req) {
             
             Requirements:
             - Language: Formal Arabic (العربية الفصحى الحديثة).
+            - Integration: Naturally weave the Primary Keyword and relevant Long-tail Targets into the narrative.
             - Word Count: Minimum ${payload.section.targetWordCount || 400} words.
-            - Format: Use HTML tags for structure (<h3>, <p>, <strong>, <ul>, <li>).
+            - Format: Use HTML tags (<h3>, <p>, <strong>, <ul>, <li>). Maintain high semantic depth.
             - Tone: Elite, Strategic, Informative.
-            - Visuals: If you suggest an image here, insert a tag like [IMAGE_PROMPT: description in english].
+            - Visuals: Insert [IMAGE_PROMPT: description in english] when a visual would enhance authority.
             
             WRITE ONLY THE CONTENT FOR THIS SPECIFIC SECTION.
             `;

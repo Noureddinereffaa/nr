@@ -76,7 +76,7 @@ const WritingWorkspace: React.FC<WritingWorkspaceProps> = ({ article: initialArt
     const [revisions, setRevisions] = useState<{ timestamp: string; article: Article }[]>([]);
     const [lastRevisionTime, setLastRevisionTime] = useState(Date.now());
 
-    // SEO Analysis (Real-time)
+    // SEO Analysis (Master Engine)
     const [seoMetrics, setSeoMetrics] = useState({
         wordCount: 0,
         readingTime: 0,
@@ -85,6 +85,8 @@ const WritingWorkspace: React.FC<WritingWorkspaceProps> = ({ article: initialArt
         metaLength: 0,
         hasH1: false,
         h2Count: 0,
+        semanticReach: 0,
+        aiOptimized: false,
         audit: [] as string[]
     });
 
@@ -94,26 +96,36 @@ const WritingWorkspace: React.FC<WritingWorkspaceProps> = ({ article: initialArt
         const wordCount = words.length;
         const readingTime = Math.ceil(wordCount / 200);
 
-        const keyword = article.keywords?.[0] || '';
-        const keywordCount = keyword ? (contentForAnalysis.toLowerCase().match(new RegExp(keyword.toLowerCase(), 'g')) || []).length : 0;
+        const primaryKeyword = article.seo?.focusKeyword || '';
+        const longTailKeywords = article.seo?.targetLongTail || [];
+
+        const countOccurrences = (term: string) => term ? (contentForAnalysis.toLowerCase().match(new RegExp(term.toLowerCase(), 'g')) || []).length : 0;
+
+        const keywordCount = countOccurrences(primaryKeyword);
         const keywordDensity = wordCount > 0 ? (keywordCount / wordCount) * 100 : 0;
+
+        // Long-tail Coverage
+        const coveredLongTail = longTailKeywords.filter(lt => contentForAnalysis.toLowerCase().includes(lt.toLowerCase())).length;
+        const semanticReach = longTailKeywords.length > 0 ? (coveredLongTail / longTailKeywords.length) * 100 : 100;
 
         const sentences = contentForAnalysis.split(/[.!?]+/).filter(s => s.trim().length > 0);
         const avgWordsPerSentence = sentences.length > 0 ? wordCount / sentences.length : 0;
         const readabilityScore = Math.max(0, 100 - (avgWordsPerSentence * 2));
 
-        const metaLength = article.excerpt?.length || 0;
+        const metaLength = article.seo?.description?.length || article.excerpt?.length || 0;
         const hasH1 = /<h1/i.test(contentForAnalysis);
         const h2Count = (contentForAnalysis.match(/<h2/gi) || []).length;
 
-        // NEW: Audit Logic
+        // AI Search (SGE) Logic: Detect Direct Answer Structure
+        const hasDirectAnswer = /^(ما هو|كيف يتم|كيفية|أفضل|مميزات)/i.test(contentForAnalysis.trim()) ||
+            (contentForAnalysis.match(/(<h3>|<h4>)(ما هو|كيف|لماذا)/gi) || []).length > 0;
+
         const auditNodes: string[] = [];
-        if (wordCount < 300) auditNodes.push("المحتوى قصير جداً (أقل من 300 كلمة)");
-        if (!article.image) auditNodes.push("المقال يفتقر لصورة بارزة (Featured Image)");
-        if (!article.keywords || article.keywords.length === 0) auditNodes.push("لم يتم تحديد كلمات مفتاحية استراتيجية");
-        if (keyword && !contentForAnalysis.toLowerCase().includes(keyword.toLowerCase())) auditNodes.push(`الكلمة المفتاحية "${keyword}" غير موجودة في المحتوى`);
-        if (h2Count < 2) auditNodes.push("المقال يحتاج إلى ترويسات H2 أكثر للتنظيم");
-        if (metaLength < 50) auditNodes.push("المقتطف (Excerpt) قصير جداً للأرشفة");
+        if (wordCount < 1500) auditNodes.push("المحتوى مثالي للسيو التقليدي ولكن الذكاء الاصطناعي يفضل 2000+ كلمة.");
+        if (!primaryKeyword) auditNodes.push("نقص الكلمة المفتاحية الاستراتيجية الأساسية.");
+        if (longTailKeywords.length < 3) auditNodes.push("استهدف المزيد من الكلمات طويلة الذيل (Long-tail) للهيمنة على Niche.");
+        if (!hasDirectAnswer) auditNodes.push("المقال يفتقر لهيكلية 'الإجابة المباشرة' المفضلة لبوتات AI Search.");
+        if (metaLength < 120 || metaLength > 160) auditNodes.push("طول الوصف (Meta Description) يجب أن يكون بين 120-160 حرفاً.");
 
         setSeoMetrics({
             wordCount,
@@ -123,15 +135,17 @@ const WritingWorkspace: React.FC<WritingWorkspaceProps> = ({ article: initialArt
             metaLength,
             hasH1,
             h2Count,
+            semanticReach: Math.round(semanticReach),
+            aiOptimized: hasDirectAnswer,
             audit: auditNodes
         });
 
-        // Capture Revision every 10 mins or major shift
+        // Capture Revision
         if (Date.now() - lastRevisionTime > 600000 && hasChanges) {
             setRevisions(prev => [{ timestamp: new Date().toLocaleTimeString(), article: { ...article } }, ...prev.slice(0, 9)]);
             setLastRevisionTime(Date.now());
         }
-    }, [article.content, article.excerpt, article.keywords, editorMode, projectFiles, hasChanges]);
+    }, [article.content, article.seo, article.excerpt, editorMode, projectFiles, hasChanges]);
 
     // AI Forge Engine
     const startForge = async () => {
@@ -149,10 +163,12 @@ const WritingWorkspace: React.FC<WritingWorkspaceProps> = ({ article: initialArt
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     stage: 'architect',
-                    apiKey: siteData.aiConfig.apiKey, // Use configured key
+                    apiKey: siteData.aiConfig.apiKey,
                     payload: {
                         topic: aiTopic,
-                        templateTitle: SOVEREIGN_TEMPLATES.find(t => t.id === article.category)?.title || 'General'
+                        templateTitle: SOVEREIGN_TEMPLATES.find(t => t.id === article.category)?.title || 'General',
+                        primaryKeyword: article.seo?.focusKeyword || '',
+                        longTail: article.seo?.targetLongTail || []
                     }
                 })
             });
@@ -185,11 +201,13 @@ const WritingWorkspace: React.FC<WritingWorkspaceProps> = ({ article: initialArt
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         stage: 'forge',
-                        apiKey: siteData.aiConfig.apiKey, // Use configured key
+                        apiKey: siteData.aiConfig.apiKey,
                         payload: {
                             topic: aiTopic,
                             section: section,
-                            context: currentContext
+                            context: currentContext,
+                            primaryKeyword: article.seo?.focusKeyword || '',
+                            longTail: article.seo?.targetLongTail || []
                         }
                     })
                 });
@@ -590,33 +608,158 @@ const WritingWorkspace: React.FC<WritingWorkspaceProps> = ({ article: initialArt
                         <button onClick={() => handleModeSwitch('nextjs')} className={`flex-1 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${editorMode === 'nextjs' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/20' : 'text-slate-500 hover:text-white hover:bg-white/5'}`}>Next.js</button>
                     </div>
 
-                    {/* AI Sovereign Forge - NEW */}
+                    {/* Global Asset Manager */}
                     <div className="space-y-6 pt-4 border-t border-white/5">
+                        <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest px-2">Hero Intelligence</label>
+                        <ImageUploader
+                            currentImage={article.image}
+                            onUpload={(url) => setArticle({ ...article, image: url })}
+                            folder="articles"
+                            label="Professional Thumbnail"
+                            aspectRatio="16/9"
+                        />
+                    </div>
+
+                    {/* SEO STRATEGIC COMMAND */}
+                    <div className="space-y-8 pt-10 border-t border-white/5">
+                        <div className="flex items-center justify-between px-2">
+                            <h3 className="text-[10px] font-black text-indigo-400 uppercase tracking-[0.4em]">SEO Command Center</h3>
+                            <Target size={14} className="text-indigo-400" />
+                        </div>
+
+                        {/* Keyword Strategy Panel */}
+                        <div className="p-6 bg-slate-900/50 rounded-[2.5rem] border border-white/5 space-y-6">
+                            <div className="space-y-3">
+                                <label className="text-[9px] font-black text-slate-600 uppercase tracking-widest flex items-center gap-2">
+                                    <Globe size={10} /> Primary Focus Keyword
+                                </label>
+                                <input
+                                    type="text"
+                                    value={article.seo?.focusKeyword || ''}
+                                    onChange={(e) => setArticle({ ...article, seo: { ...article.seo, focusKeyword: e.target.value } })}
+                                    className="w-full bg-slate-950 border border-white/10 text-white text-xs p-4 rounded-2xl outline-none focus:border-indigo-500 transition-all font-bold"
+                                    placeholder="e.g. أتمتة الشركات"
+                                    dir="rtl"
+                                />
+                            </div>
+
+                            <div className="space-y-4">
+                                <label className="text-[9px] font-black text-slate-600 uppercase tracking-widest flex items-center gap-2">
+                                    <Hash size={10} /> Long-tail Targets
+                                </label>
+                                <div className="flex gap-2">
+                                    <input
+                                        type="text"
+                                        placeholder="Add Target..."
+                                        onKeyDown={(e) => {
+                                            if (e.key === 'Enter') {
+                                                const val = e.currentTarget.value.trim();
+                                                if (val) {
+                                                    const current = article.seo?.targetLongTail || [];
+                                                    setArticle({ ...article, seo: { ...article.seo, targetLongTail: [...current, val] } });
+                                                    e.currentTarget.value = '';
+                                                }
+                                            }
+                                        }}
+                                        className="flex-1 bg-slate-950 border border-white/10 text-[10px] p-3 rounded-xl outline-none focus:border-indigo-500/50"
+                                        dir="rtl"
+                                    />
+                                </div>
+                                <div className="flex flex-wrap gap-2">
+                                    {article.seo?.targetLongTail?.map(lt => (
+                                        <span key={lt} className={`px-3 py-1.5 rounded-lg border text-[9px] font-bold flex items-center gap-2 transition-all ${article.content?.toLowerCase().includes(lt.toLowerCase()) ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400' : 'bg-slate-950 border-white/10 text-slate-500'}`}>
+                                            {lt}
+                                            <button onClick={() => setArticle({ ...article, seo: { ...article.seo, targetLongTail: article.seo.targetLongTail?.filter(x => x !== lt) } })} className="hover:text-white"><X size={10} /></button>
+                                        </span>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Search Intelligence Gauges */}
+                        <div className="grid grid-cols-2 gap-4">
+                            <div className="p-5 bg-slate-900 rounded-3xl border border-white/5 space-y-4">
+                                <p className="text-[8px] font-black text-slate-500 uppercase tracking-tighter text-center">Google Visibility</p>
+                                <div className="relative group">
+                                    <svg className="w-16 h-16 mx-auto transform -rotate-90">
+                                        <circle cx="32" cy="32" r="28" className="stroke-slate-800" strokeWidth="4" fill="transparent" />
+                                        <motion.circle
+                                            cx="32" cy="32" r="28"
+                                            className="stroke-indigo-500"
+                                            strokeWidth="4"
+                                            fill="transparent"
+                                            strokeDasharray={176}
+                                            initial={{ strokeDashoffset: 176 }}
+                                            animate={{ strokeDashoffset: 176 - (176 * (seoMetrics.readabilityScore / 100)) }}
+                                        />
+                                    </svg>
+                                    <div className="absolute inset-0 flex items-center justify-center text-[11px] font-black text-white">
+                                        {seoMetrics.readabilityScore}%
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="p-5 bg-slate-900 rounded-3xl border border-white/5 space-y-4">
+                                <p className="text-[8px] font-black text-slate-500 uppercase tracking-tighter text-center">AI Answers (SGE)</p>
+                                <div className="relative group">
+                                    <svg className="w-16 h-16 mx-auto transform -rotate-90">
+                                        <circle cx="32" cy="32" r="28" className="stroke-slate-800" strokeWidth="4" fill="transparent" />
+                                        <motion.circle
+                                            cx="32" cy="32" r="28"
+                                            className="stroke-purple-500"
+                                            strokeWidth="4"
+                                            fill="transparent"
+                                            strokeDasharray={176}
+                                            initial={{ strokeDashoffset: 176 }}
+                                            animate={{ strokeDashoffset: 176 - (176 * (seoMetrics.semanticReach / 100)) }}
+                                        />
+                                    </svg>
+                                    <div className="absolute inset-0 flex items-center justify-center text-[11px] font-black text-white">
+                                        {seoMetrics.semanticReach}%
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Audit Log Refined */}
+                        <div className="p-6 bg-slate-900/40 rounded-[2rem] border border-white/5 flex flex-col gap-4">
+                            <h4 className="text-[9px] font-black text-slate-600 uppercase tracking-widest flex items-center gap-2">
+                                <Activity size={12} /> Optimization Engine
+                            </h4>
+                            <div className="space-y-3">
+                                {seoMetrics.audit.length === 0 ? (
+                                    <p className="text-[10px] text-emerald-400 font-bold flex items-center gap-2"><CheckCircle size={14} /> المقال يتصدر معايير الهيمنة.</p>
+                                ) : (
+                                    seoMetrics.audit.map((node, i) => (
+                                        <div key={i} className="flex gap-3 items-start">
+                                            <div className="w-1 h-1 rounded-full bg-indigo-500 mt-1.5 shrink-0" />
+                                            <p className="text-slate-400 text-[10px] font-bold leading-relaxed" dir="rtl">{node}</p>
+                                        </div>
+                                    ))
+                                )}
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* AI Sovereign Forge (Moved inside sidebar) */}
+                    <div className="space-y-6 pt-10 border-t border-white/5">
                         <div className="flex items-center justify-between px-2">
                             <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest">AI Sovereign Forge</label>
                             <Sparkles size={14} className="text-amber-500" />
                         </div>
-
                         <div className="p-6 bg-slate-900/50 rounded-[2rem] border border-white/5 space-y-4">
                             {!isForging ? (
                                 <>
-                                    <p className="text-[10px] text-slate-400 leading-relaxed font-bold">صب محتوى استراتيجي متكامل (2500+ كلمة) مبني على سياق ذكي وهيكلية سيادية.</p>
+                                    <p className="text-[10px] text-slate-400 leading-relaxed font-bold italic">صب محتوى استراتيجي متكامل (2500+ كلمة) مبني على سياق ذكي وهيكلية سيادية.</p>
                                     <div className="space-y-3">
                                         <input
                                             type="text"
                                             value={aiTopic}
                                             onChange={(e) => setAiTopic(e.target.value)}
-                                            placeholder="موضوع المقال أو الفكرة الرئيسية..."
-                                            className="w-full bg-slate-950 border border-white/10 text-white text-xs p-4 rounded-2xl outline-none focus:border-indigo-500 transition-all font-bold text-right"
+                                            placeholder="موضوع المقال..."
+                                            className="w-full bg-slate-950 border border-white/10 text-white text-xs p-4 rounded-2xl outline-none focus:border-indigo-500 font-bold text-right"
                                             dir="rtl"
                                         />
-                                        <button
-                                            onClick={startForge}
-                                            disabled={!aiTopic}
-                                            className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed text-white py-4 rounded-2xl text-[11px] font-black uppercase tracking-widest flex items-center justify-center gap-3 transition-all active:scale-95 shadow-lg shadow-indigo-600/20"
-                                        >
-                                            <Zap size={14} className="fill-current" /> Forge Sovereignty
-                                        </button>
+                                        <button onClick={startForge} disabled={!aiTopic} className="w-full bg-indigo-600 text-white py-4 rounded-2xl text-[11px] font-black uppercase flex items-center justify-center gap-3 active:scale-95 shadow-lg shadow-indigo-600/20"><Zap size={14} /> Forge Sovereignty</button>
                                     </div>
                                 </>
                             ) : (
@@ -626,16 +769,9 @@ const WritingWorkspace: React.FC<WritingWorkspaceProps> = ({ article: initialArt
                                         <span className="text-white">{Math.round(forgeProgress)}%</span>
                                     </div>
                                     <div className="w-full h-1.5 bg-slate-800 rounded-full overflow-hidden">
-                                        <motion.div
-                                            initial={{ width: 0 }}
-                                            animate={{ width: `${forgeProgress}%` }}
-                                            className="h-full bg-gradient-to-r from-indigo-500 to-purple-500 shadow-[0_0_15px_rgba(99,102,241,0.5)]"
-                                        />
+                                        <motion.div initial={{ width: 0 }} animate={{ width: `${forgeProgress}%` }} className="h-full bg-gradient-to-r from-indigo-500 to-purple-500 shadow-[0_0_15px_rgba(99,102,241,0.5)]" />
                                     </div>
                                     <p className="text-[10px] text-slate-400 text-center font-bold italic leading-relaxed">{forgeStatus}</p>
-                                    <div className="flex justify-center">
-                                        <div className="w-8 h-8 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
-                                    </div>
                                 </div>
                             )}
                         </div>
@@ -643,7 +779,7 @@ const WritingWorkspace: React.FC<WritingWorkspaceProps> = ({ article: initialArt
 
                     {/* Next.js File Navigator if mode active */}
                     {editorMode === 'nextjs' && (
-                        <div className="space-y-4">
+                        <div className="space-y-4 pt-8 border-t border-white/5">
                             <label className="text-[10px] font-black text-slate-500 flex items-center gap-2 uppercase tracking-widest px-2">
                                 <Layout size={12} /> App Router Architecture
                             </label>
@@ -665,141 +801,10 @@ const WritingWorkspace: React.FC<WritingWorkspaceProps> = ({ article: initialArt
                         </div>
                     )}
 
-                    {/* Assets & Meta Section */}
-                    <div className="space-y-6 pt-4 border-t border-white/5">
-                        <div className="space-y-4">
-                            <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest px-2">Visual Assets</label>
-                            <ImageUploader
-                                currentImage={article.image}
-                                onUpload={(url) => setArticle({ ...article, image: url })}
-                                folder="articles"
-                                label="Featured Hero Image"
-                                aspectRatio="16/9"
-                            />
-                        </div>
-
-                        <div className="space-y-4 pt-4">
-                            <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest px-2">Strategic Meta</label>
-                            <textarea
-                                value={article.excerpt}
-                                onChange={(e) => setArticle({ ...article, excerpt: e.target.value })}
-                                className="w-full bg-slate-900/50 border border-white/10 text-white text-xs p-4 rounded-2xl outline-none focus:border-indigo-500/50 transition-all min-h-[100px] leading-relaxed"
-                                placeholder="Strategic excerpt for indexing..."
-                            />
-                        </div>
-
-                        <div className="space-y-4 pt-4">
-                            <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest px-2">Knowledge Tags</label>
-                            <input
-                                type="text"
-                                value={tagInput}
-                                onChange={(e) => setTagInput(e.target.value)}
-                                onKeyDown={handleAddTag}
-                                className="w-full bg-slate-900/50 border border-white/10 text-white text-xs p-4 rounded-2xl outline-none focus:border-indigo-500 transition-all mb-4"
-                                placeholder="Add Tag + Enter"
-                            />
-                            <div className="flex flex-wrap gap-2">
-                                {article.tags?.map(tag => (
-                                    <span key={tag} className="px-3 py-1.5 bg-indigo-500/10 text-indigo-300 text-[10px] font-black rounded-lg border border-indigo-500/20 flex items-center gap-2 group-hover:bg-indigo-500/20">
-                                        {tag} <button onClick={() => removeTag(tag)} className="hover:text-white transition-colors"><X size={10} /></button>
-                                    </span>
-                                ))}
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Authority Analytics Section */}
-                    <div className="space-y-6 pt-8 border-t border-white/5">
-                        <div className="flex items-center justify-between px-2">
-                            <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Authority Analytics</label>
-                            <span className="px-2 py-0.5 bg-indigo-500 text-white text-[8px] font-black rounded-full shadow-lg shadow-indigo-500/20">AI AUDIT LIVE</span>
-                        </div>
-
-                        <div className="grid grid-cols-2 gap-3">
-                            <div className="p-4 bg-slate-900 rounded-2xl border border-white/5 text-center">
-                                <p className="text-[9px] text-slate-500 font-black uppercase mb-1">Words</p>
-                                <p className={`text-xl font-black ${seoMetrics.wordCount < 300 ? 'text-amber-500' : 'text-white'}`}>{seoMetrics.wordCount}</p>
-                            </div>
-                            <div className="p-4 bg-slate-900 rounded-2xl border border-white/5 text-center">
-                                <p className="text-[9px] text-slate-500 font-black uppercase mb-1">Read Time</p>
-                                <p className="text-xl font-black text-indigo-400">{seoMetrics.readingTime}m</p>
-                            </div>
-                            <div className="col-span-2 p-5 bg-gradient-to-br from-indigo-600/10 to-transparent rounded-3xl border border-indigo-500/20">
-                                <div className="flex justify-between items-center mb-4">
-                                    <span className="text-[10px] font-black text-white uppercase tracking-widest">Authority Score</span>
-                                    <span className="text-xl font-black text-indigo-400">{seoMetrics.readabilityScore}%</span>
-                                </div>
-                                <div className="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden">
-                                    <motion.div
-                                        initial={{ width: 0 }}
-                                        animate={{ width: `${seoMetrics.readabilityScore}%` }}
-                                        className="h-full bg-indigo-500 shadow-[0_0_10px_rgba(99,102,241,0.5)]"
-                                    />
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Deep Audit Checklist - NEW */}
-                        <div className="bg-slate-900/40 rounded-[1.5rem] border border-white/5 p-6 space-y-4">
-                            <h4 className="text-[9px] font-black text-slate-500 uppercase tracking-[0.2em] mb-4 flex items-center gap-2">
-                                <Zap size={10} className="text-amber-500" /> SEO Optimization Audit
-                            </h4>
-                            {seoMetrics.audit.length === 0 ? (
-                                <div className="flex items-center gap-3 text-emerald-400 text-[10px] font-bold">
-                                    <CheckCircle size={14} /> المقال محسن بالكامل وفق معايير السيادة.
-                                </div>
-                            ) : (
-                                <div className="space-y-3">
-                                    {seoMetrics.audit.map((node, i) => (
-                                        <div key={i} className="flex items-start gap-3 group">
-                                            <div className="w-1 h-1 rounded-full bg-amber-500 mt-1.5 shrink-0 group-hover:scale-150 transition-transform" />
-                                            <p className="text-slate-400 text-[10px] font-bold leading-relaxed transition-colors group-hover:text-white" dir="rtl">{node}</p>
-                                        </div>
-                                    ))}
-                                </div>
-                            )}
-                        </div>
-                    </div>
-
-                    {/* Session Revisions - NEW */}
-                    <div className="space-y-4 pt-8 border-t border-white/5">
-                        <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest px-2 flex items-center justify-between w-full">
-                            Session History
-                            <span className="text-indigo-400 tracking-tighter">{revisions.length} Snapshots</span>
-                        </label>
-                        <div className="space-y-2">
-                            {revisions.length === 0 ? (
-                                <p className="text-[9px] text-slate-700 italic px-2">لا توجد نسخ سابقة في هذه الجلسة بعد...</p>
-                            ) : (
-                                revisions.map((rev, idx) => (
-                                    <button
-                                        key={idx}
-                                        onClick={() => {
-                                            if (confirm(`هل تريد استعادة النسخة المحفوظة في ${rev.timestamp}؟`)) {
-                                                setArticle(rev.article);
-                                                if (rev.article.content.startsWith('{"nextjs":true')) {
-                                                    const parsed = JSON.parse(rev.article.content);
-                                                    setProjectFiles(parsed.files);
-                                                    setEditorMode('nextjs');
-                                                } else {
-                                                    setEditorMode('classic');
-                                                }
-                                            }
-                                        }}
-                                        className="w-full flex items-center justify-between p-3 rounded-xl bg-slate-900 hover:bg-slate-800 border border-white/5 transition-all group"
-                                    >
-                                        <span className="text-[10px] font-mono text-slate-500 group-hover:text-indigo-400">{rev.timestamp}</span>
-                                        <span className="text-[8px] font-black text-slate-700 group-hover:text-white uppercase">Restore</span>
-                                    </button>
-                                ))
-                            )}
-                        </div>
-                    </div>
-
-                    {/* Quick Actions (CTA Links) */}
+                    {/* Strategic Links */}
                     <div className="space-y-4 pt-8 border-t border-white/5">
                         <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest px-2 flex items-center gap-2">
-                            <Settings size={12} /> Strategic Links
+                            <Settings size={12} /> Strategic CTA
                         </label>
                         <div className="space-y-3">
                             <div className="relative group">
@@ -822,6 +827,37 @@ const WritingWorkspace: React.FC<WritingWorkspaceProps> = ({ article: initialArt
                                     placeholder="download/url..."
                                 />
                             </div>
+                        </div>
+                    </div>
+
+                    {/* Session History Snapshot */}
+                    <div className="space-y-4 pt-8 border-t border-white/5">
+                        <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest px-2 flex items-center justify-between w-full">
+                            History
+                            <span className="text-indigo-400 tracking-tighter">{revisions.length} Snapshots</span>
+                        </label>
+                        <div className="space-y-2">
+                            {revisions.map((rev, idx) => (
+                                <button
+                                    key={idx}
+                                    onClick={() => {
+                                        if (confirm(`Restore version from ${rev.timestamp}?`)) {
+                                            setArticle(rev.article);
+                                            if (rev.article.content.startsWith('{"nextjs"')) {
+                                                const parsed = JSON.parse(rev.article.content);
+                                                setProjectFiles(parsed.files);
+                                                setEditorMode('nextjs');
+                                            } else {
+                                                setEditorMode('classic');
+                                            }
+                                        }
+                                    }}
+                                    className="w-full flex items-center justify-between p-3 rounded-xl bg-slate-900 hover:bg-slate-800 border border-white/5 transition-all group"
+                                >
+                                    <span className="text-[10px] font-mono text-slate-500 group-hover:text-indigo-400">{rev.timestamp}</span>
+                                    <span className="text-[8px] font-black text-slate-700 group-hover:text-white uppercase">Restore</span>
+                                </button>
+                            ))}
                         </div>
                     </div>
                 </div>

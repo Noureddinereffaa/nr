@@ -23,17 +23,15 @@ const ArticleReader: React.FC<ArticleReaderProps> = ({ article, onClose }) => {
     };
 
     const handleShare = async () => {
-        const shareData = {
-            title: article.title,
-            text: article.excerpt,
-            url: window.location.href,
-        };
-
         if (navigator.share) {
             try {
-                await navigator.share(shareData);
-            } catch (err) {
-                console.log('Share canceled');
+                await navigator.share({
+                    title: article.title,
+                    text: article.excerpt,
+                    url: shareUrl, // Proxy URL for better previews
+                });
+            } catch (error) {
+                setShowShareModal(true);
             }
         } else {
             setShowShareModal(true);
@@ -41,10 +39,10 @@ const ArticleReader: React.FC<ArticleReaderProps> = ({ article, onClose }) => {
     };
 
     const copyToClipboard = () => {
-        // Copy the Proxy URL to ensure social previews work when pasted
-        navigator.clipboard.writeText(cleanUrl);
-        setCopySuccess(true);
-        setTimeout(() => setCopySuccess(false), 2000);
+        navigator.clipboard.writeText(shareUrl).then(() => {
+            setCopySuccess(true);
+            setTimeout(() => setCopySuccess(false), 2000);
+        });
     };
 
     // Safe access to window/props in render

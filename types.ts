@@ -254,19 +254,24 @@ export interface Article {
     title: string;
     description: string;
     focusKeyword: string;
+    targetLongTail?: string[];
   };
   seoScore?: number;
+  aiSgeScore?: number;
   seoAnalysis?: {
-    keywordDensity: string;
-    readabilityScore: string;
+    keywordDensity: number;
+    readabilityScore: number;
+    wordCount: number;
     metaTags: boolean;
     internalLinks: boolean;
     imageAltTags: boolean;
     structuredData: boolean;
-    lsicoverage: boolean;
-    hTagsHierarchy: boolean;
+    semanticBreadth?: number;
+    intentMatch?: number;
+    lsicoverage?: boolean;
+    hTagsHierarchy?: boolean;
   };
-}
+};
 
 export interface BrandIdentity {
   siteName: string;

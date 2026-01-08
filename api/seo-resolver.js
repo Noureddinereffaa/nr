@@ -2,36 +2,43 @@ import { createClient } from '@supabase/supabase-js';
 
 // Vercel Serverless Function
 export default async function handler(req, res) {
-    // 1. Get Slug
-    const { slug } = req.query;
+    // 1. Get Identifiers
+    const { slug, id } = req.query;
 
     // 2. Setup Default Metadata
     const defaults = {
         title: 'NR-OS | Noureddine Reffaa Operating System',
         desc: 'Automate your growth with AI-powered content strategy and competitor intelligence.',
-        image: 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&q=80', // Tech/Cyberpunk default
+        image: 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&q=80',
         url: `https://${req.headers.host || 'nr-os.vercel.app'}`
     };
 
     let meta = { ...defaults };
-    const targetUrl = slug ? `${defaults.url}/blog/${slug}` : defaults.url;
+    let targetUrl = defaults.url;
 
-    // 3. Fetch from Supabase if Slug Exists
     if (slug) {
-        // Initialize Supabase only if needed
-        // Note: Vercel exposes VITE_ prefixed vars to Serverless Functions if configured in Project Settings
-        // We fall back to standard process.env names if VITE missing
+        targetUrl = `${defaults.url}/blog/${slug}`;
+    } else if (id) {
+        targetUrl = `${defaults.url}/?article=${id}`;
+    }
+
+    // 3. Fetch from Supabase if Identifier Exists
+    if (slug || id) {
         const supabaseUrl = process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL;
         const supabaseKey = process.env.VITE_SUPABASE_ANON_KEY || process.env.SUPABASE_ANON_KEY;
 
         if (supabaseUrl && supabaseKey) {
             try {
                 const supabase = createClient(supabaseUrl, supabaseKey);
-                const { data, error } = await supabase
-                    .from('articles')
-                    .select('title, excerpt, image, content')
-                    .eq('slug', slug)
-                    .maybeSingle();
+                let query = supabase.from('articles').select('title, excerpt, image, content');
+
+                if (slug) {
+                    query = query.eq('slug', slug);
+                } else if (id) {
+                    query = query.eq('id', id);
+                }
+
+                const { data, error } = await query.maybeSingle();
 
                 if (data && !error) {
                     meta.title = data.title;
@@ -39,7 +46,7 @@ export default async function handler(req, res) {
                     meta.image = data.image || defaults.image;
                 }
             } catch (e) {
-                console.error('Supabase Fetch Error:', e);
+                console.error('Supabase SEO Fetch Error:', e);
             }
         }
     }
