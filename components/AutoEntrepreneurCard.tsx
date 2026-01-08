@@ -7,7 +7,7 @@ import { MapPin, ShieldCheck, Verified } from 'lucide-react';
 const AutoEntrepreneurCard: React.FC = () => {
   const { siteData } = useSystem();
   const { isShieldMode } = useUI();
-  const { profile } = siteData;
+  const profile = siteData?.profile || {};
 
   return (
     <section id="about" className="py-12 relative overflow-hidden bg-slate-950/20">

@@ -99,7 +99,8 @@ export const SystemProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         },
         faqs: [],
         process: [],
-        siteTexts: {}
+        siteTexts: {},
+        profile: NOUREDDINE_DATA
     });
     const [activityLog, setActivityLog] = useState<SystemActivity[]>([]);
     const [socialPosts, setSocialPosts] = useState<SocialPost[]>([]);
@@ -128,7 +129,8 @@ export const SystemProvider: React.FC<{ children: React.ReactNode }> = ({ childr
                         ...prev,
                         faqs: s.faqs || prev.faqs,
                         process: s.process || prev.process,
-                        siteTexts: s.siteTexts || prev.siteTexts
+                        siteTexts: s.siteTexts || prev.siteTexts,
+                        profile: s.profile || prev.profile
                     }));
                     if (s.integrations) setIntegrations(s.integrations);
                     if (s.socialPosts) setSocialPosts(s.socialPosts);
