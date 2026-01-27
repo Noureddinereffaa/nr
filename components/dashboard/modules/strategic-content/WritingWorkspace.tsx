@@ -454,13 +454,16 @@ const WritingWorkspace: React.FC<WritingWorkspaceProps> = ({ article: initialArt
                         <ArrowRight size={18} className="rotate-180 group-hover:-translate-x-1 transition-transform" />
                     </button>
                     <div className="h-4 w-[1px] bg-white/10" />
-                    <nav className="flex items-center gap-3 text-xs font-bold tracking-tight">
+                    <nav className="hidden sm:flex items-center gap-3 text-xs font-bold tracking-tight">
                         <span className="text-slate-500 uppercase tracking-widest text-[9px]">Archive</span>
                         <span className="text-slate-800">/</span>
                         <span className="text-indigo-400 uppercase tracking-widest text-[9px]">{isNew ? 'Drafting' : 'Studio'}</span>
                         <span className="text-slate-800">/</span>
-                        <span className="text-white max-w-[300px] truncate">{article.title || 'Untitled Article'}</span>
+                        <span className="text-white max-w-[100px] md:max-w-[300px] truncate">{article.title || 'Untitled Article'}</span>
                     </nav>
+                    <div className="flex sm:hidden items-center gap-2">
+                        <span className="text-white font-black text-[10px] uppercase truncate max-w-[120px]">{article.title || 'Draft'}</span>
+                    </div>
                 </div>
 
                 <div className="flex items-center gap-3">
@@ -491,30 +494,31 @@ const WritingWorkspace: React.FC<WritingWorkspaceProps> = ({ article: initialArt
 
                     <button
                         onClick={handleTogglePublish}
-                        className={`px-6 py-2 rounded-xl font-black text-[10px] uppercase tracking-[0.1em] flex items-center gap-2 transition-all hover:scale-[1.02] active:scale-95 shadow-xl ${article.status === 'published' ? 'bg-amber-500/10 text-amber-500 border border-amber-500/20 hover:bg-amber-500/20' : 'bg-emerald-600 text-white hover:bg-emerald-500 shadow-emerald-600/20'}`}
+                        className={`px-4 sm:px-6 py-2 rounded-xl font-black text-[10px] uppercase tracking-[0.1em] flex items-center gap-2 transition-all hover:scale-[1.02] active:scale-95 shadow-xl ${article.status === 'published' ? 'bg-amber-500/10 text-amber-500 border border-amber-500/20 hover:bg-amber-500/20' : 'bg-emerald-600 text-white hover:bg-emerald-500 shadow-emerald-600/20'}`}
                     >
                         {article.status === 'published' ? <X size={14} /> : <CheckCircle size={14} />}
-                        {article.status === 'published' ? 'Set to Draft' : 'Publish Now'}
+                        <span className="hidden sm:inline">{article.status === 'published' ? 'Set to Draft' : 'Publish Now'}</span>
+                        <span className="sm:hidden">{article.status === 'published' ? 'Draft' : 'Push'}</span>
                     </button>
 
                     <button
                         onClick={() => { setSaveStatus('saving'); onSave(article); setTimeout(() => setSaveStatus('saved'), 1000); }}
-                        className="bg-white text-slate-950 px-6 py-2 rounded-xl font-black text-[10px] uppercase tracking-[0.1em] flex items-center gap-2 hover:bg-white/90 transition-all hover:scale-[1.02] active:scale-95 shadow-xl shadow-white/5 border border-white/10"
+                        className="bg-white text-slate-950 px-4 sm:px-6 py-2 rounded-xl font-black text-[10px] uppercase tracking-[0.1em] flex items-center gap-2 hover:bg-white/90 transition-all hover:scale-[1.02] active:scale-95 shadow-xl shadow-white/5 border border-white/10"
                     >
-                        <Save size={14} /> Deploy Changes
+                        <Save size={14} /> <span className="hidden sm:inline">Deploy Changes</span><span className="sm:hidden">Save</span>
                     </button>
                 </div>
             </div>
 
             <div className="flex-1 flex overflow-hidden">
                 {/* 2. MAIN CANVAS (LEFT) */}
-                <div className="flex-1 overflow-y-auto bg-slate-950 scrollbar-hide py-12">
-                    <div className="max-w-4xl mx-auto px-8 md:px-16 flex flex-col min-h-full">
+                <div className="flex-1 overflow-y-auto bg-slate-950 scrollbar-hide py-8 md:py-12">
+                    <div className="max-w-4xl mx-auto px-6 md:px-16 flex flex-col min-h-full">
                         {/* Title Refined */}
                         <textarea
                             value={article.title}
                             onChange={(e) => setArticle({ ...article, title: e.target.value })}
-                            className="bg-transparent border-none text-5xl md:text-7xl font-black text-white placeholder:text-slate-900 outline-none resize-none overflow-hidden leading-[1.05] mb-12 text-right tracking-tighter"
+                            className="bg-transparent border-none text-4xl md:text-7xl font-black text-white placeholder:text-slate-900 outline-none resize-none overflow-hidden leading-[1.05] mb-8 md:mb-12 text-right tracking-tighter"
                             placeholder="Primary Vision Title..."
                             rows={1}
                             style={{ height: 'auto' }}
@@ -594,8 +598,8 @@ const WritingWorkspace: React.FC<WritingWorkspaceProps> = ({ article: initialArt
                     </div>
                 </div>
 
-                {/* 3. PROPERTIES PANEL (RIGHT SIDEBAR) */}
-                <div className="w-[380px] border-l border-white/5 bg-slate-950 overflow-y-auto overflow-x-hidden p-8 space-y-10 shrink-0">
+                {/* 3. PROPERTIES PANEL (SIDEBAR) */}
+                <div className="hidden xl:block w-[380px] border-l border-white/5 bg-slate-950 overflow-y-auto overflow-x-hidden p-8 space-y-10 shrink-0">
                     {/* Header for Sidebar */}
                     <div className="flex items-center justify-between mb-4">
                         <h3 className="text-[10px] font-black text-indigo-400 uppercase tracking-[0.4em]">Properties Studio</h3>
@@ -1034,7 +1038,7 @@ const WritingWorkspace: React.FC<WritingWorkspaceProps> = ({ article: initialArt
                     </div>
                 )}
             </AnimatePresence>
-        </motion.div>
+        </motion.div >
     );
 };
 

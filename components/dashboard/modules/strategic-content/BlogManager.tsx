@@ -35,12 +35,12 @@ const BlogManager: React.FC = () => {
     }, []);
 
     const SkeletonCard = () => (
-        <div className="bg-slate-900 border border-white/5 rounded-[2.5rem] overflow-hidden flex flex-col h-[600px] animate-pulse">
+        <div className="bg-slate-900 border border-white/5 rounded-[2.5rem] overflow-hidden flex flex-col h-[500px] md:h-[600px] animate-pulse">
             <div className="aspect-[16/9] bg-slate-800" />
-            <div className="p-8 space-y-6">
+            <div className="p-6 md:p-8 space-y-6">
                 <div className="flex justify-between">
-                    <div className="w-20 h-3 bg-slate-800 rounded-full" />
-                    <div className="w-32 h-3 bg-slate-800 rounded-full" />
+                    <div className="w-16 h-3 bg-slate-800 rounded-full" />
+                    <div className="w-24 h-3 bg-slate-800 rounded-full" />
                 </div>
                 <div className="w-full h-8 bg-slate-800 rounded-xl" />
                 <div className="w-2/3 h-8 bg-slate-800 rounded-xl" />
@@ -49,7 +49,7 @@ const BlogManager: React.FC = () => {
                     <div className="w-full h-3 bg-slate-800 rounded-full" />
                 </div>
                 <div className="mt-auto pt-8">
-                    <div className="w-full h-24 bg-slate-800/50 rounded-2xl" />
+                    <div className="w-full h-16 md:h-24 bg-slate-800/50 rounded-2xl" />
                 </div>
             </div>
         </div>
@@ -93,7 +93,7 @@ const BlogManager: React.FC = () => {
     return (
         <div className="space-y-12 pb-24">
             {/* 0. EXECUTIVE INSIGHTS GRID */}
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4" dir="rtl">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4" dir="rtl">
                 {[
                     { label: 'إجمالي السلطة المعرفية', value: articles.length, icon: FileText, color: 'text-indigo-400', sub: 'مقال منشأ' },
                     { label: 'الانتشار العالمي', value: totalViews.toLocaleString(), icon: Eye, color: 'text-emerald-400', sub: 'مشاهدة تراكمية' },
@@ -125,24 +125,24 @@ const BlogManager: React.FC = () => {
             </div>
 
             {/* 1. STUDIO COMMAND HEADER */}
-            <div className="relative overflow-hidden rounded-[3rem] bg-slate-900 border border-white/5 p-12">
+            <div className="relative overflow-hidden rounded-[2rem] md:rounded-[3rem] bg-slate-900 border border-white/5 p-6 md:p-12">
                 <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-indigo-600/5 blur-[120px] rounded-full -mr-40 -mt-40 shrink-0" />
                 <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-8">
                     <div className="text-right w-full lg:w-2/3">
                         <div className="flex items-center gap-3 justify-end mb-6">
-                            <span className="px-4 py-1.5 bg-indigo-500/10 text-indigo-400 text-[10px] font-black uppercase tracking-[0.4em] rounded-xl border border-indigo-500/20">
+                            <span className="px-4 py-1.5 bg-indigo-500/10 text-indigo-400 text-[8px] md:text-[10px] font-black uppercase tracking-[0.4em] rounded-xl border border-indigo-500/20">
                                 Digital Empire Hub v4.8
                             </span>
                         </div>
-                        <h2 className="text-6xl md:text-7xl font-black text-white mb-6 leading-tight tracking-tighter">
+                        <h2 className="text-3xl md:text-7xl font-black text-white mb-6 leading-tight tracking-tighter">
                             إدارة المحتوى السيادي
                         </h2>
-                        <p className="text-slate-400 text-lg max-w-2xl ml-auto leading-relaxed">
+                        <p className="text-slate-400 text-sm md:text-lg max-w-2xl ml-auto leading-relaxed">
                             أدوات تحرير متقدمة، تحليلات أداء لحظية، وقدرات تخصيص لا محدودة. قُد إمبراطوريتك المعرفية من هنا.
                         </p>
                     </div>
-                    <div className="shrink-0">
-                        <div className="flex flex-wrap items-center gap-4">
+                    <div className="shrink-0 w-full lg:w-auto">
+                        <div className="flex flex-col sm:flex-row items-center gap-4">
                             <button
                                 onClick={async () => {
                                     if (confirm('هل تريد مزامنة المقالات المحلية مع السحابة؟ سيتم رفع القوالب المحلية بشكل تتابعي لضمان استقرار الاتصال.')) {
@@ -150,11 +150,11 @@ const BlogManager: React.FC = () => {
                                     }
                                 }}
                                 disabled={syncStatus.isSyncing}
-                                className={`px-6 py-5 rounded-2xl font-black text-sm uppercase tracking-wider flex items-center gap-3 transition-all hover:scale-105 active:scale-95 shadow-xl ${syncStatus.isSyncing ? 'bg-slate-800 text-slate-500 cursor-not-allowed' : 'bg-indigo-600/20 text-indigo-400 border border-indigo-500/30 hover:bg-indigo-600 hover:text-white'}`}
+                                className={`w-full sm:w-auto px-6 py-4 md:py-5 rounded-2xl font-black text-sm uppercase tracking-wider flex items-center justify-center gap-3 transition-all hover:scale-105 active:scale-95 shadow-xl ${syncStatus.isSyncing ? 'bg-slate-800 text-slate-500 cursor-not-allowed' : 'bg-indigo-600/20 text-indigo-400 border border-indigo-500/30 hover:bg-indigo-600 hover:text-white'}`}
                                 title="مزامنة القوالب المحلية مع السحابة"
                             >
                                 <RefreshCw size={20} className={syncStatus.isSyncing ? 'animate-spin' : ''} />
-                                {syncStatus.isSyncing ? 'جاري المزامنة...' : 'مزامنة القوالب'}
+                                {syncStatus.isSyncing ? 'جاري...' : 'مزامنة القوالب'}
                             </button>
 
                             <button
@@ -177,7 +177,7 @@ const BlogManager: React.FC = () => {
                                     const newId = await addArticle(newArticle);
                                     setEditingArticle({ ...newArticle, id: newId, views: 0 });
                                 }}
-                                className="bg-white text-slate-950 px-10 py-5 rounded-2xl font-black text-sm uppercase tracking-wider flex items-center gap-3 hover:bg-indigo-50 transition-all hover:scale-105 active:scale-95 shadow-2xl shadow-white/5"
+                                className="w-full sm:w-auto bg-white text-slate-950 px-10 py-4 md:py-5 rounded-2xl font-black text-sm uppercase tracking-wider flex items-center justify-center gap-3 hover:bg-indigo-50 transition-all hover:scale-105 active:scale-95 shadow-2xl shadow-white/5"
                             >
                                 <Plus size={24} /> مقال سيادي جديد
                             </button>
@@ -237,13 +237,13 @@ const BlogManager: React.FC = () => {
                         />
                     </div>
 
-                    <div className="flex items-center gap-4 bg-slate-900/50 p-2 rounded-[2rem] border border-white/5">
-                        <div className="flex items-center gap-1">
+                    <div className="flex items-center gap-4 bg-slate-900/50 p-2 rounded-[2rem] border border-white/5 overflow-x-auto no-scrollbar scroll-smooth">
+                        <div className="flex items-center gap-1 shrink-0">
                             {categories.map(cat => (
                                 <button
                                     key={cat}
                                     onClick={() => setSelectedCategory(cat)}
-                                    className={`px-6 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all ${selectedCategory === cat ? 'bg-indigo-600 text-white shadow-xl shadow-indigo-600/30' : 'text-slate-500 hover:text-white hover:bg-white/5'}`}
+                                    className={`px-6 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all shrink-0 ${selectedCategory === cat ? 'bg-indigo-600 text-white shadow-xl shadow-indigo-600/30' : 'text-slate-500 hover:text-white hover:bg-white/5'}`}
                                 >
                                     {cat === 'All' ? 'الكل' : cat}
                                 </button>
