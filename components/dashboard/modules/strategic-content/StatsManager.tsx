@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { useSystem } from '../../../context/SystemContext';
-import { Stat } from '../../../types';
+import { useSystem } from '../../../../context/SystemContext';
+import { Stat } from '../../../../types';
 import { Edit2, Save, X, ShieldCheck, Users, Briefcase, Zap, Activity } from 'lucide-react';
 import * as LucideIcons from 'lucide-react';
 

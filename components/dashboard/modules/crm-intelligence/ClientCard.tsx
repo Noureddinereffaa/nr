@@ -1,8 +1,9 @@
 import React from 'react';
-import { Client } from '../../../types';
+import { motion } from 'framer-motion';
+import { Client } from '../../../../lib/types';
 import { Phone, Mail, DollarSign, Calendar, Clock, Zap } from 'lucide-react';
-import { useUI } from '../../../context/UIContext';
-import { BusinessIntelligence } from '../../../lib/business-intelligence';
+import { useUI } from '../../../../context/UIContext';
+import { BusinessIntelligence } from '../../../../lib/business-intelligence';
 
 interface ClientCardProps {
     client: Client;
@@ -22,9 +23,11 @@ const ClientCard: React.FC<ClientCardProps> = ({ client, onEdit, onMove }) => {
     };
 
     return (
-        <div
+        <motion.div
+            layout
+            whileHover={{ y: -2 }}
             onClick={() => onEdit(client)}
-            className="p-4 bg-slate-900 border border-white/5 rounded-xl hover:border-indigo-500/30 transition-all cursor-pointer group"
+            className="p-4 glass-card cursor-pointer group"
         >
             <div className="flex justify-between items-start mb-3">
                 <div className="space-y-1">
@@ -93,7 +96,7 @@ const ClientCard: React.FC<ClientCardProps> = ({ client, onEdit, onMove }) => {
                     </button>
                 )}
             </div>
-        </div>
+        </motion.div>
     );
 };
 

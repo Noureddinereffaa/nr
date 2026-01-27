@@ -16,28 +16,29 @@
     --font-arabic: 'Cairo', sans-serif;
 
     /* Theme Variables - Dark Mode (Default) */
-    --bg-primary: #0f172a;
-    --bg-secondary: #1e293b;
-    --bg-tertiary: #334155;
-    --bg-card: rgba(17, 25, 40, 0.75);
-    --text-primary: #f1f5f9;
-    --text-secondary: #cbd5e1;
-    --text-tertiary: #94a3b8;
+    --bg-primary: #030014;
+    --bg-secondary: #0a0a1f;
+    --bg-tertiary: #161633;
+    --bg-card: rgba(10, 10, 31, 0.7);
+    --text-primary: #f8fafc;
+    --text-secondary: #94a3b8;
+    --text-tertiary: #64748b;
     --accent-primary: #6366f1;
-    --accent-secondary: #8b5cf6;
-    --border-color: #334155;
-    --border-subtle: rgba(255, 255, 255, 0.05);
+    --accent-secondary: #c084fc;
+    --accent-emerald: #10b981;
+    --accent-gold: #fbbf24;
+    --border-color: rgba(255, 255, 255, 0.08);
+    --border-subtle: rgba(255, 255, 255, 0.03);
 
-    /* Color Palette - Deep Universe */
-    --bg-deep: #030014;
-
-    /* Aurora Gradients */
+    /* Aurora Gradients - Enhanced */
     --aurora-1: #4f46e5;
-    --aurora-2: #818cf8;
-    --aurora-3: #c084fc;
+    --aurora-2: #8b5cf6;
+    --aurora-3: #ec4899;
+    --aurora-4: #06b6d4;
 
-    /* Animation Timing */
-    --ease-out-expo: cubic-bezier(0.19, 1, 0.22, 1);
+    /* Shadows */
+    --shadow-premium: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+    --glow-primary: 0 0 20px rgba(99, 102, 241, 0.2);
 }
 
 /* Light Theme */
@@ -67,6 +68,19 @@ body {
     overflow-x: hidden;
     -webkit-font-smoothing: antialiased;
     transition: background-color 0.3s ease, color 0.3s ease;
+    padding-bottom: env(safe-area-inset-bottom);
+}
+
+/* Mobile Interaction Polish */
+@media (max-width: 768px) {
+    * {
+        -webkit-tap-highlight-color: transparent;
+    }
+
+    .active-scale:active {
+        transform: scale(0.96);
+        transition: transform 0.1s ease;
+    }
 }
 
 h1,
@@ -162,30 +176,65 @@ h6 {
     background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
 }
 
-/* Glassmorphism 4.0 - Unified Elite System */
-.glass-panel,
-.glass-card,
-.glass-effect,
-.glass-morph {
+/* Glassmorphism 5.0 - Ultra-Premium System */
+.glass-panel {
+    background: rgba(10, 10, 31, 0.65);
+    backdrop-filter: blur(20px) saturate(200%);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: var(--shadow-premium);
+}
+
+.glass-card {
     background: linear-gradient(145deg,
             rgba(255, 255, 255, 0.05) 0%,
             rgba(255, 255, 255, 0.01) 100%);
     backdrop-filter: blur(12px) saturate(180%);
     border: 1px solid rgba(255, 255, 255, 0.05);
     box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
-    transition: all 0.4s var(--ease-out-expo);
+    transition: all 0.5s var(--ease-out-expo);
 }
 
-.glass-card:hover,
-.glass-morph:hover {
-    background: linear-gradient(145deg,
-            rgba(255, 255, 255, 0.08) 0%,
-            rgba(255, 255, 255, 0.02) 100%);
-    border-color: rgba(99, 102, 241, 0.4);
-    transform: translateY(-8px) scale(1.02);
+.glass-card:hover {
+    background: rgba(255, 255, 255, 0.07);
+    border-color: var(--accent-primary);
+    transform: translateY(-5px) scale(1.01);
     box-shadow:
-        0 25px 50px rgba(0, 0, 0, 0.4),
-        0 0 20px rgba(99, 102, 241, 0.1);
+        0 20px 40px rgba(0, 0, 0, 0.5),
+        0 0 15px rgba(99, 102, 241, 0.15);
+}
+
+.glass-input {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    transition: all 0.3s ease;
+}
+
+.glass-input:focus {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: var(--accent-primary);
+    box-shadow: 0 0 15px rgba(99, 102, 241, 0.1);
+    outline: none;
+}
+
+/* Skeleton Animation */
+.skeleton-shimmer {
+    background: linear-gradient(90deg,
+            rgba(255, 255, 255, 0.03) 25%,
+            rgba(255, 255, 255, 0.08) 50%,
+            rgba(255, 255, 255, 0.03) 75%);
+    background-size: 200% 100%;
+    animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+    0% {
+        background-position: 200% 0;
+    }
+
+    100% {
+        background-position: -200% 0;
+    }
 }
 
 /* Elite Component Utilities */

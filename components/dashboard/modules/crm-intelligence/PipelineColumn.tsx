@@ -1,5 +1,5 @@
 import React from 'react';
-import { Client } from '../../../types';
+import { Client } from '../../../../lib/types';
 import ClientCard from './ClientCard';
 
 interface PipelineColumnProps {
@@ -17,20 +17,20 @@ const PipelineColumn: React.FC<PipelineColumnProps> = ({ title, clients, status,
     return (
         <div className="min-w-[280px] w-full md:w-1/3 lg:w-1/5 flex flex-col h-full max-h-[calc(100vh-200px)]">
             {/* Header */}
-            <div className={`p-3 rounded-t-xl border-b-2 ${color} bg-slate-900/50 backdrop-blur-sm flex justify-between items-center`}>
+            <div className={`p-4 rounded-t-2xl border-b-2 ${color} glass-card flex justify-between items-center`}>
                 <div>
-                    <h4 className="font-bold text-white text-sm">{title}</h4>
-                    <span className="text-xs text-slate-500">{clients.length} عملاء</span>
+                    <h4 className="font-bold text-[var(--text-primary)] text-sm">{title}</h4>
+                    <span className="text-[10px] text-[var(--text-tertiary)] font-bold uppercase tracking-widest">{clients.length} عملاء</span>
                 </div>
                 {totalValue > 0 && (
-                    <div className="text-xs font-mono font-bold text-slate-400">
+                    <div className="text-[10px] font-mono font-black text-[var(--text-secondary)] bg-white/5 px-2 py-1 rounded-lg">
                         {totalValue.toLocaleString()}د.ج
                     </div>
                 )}
             </div>
 
             {/* Content */}
-            <div className="bg-slate-950/30 flex-1 p-2 space-y-3 overflow-y-auto rounded-b-xl border border-white/5 border-t-0 custom-scrollbar">
+            <div className="glass-panel flex-1 p-2 space-y-3 overflow-y-auto rounded-b-2xl border-t-0 custom-scrollbar">
                 {clients.map(client => (
                     <ClientCard
                         key={client.id}
@@ -41,8 +41,8 @@ const PipelineColumn: React.FC<PipelineColumnProps> = ({ title, clients, status,
                 ))}
 
                 {clients.length === 0 && (
-                    <div className="text-center py-8 opacity-30 text-sm">
-                        لا يوجد هنا
+                    <div className="text-center py-8 opacity-20 text-[10px] font-bold uppercase tracking-widest text-[var(--text-tertiary)]">
+                        Empty Stage
                     </div>
                 )}
             </div>

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { useSystem } from '../../../context/SystemContext';
-import { ProcessStep } from '../../../types';
+import { useSystem } from '../../../../context/SystemContext';
+import { ProcessStep } from '../../../../types';
 import { Edit2, Save, X, Plus, Trash2, ArrowUp, ArrowDown, GitMerge } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 

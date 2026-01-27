@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { useBusiness } from '../../../context/BusinessContext';
-import { useUI } from '../../../context/UIContext';
-import { Client } from '../../../types';
+import { useBusiness } from '../../../../context/BusinessContext';
+import { useUI } from '../../../../context/UIContext';
+import { Client } from '../../../../types';
 import { X, Save, Trash2, Phone, Mail, Globe, MapPin, Tag, Calendar, User, DollarSign, FileText } from 'lucide-react';
 
 interface ClientDetailProps {

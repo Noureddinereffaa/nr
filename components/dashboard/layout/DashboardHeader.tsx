@@ -72,38 +72,38 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({ onOpenSidebar, isMenu
                 <div className="relative">
                     <GlobalSyncButton />
                 </div>
-                <div className="flex items-center gap-3 ml-4 pl-4 border-l border-white/5 relative" ref={notifRef}>
-                    <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 bg-green-500/10 rounded-full border border-green-500/20">
+                <div className="flex items-center gap-2 ml-2 pl-2 md:ml-4 md:pl-4 border-l border-white/5 relative" ref={notifRef}>
+                    <div className="hidden lg:flex items-center gap-2 px-3 py-1.5 bg-green-500/10 rounded-full border border-green-500/20">
                         <Circle size={8} className="fill-green-500 text-green-500 animate-pulse" />
                         <span className="text-[10px] font-black text-green-400 uppercase tracking-widest">AI Online</span>
                     </div>
 
                     <button
                         onClick={() => setShowNotifications(!showNotifications)}
-                        className={`text-slate-500 hover:text-white transition-colors relative ${showNotifications ? 'text-white' : ''}`}
+                        className={`p-2 text-slate-500 hover:text-white transition-colors relative ${showNotifications ? 'text-white' : ''}`}
                     >
                         <Bell size={20} />
-                        <span className="absolute -top-1 -right-1 w-2 h-2 bg-[var(--accent-indigo)] rounded-full border-2 border-slate-900"></span>
+                        <span className="absolute top-1 right-1 w-2 h-2 bg-[var(--accent-indigo)] rounded-full border-2 border-slate-900"></span>
                     </button>
                     {showNotifications && <NotificationDropdown onClose={() => setShowNotifications(false)} />}
 
-                    <button
-                        onClick={toggleShieldMode}
-                        className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all ${isShieldMode ? 'bg-amber-500 text-slate-950 shadow-[0_0_15px_rgba(245,158,11,0.4)]' : 'bg-white/5 text-slate-500 hover:text-white'}`}
-                        title={isShieldMode ? "تعطيل درع الحماية" : "تفعيل درع الحماية"}
-                    >
-                        <Shield size={16} />
-                    </button>
+                    <div className="hidden md:flex items-center gap-2">
+                        <button
+                            onClick={toggleShieldMode}
+                            className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all ${isShieldMode ? 'bg-amber-500 text-slate-950 shadow-[0_0_15px_rgba(245,158,11,0.4)]' : 'bg-white/5 text-slate-500 hover:text-white'}`}
+                        >
+                            <Shield size={16} />
+                        </button>
 
-                    <button
-                        onClick={toggleHighContrast}
-                        className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all ${isHighContrast ? 'bg-[var(--accent-indigo)] text-white' : 'bg-white/5 text-slate-500 hover:text-white'}`}
-                        title="التباين العالي"
-                    >
-                        <Contrast size={16} />
-                    </button>
+                        <button
+                            onClick={toggleHighContrast}
+                            className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all ${isHighContrast ? 'bg-[var(--accent-indigo)] text-white' : 'bg-white/5 text-slate-500 hover:text-white'}`}
+                        >
+                            <Contrast size={16} />
+                        </button>
 
-                    <ThemeToggle />
+                        <ThemeToggle />
+                    </div>
                 </div>
 
                 <button

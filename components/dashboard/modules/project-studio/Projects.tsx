@@ -2,9 +2,9 @@ import React, { useState } from 'react';
 import { useBusiness } from '../../../../context/BusinessContext';
 import { Plus, Filter, Grid, LayoutList, Clock, Activity } from 'lucide-react';
 import ProjectForm from '../../forms/ProjectForm';
-import StudioCard from '../../studio/StudioCard';
+import StudioCard from './StudioCard';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Project } from '../../../../types';
+import { Project } from '../../../../lib/types';
 
 const Projects: React.FC = () => {
     const { projects: businessProjects, deleteProject, updateProject } = useBusiness();

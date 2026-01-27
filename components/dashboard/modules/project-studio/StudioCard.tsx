@@ -1,5 +1,6 @@
 import React from 'react';
-import { Project } from '../../../types';
+import { motion } from 'framer-motion';
+import { Project } from '../../../../lib/types';
 import { ExternalLink, Github, Eye, Layers } from 'lucide-react';
 
 interface StudioCardProps {
@@ -10,7 +11,10 @@ interface StudioCardProps {
 
 const StudioCard: React.FC<StudioCardProps> = ({ project, onEdit, onDelete }) => {
     return (
-        <div className="group relative bg-slate-900 border border-white/5 rounded-2xl overflow-hidden hover:border-indigo-500/50 transition-all duration-300">
+        <motion.div
+            whileHover={{ y: -5 }}
+            className="group relative glass-card rounded-2xl overflow-hidden"
+        >
             {/* Image & Overlay */}
             <div className="aspect-video relative overflow-hidden">
                 <img
@@ -28,8 +32,8 @@ const StudioCard: React.FC<StudioCardProps> = ({ project, onEdit, onDelete }) =>
                         </span>
                     )}
                     <span className={`px-2 py-1 text-[10px] font-bold uppercase rounded-lg backdrop-blur-md ${project.status === 'in-progress' ? 'bg-indigo-500/20 text-indigo-300 border border-indigo-500/30' :
-                            project.status === 'planning' ? 'bg-slate-500/20 text-slate-300 border border-slate-500/30' :
-                                'bg-green-500/20 text-green-300 border border-green-500/30'
+                        project.status === 'planning' ? 'bg-slate-500/20 text-slate-300 border border-slate-500/30' :
+                            'bg-green-500/20 text-green-300 border border-green-500/30'
                         }`}>
                         {project.status === 'in-progress' ? 'قيد العمل' : project.status === 'planning' ? 'تخطيط' : 'مكتمل'}
                     </span>
@@ -88,7 +92,7 @@ const StudioCard: React.FC<StudioCardProps> = ({ project, onEdit, onDelete }) =>
                     </div>
                 </div>
             </div>
-        </div>
+        </motion.div>
     );
 };
 

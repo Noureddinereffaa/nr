@@ -1,5 +1,5 @@
 import React from 'react';
-import { ServiceRequest } from '../../../types';
+import { ServiceRequest } from '../../../../types';
 import { Mail, Clock, CheckCircle, AlertCircle, Archive } from 'lucide-react';
 
 interface RequestListProps {
@@ -37,8 +37,8 @@ const RequestList: React.FC<RequestListProps> = ({ requests, selectedId, onSelec
                         key={req.id}
                         onClick={() => onSelect(req)}
                         className={`p-3 rounded-xl cursor-pointer transition-all border ${selectedId === req.id
-                                ? 'bg-indigo-600/10 border-indigo-500/50'
-                                : 'bg-transparent border-transparent hover:bg-white/5'
+                            ? 'bg-indigo-600/10 border-indigo-500/50'
+                            : 'bg-transparent border-transparent hover:bg-white/5'
                             }`}
                     >
                         <div className="flex justify-between items-start mb-1">

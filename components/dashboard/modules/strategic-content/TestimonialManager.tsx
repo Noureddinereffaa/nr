@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { useSystem } from '../../../context/SystemContext';
-import { Testimonial } from '../../../types';
+import { useSystem } from '../../../../context/SystemContext';
+import { Testimonial } from '../../../../types';
 import { Plus, Trash2, Edit2, Save, X, User } from 'lucide-react';
 
 const TestimonialManager: React.FC = () => {

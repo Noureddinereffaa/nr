@@ -41,7 +41,7 @@ export default defineConfig(({ mode }) => {
             // Dashboard modules (separate chunks)
             'dashboard-crm': ['./components/dashboard/modules/crm-intelligence/CRM'],
             'dashboard-finance': ['./components/dashboard/modules/financial-intelligence/FinancialHub'],
-            'dashboard-content': ['./components/dashboard/content/WritingWorkspace'],
+            'dashboard-content': ['./components/dashboard/modules/strategic-content/WritingWorkspace'],
             'dashboard-marketing': ['./components/dashboard/modules/marketing-growth/MarketingGrowth'],
 
             // AI & Heavy libraries

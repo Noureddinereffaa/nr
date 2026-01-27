@@ -1,8 +1,8 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useSystem } from './SystemContext';
+import { useModals } from '../lib/hooks/useModals';
 
-
-interface Toast {
+export interface Toast {
     id: string;
     message: string;
     type: 'success' | 'error' | 'info';
@@ -18,31 +18,34 @@ export interface SystemNotification {
 }
 
 interface UIContextType {
-    // ... existing
+    // Modal state from useModals
     isClientModalOpen: boolean;
     openClientModal: () => void;
     closeClientModal: () => void;
-
     isInvoiceModalOpen: boolean;
     openInvoiceModal: () => void;
     closeInvoiceModal: () => void;
-
     isProjectModalOpen: boolean;
     openProjectModal: () => void;
     closeProjectModal: () => void;
+    isRequestModalOpen: boolean;
+    openRequestModal: () => void;
+    closeRequestModal: () => void;
+    isArticleModalOpen: boolean;
+    openArticleModal: () => void;
+    closeArticleModal: () => void;
+    isExpenseModalOpen: boolean;
+    openExpenseModal: () => void;
+    closeExpenseModal: () => void;
+    isServiceModalOpen: boolean;
+    openServiceModal: () => void;
+    closeServiceModal: () => void;
 
+    // Local UI states
     isChatOpen: boolean;
     openChat: () => void;
     closeChat: () => void;
     toggleChat: () => void;
-
-    isRequestModalOpen: boolean;
-    openRequestModal: () => void;
-    closeRequestModal: () => void;
-
-    isArticleModalOpen: boolean;
-    openArticleModal: () => void;
-    closeArticleModal: () => void;
 
     isCommandPaletteOpen: boolean;
     openCommandPalette: () => void;
@@ -79,12 +82,7 @@ interface UIContextType {
 const UIContext = createContext<UIContextType | null>(null);
 
 export const UIProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-    // ... existing states
-    const [isClientModalOpen, setIsClientModalOpen] = useState(false);
-    const [isInvoiceModalOpen, setIsInvoiceModalOpen] = useState(false);
-    const [isProjectModalOpen, setIsProjectModalOpen] = useState(false);
-    const [isRequestModalOpen, setIsRequestModalOpen] = useState(false);
-    const [isArticleModalOpen, setIsArticleModalOpen] = useState(false);
+    const modals = useModals();
     const [isChatOpen, setIsChatOpen] = useState(false);
     const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false);
     const [isShieldMode, setIsShieldMode] = useState(() => localStorage.getItem('nr_shield_mode') === 'true');
@@ -189,7 +187,6 @@ export const UIProvider: React.FC<{ children: React.ReactNode }> = ({ children }
                             activity.status === 'warning' ? 'warning' : 'info'
                 });
 
-                // Also show a toast for high-priority successes/errors
                 if (activity.status === 'success' || activity.status === 'error') {
                     addToast(activity.label, activity.status);
                 }
@@ -201,7 +198,7 @@ export const UIProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     }, []);
 
     // Apply theme on mount and when config changes
-    React.useEffect(() => {
+    useEffect(() => {
         if (themeConfig.accentColor) {
             document.documentElement.style.setProperty('--accent-indigo', themeConfig.accentColor);
             document.documentElement.style.setProperty('--accent-indigo-rgb', hexToRgb(themeConfig.accentColor));
@@ -256,35 +253,15 @@ export const UIProvider: React.FC<{ children: React.ReactNode }> = ({ children }
         });
     };
 
-    // Apply high contrast on mount
-    React.useEffect(() => {
+    useEffect(() => {
         if (isHighContrast) {
             document.documentElement.setAttribute('data-theme', 'high-contrast');
         }
-    }, []);
+    }, [isHighContrast]);
 
     return (
         <UIContext.Provider value={{
-            isClientModalOpen,
-            openClientModal: () => setIsClientModalOpen(true),
-            closeClientModal: () => setIsClientModalOpen(false),
-
-            isInvoiceModalOpen,
-            openInvoiceModal: () => setIsInvoiceModalOpen(true),
-            closeInvoiceModal: () => setIsInvoiceModalOpen(false),
-
-            isProjectModalOpen,
-            openProjectModal: () => setIsProjectModalOpen(true),
-            closeProjectModal: () => setIsProjectModalOpen(false),
-
-            isRequestModalOpen,
-            openRequestModal: () => setIsRequestModalOpen(true),
-            closeRequestModal: () => setIsRequestModalOpen(false),
-
-            isArticleModalOpen,
-            openArticleModal: () => setIsArticleModalOpen(true),
-            closeArticleModal: () => setIsArticleModalOpen(false),
-
+            ...modals,
             isChatOpen,
             openChat: () => setIsChatOpen(true),
             closeChat: () => setIsChatOpen(false),
@@ -312,7 +289,6 @@ export const UIProvider: React.FC<{ children: React.ReactNode }> = ({ children }
             clearNotifications
         }}>
             {children}
-            {/* Toast Container */}
             <div className="fixed bottom-4 left-4 z-[100] flex flex-col gap-2">
                 {toasts.map(toast => (
                     <div

@@ -47,7 +47,7 @@ const FinancialHub: React.FC = () => {
                 }
             });
         return currencies;
-    }, [siteData.invoices]);
+    }, [invoices]);
 
     return (
         <div className="space-y-6 animate-in fade-in duration-500">
@@ -74,21 +74,21 @@ const FinancialHub: React.FC = () => {
 
             {/* Top Cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                <div className="bg-slate-900/50 backdrop-blur-xl border border-white/5 p-6 rounded-[var(--border-radius-elite)] relative overflow-hidden group">
-                    <div className="absolute top-0 right-0 w-24 h-24 bg-emerald-500/10 blur-3xl rounded-full -mr-12 -mt-12 group-hover:bg-emerald-500/20 transition-all duration-700"></div>
+                <div className="glass-card p-6 relative overflow-hidden group">
+                    <div className="absolute top-0 right-0 w-24 h-24 bg-[var(--accent-emerald)]/10 blur-3xl rounded-full -mr-12 -mt-12 group-hover:bg-[var(--accent-emerald)]/20 transition-all duration-700"></div>
                     <div className="flex justify-between items-start mb-4" dir="rtl">
-                        <div className="p-3 bg-emerald-500/10 rounded-[var(--border-radius-elite)] text-emerald-400">
+                        <div className="p-3 bg-[var(--accent-emerald)]/10 rounded-[var(--border-radius-elite)] text-[var(--accent-emerald)]">
                             <TrendingUp size={24} />
                         </div>
-                        <span className="text-[10px] font-black bg-emerald-500/10 text-emerald-400 px-2 py-1 rounded-full">+12%</span>
+                        <span className="text-[10px] font-black bg-[var(--accent-emerald)]/10 text-[var(--accent-emerald)] px-2 py-1 rounded-full">+12%</span>
                     </div>
                     <div className="text-right">
-                        <p className="text-slate-400 text-xs font-bold uppercase tracking-widest mb-1">إجمالي الدخل</p>
-                        <h4 className="text-2xl font-black text-white">{mask(stats.totalIncome.toLocaleString(), 'currency')} <span className="text-xs text-slate-500 italic">DZD</span></h4>
+                        <p className="text-[var(--text-secondary)] text-xs font-bold uppercase tracking-widest mb-1">إجمالي الدخل</p>
+                        <h4 className="text-2xl font-black text-[var(--text-primary)]">{mask(stats.totalIncome.toLocaleString(), 'currency')} <span className="text-xs text-[var(--text-tertiary)] italic">DZD</span></h4>
                     </div>
                 </div>
 
-                <div className="bg-slate-900/50 backdrop-blur-xl border border-white/5 p-6 rounded-[var(--border-radius-elite)] relative overflow-hidden group">
+                <div className="glass-card p-6 relative overflow-hidden group">
                     <div className="absolute top-0 right-0 w-24 h-24 bg-red-500/10 blur-3xl rounded-full -mr-12 -mt-12 group-hover:bg-red-500/20 transition-all duration-700"></div>
                     <div className="flex justify-between items-start mb-4" dir="rtl">
                         <div className="p-3 bg-red-500/10 rounded-[var(--border-radius-elite)] text-red-400">
@@ -97,36 +97,36 @@ const FinancialHub: React.FC = () => {
                         <span className="text-[10px] font-black bg-red-500/10 text-red-400 px-2 py-1 rounded-full">-5%</span>
                     </div>
                     <div className="text-right">
-                        <p className="text-slate-400 text-xs font-bold uppercase tracking-widest mb-1">إجمالي المصاريف</p>
-                        <h4 className="text-2xl font-black text-white">{mask(stats.totalExpenses.toLocaleString(), 'currency')} <span className="text-xs text-slate-500 italic">DZD</span></h4>
+                        <p className="text-[var(--text-secondary)] text-xs font-bold uppercase tracking-widest mb-1">إجمالي المصاريف</p>
+                        <h4 className="text-2xl font-black text-[var(--text-primary)]">{mask(stats.totalExpenses.toLocaleString(), 'currency')} <span className="text-xs text-[var(--text-tertiary)] italic">DZD</span></h4>
                     </div>
                 </div>
 
-                <div className="bg-slate-900/50 backdrop-blur-xl border border-white/5 p-6 rounded-[var(--border-radius-elite)] relative overflow-hidden group">
-                    <div className="absolute top-0 right-0 w-24 h-24 bg-[rgba(var(--accent-indigo-rgb),0.1)] blur-3xl rounded-full -mr-12 -mt-12 group-hover:bg-[rgba(var(--accent-indigo-rgb),0.2)] transition-all duration-700"></div>
+                <div className="glass-card p-6 relative overflow-hidden group">
+                    <div className="absolute top-0 right-0 w-24 h-24 bg-[var(--accent-primary)]/10 blur-3xl rounded-full -mr-12 -mt-12 group-hover:bg-[var(--accent-primary)]/20 transition-all duration-700"></div>
                     <div className="flex justify-between items-start mb-4" dir="rtl">
-                        <div className="p-3 bg-[rgba(var(--accent-indigo-rgb),0.1)] rounded-[var(--border-radius-elite)] text-[var(--accent-indigo)]">
+                        <div className="p-3 bg-[var(--accent-primary)]/10 rounded-[var(--border-radius-elite)] text-[var(--accent-primary)]">
                             <DollarSign size={24} />
                         </div>
-                        <span className="text-[10px] font-black bg-[rgba(var(--accent-indigo-rgb),0.1)] text-[var(--accent-indigo)] px-2 py-1 rounded-full">صافي</span>
+                        <span className="text-[10px] font-black bg-[var(--accent-primary)]/10 text-[var(--accent-primary)] px-2 py-1 rounded-full">صافي</span>
                     </div>
                     <div className="text-right">
-                        <p className="text-slate-400 text-xs font-bold uppercase tracking-widest mb-1">الأرباح الصافية</p>
-                        <h4 className="text-2xl font-black text-white">{mask(stats.profit.toLocaleString(), 'currency')} <span className="text-xs text-slate-500 italic">DZD</span></h4>
+                        <p className="text-[var(--text-secondary)] text-xs font-bold uppercase tracking-widest mb-1">الأرباح الصافية</p>
+                        <h4 className="text-2xl font-black text-[var(--text-primary)]">{mask(stats.profit.toLocaleString(), 'currency')} <span className="text-xs text-[var(--text-tertiary)] italic">DZD</span></h4>
                     </div>
                 </div>
 
-                <div className="bg-slate-900/50 backdrop-blur-xl border border-white/5 p-6 rounded-[var(--border-radius-elite)] relative overflow-hidden group">
-                    <div className="absolute top-0 right-0 w-24 h-24 bg-amber-500/10 blur-3xl rounded-full -mr-12 -mt-12 group-hover:bg-amber-500/20 transition-all duration-700"></div>
+                <div className="glass-card p-6 relative overflow-hidden group">
+                    <div className="absolute top-0 right-0 w-24 h-24 bg-[var(--accent-gold)]/10 blur-3xl rounded-full -mr-12 -mt-12 group-hover:bg-[var(--accent-gold)]/20 transition-all duration-700"></div>
                     <div className="flex justify-between items-start mb-4" dir="rtl">
-                        <div className="p-3 bg-amber-500/10 rounded-[var(--border-radius-elite)] text-amber-400">
+                        <div className="p-3 bg-[var(--accent-gold)]/10 rounded-[var(--border-radius-elite)] text-[var(--accent-gold)]">
                             <PieChart size={24} />
                         </div>
-                        <span className="text-[10px] font-black bg-amber-500/10 text-amber-400 px-2 py-1 rounded-full">{stats.profitMargin.toFixed(1)}%</span>
+                        <span className="text-[10px] font-black bg-[var(--accent-gold)]/10 text-[var(--accent-gold)] px-2 py-1 rounded-full">{stats.profitMargin.toFixed(1)}%</span>
                     </div>
                     <div className="text-right">
-                        <p className="text-slate-400 text-xs font-bold uppercase tracking-widest mb-1">هامش الربح</p>
-                        <h4 className="text-2xl font-black text-white">ممتاز</h4>
+                        <p className="text-[var(--text-secondary)] text-xs font-bold uppercase tracking-widest mb-1">هامش الربح</p>
+                        <h4 className="text-2xl font-black text-[var(--text-primary)]">ممتاز</h4>
                     </div>
                 </div>
             </div>
@@ -134,7 +134,7 @@ const FinancialHub: React.FC = () => {
             {/* Main Section */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 {/* Cash Flow Chart Holder */}
-                <div className="lg:col-span-2 bg-slate-900/50 backdrop-blur-xl border border-white/5 rounded-[var(--border-radius-elite)] p-6 relative">
+                <div className="lg:col-span-2 glass-panel p-6 relative rounded-[var(--border-radius-elite)]">
                     <div className="flex justify-between items-center mb-8" dir="rtl">
                         <h4 className="text-lg font-black text-white">التدفقات النقدية (6 أشهر)</h4>
                         <div className="flex gap-2">
@@ -178,7 +178,7 @@ const FinancialHub: React.FC = () => {
                     </div>
                 </div>
 
-                <div className="bg-slate-900/50 backdrop-blur-xl border border-white/5 rounded-[var(--border-radius-elite)] p-6">
+                <div className="glass-panel p-6 rounded-[var(--border-radius-elite)]">
                     <h4 className="text-lg font-black text-white mb-6 text-right">توزيع العملات</h4>
                     <div className="space-y-6">
                         <div className="space-y-2">
@@ -218,7 +218,7 @@ const FinancialHub: React.FC = () => {
             </div>
 
             {/* Expenses Analytics */}
-            <div className="bg-slate-900/50 backdrop-blur-xl border border-white/5 rounded-[var(--border-radius-elite)] overflow-hidden">
+            <div className="glass-panel rounded-[var(--border-radius-elite)] overflow-hidden">
                 <div className="p-6 border-b border-white/5 flex justify-between items-center bg-slate-900/30" dir="rtl">
                     <div className="flex items-center gap-3">
                         <Wallet className="text-red-400" size={20} />

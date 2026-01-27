@@ -14,6 +14,7 @@ import {
     ShieldCheck,
     Briefcase
 } from 'lucide-react';
+import Skeleton from '../../ui/Skeleton';
 import WidgetWrapper from '../widgets/WidgetWrapper';
 import { WIDGET_REGISTRY } from '../widgets/WidgetRegistry';
 import LoadingSpinner from '../../ui/LoadingSpinner';
@@ -37,11 +38,17 @@ const Overview: React.FC = () => {
 
     if (isLoading) {
         return (
-            <div className="space-y-12 animate-pulse">
+            <div className="space-y-12 h-screen overflow-hidden">
+                <div className="flex justify-between items-center mb-12">
+                    <div className="space-y-2">
+                        <Skeleton className="w-48 h-10" />
+                        <Skeleton className="w-32 h-3" />
+                    </div>
+                </div>
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-                    <div className="col-span-1 md:col-span-2 h-64 bg-slate-900 border border-white/5 rounded-[2.5rem]"></div>
-                    <div className="col-span-1 md:col-span-2 h-64 bg-slate-900/50 border border-white/5 rounded-[2.5rem]"></div>
-                    <div className="col-span-4 h-32 bg-slate-900 border border-white/5 rounded-[2rem]"></div>
+                    <Skeleton className="col-span-1 md:col-span-2 h-72" />
+                    <Skeleton className="col-span-1 md:col-span-2 h-72" />
+                    <Skeleton className="col-span-4 h-40" />
                 </div>
             </div>
         );

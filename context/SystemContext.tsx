@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { NOUREDDINE_DATA } from '../constants';
 import { LogService } from '../lib/log-service';
-import { SiteData, SystemActivity, AIConfig, BrandIdentity, ContactInfo, SocialPost, SocialIntegration, DEFAULT_SITE_TEXTS } from '../types';
+import { SiteData, SystemActivity, AIConfig, BrandIdentity, ContactInfo, SocialPost, SocialIntegration, DEFAULT_SITE_TEXTS, SiteTexts, FAQItem, ProcessStep } from '../types';
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
 import Logger from '../lib/logger';
 import { INTEGRATIONS } from '../constants';
@@ -17,9 +17,9 @@ interface SystemContextType {
     updateBrand: (brand: Partial<BrandIdentity>) => Promise<void>;
     updateContact: (contact: Partial<ContactInfo>) => Promise<void>;
     updateAIConfig: (config: Partial<AIConfig>) => Promise<void>;
-    faqs: any[];
-    process: any[];
-    siteTexts: any;
+    faqs: FAQItem[];
+    process: ProcessStep[];
+    siteTexts: SiteTexts;
     autopilot: any;
     siteData: SiteData;
     updateSiteData: (data: Partial<SiteData>) => Promise<void>;
@@ -96,7 +96,9 @@ export const SystemProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         },
         features: {
             contentManager: true,
-            aiBrain: true
+            aiBrain: true,
+            crm: true,
+            financials: true
         },
         faqs: [],
         process: [],
@@ -138,7 +140,8 @@ export const SystemProvider: React.FC<{ children: React.ReactNode }> = ({ childr
                         faqs: s.faqs || prev.faqs,
                         process: s.process || prev.process,
                         siteTexts: s.siteTexts || prev.siteTexts,
-                        profile: s.profile || prev.profile
+                        profile: s.profile || prev.profile,
+                        features: s.features || prev.features
                     }));
                     if (s.integrations) setIntegrations(s.integrations);
                     if (s.socialPosts) setSocialPosts(s.socialPosts);
@@ -230,7 +233,7 @@ export const SystemProvider: React.FC<{ children: React.ReactNode }> = ({ childr
             updateBrand, updateContact, updateAIConfig,
             faqs: siteData.faqs || [],
             process: siteData.process || [],
-            siteTexts: (siteData as any).siteTexts || {},
+            siteTexts: siteData.siteTexts || DEFAULT_SITE_TEXTS,
             autopilot: siteData.autopilot || { enabled: false, frequency: 'weekly', platforms: [], strategyFocus: 'growth' },
             siteData,
             updateSiteData,

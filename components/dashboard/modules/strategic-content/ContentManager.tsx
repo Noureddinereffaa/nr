@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
-import FAQManager from '../../content/FAQManager';
-import TestimonialManager from '../../content/TestimonialManager';
-import StatsManager from '../../content/StatsManager';
-import ProcessManager from '../../content/ProcessManager';
-import BlogManager from '../../content/BlogManager';
+import FAQManager from './FAQManager';
+import TestimonialManager from './TestimonialManager';
+import StatsManager from './StatsManager';
+import ProcessManager from './ProcessManager';
+import BlogManager from './BlogManager';
 import { HelpCircle, MessageSquare, BarChart2, GitMerge, Sparkles } from 'lucide-react';
 
 const ContentManager: React.FC = () => {

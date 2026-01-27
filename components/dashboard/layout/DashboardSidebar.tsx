@@ -39,11 +39,12 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
     onToggleDebug,
 }) => {
     const { siteData } = useSystem() as any;
-    const features = siteData.features || {
+    const features = {
         contentManager: true,
         aiBrain: true,
         crm: true,
-        financials: true
+        financials: true,
+        ...(siteData.features || {})
     };
 
     return (

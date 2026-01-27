@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { useSystem } from '../../../context/SystemContext';
-import { FAQItem } from '../../../types';
+import { useSystem } from '../../../../context/SystemContext';
+import { FAQItem } from '../../../../types';
 import { Plus, Trash2, Edit2, Save, X } from 'lucide-react';
 
 const FAQManager: React.FC = () => {

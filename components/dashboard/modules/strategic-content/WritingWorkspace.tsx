@@ -6,12 +6,12 @@ import {
     Settings, ChevronRight, Sparkles, Link as LinkIcon, FileText
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Article, AIConfig } from '../../../types';
-import { SOVEREIGN_TEMPLATES, ArticleTemplate } from '../../../lib/article-templates';
-import { useSystem } from '../../../context/SystemContext';
-import { useContent } from '../../../context/ContentContext';
-import { useBusiness } from '../../../context/BusinessContext';
-import ImageUploader from '../../ui/ImageUploader';
+import { Article, AIConfig } from '../../../../types';
+import { SOVEREIGN_TEMPLATES, ArticleTemplate } from '../../../../lib/article-templates';
+import { useSystem } from '../../../../context/SystemContext';
+import { useContent } from '../../../../context/ContentContext';
+import { useBusiness } from '../../../../context/BusinessContext';
+import ImageUploader from '../../../ui/ImageUploader';
 
 interface WritingWorkspaceProps {
     article: Article;

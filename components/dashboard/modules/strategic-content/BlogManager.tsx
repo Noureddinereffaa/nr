@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { useContent } from '../../../context/ContentContext';
-import { useSystem } from '../../../context/SystemContext';
-import { useUI } from '../../../context/UIContext';
+import { useContent } from '../../../../context/ContentContext';
+import { useSystem } from '../../../../context/SystemContext';
+import { useUI } from '../../../../context/UIContext';
 import {
     FileText, Plus, Trash2, Edit3, CheckCircle,
     ArrowRight, BarChart, Wand2, Search, Filter,

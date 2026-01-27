@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
-import { useBusiness } from '../../../context/BusinessContext';
-import { useUI } from '../../../context/UIContext';
-import { Client } from '../../../types';
+import { useBusiness } from '../../../../context/BusinessContext';
+import { useUI } from '../../../../context/UIContext';
+import { Client } from '../../../../lib/types';
 import { MoreHorizontal, Phone, Mail, Calendar, DollarSign, User } from 'lucide-react';
 
 const COLUMNS = [

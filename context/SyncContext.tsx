@@ -20,6 +20,32 @@ export const SyncProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const [lastSync, setLastSync] = useState<Date | null>(null);
     const [serverData, setServerData] = useState<any | null>(null);
 
+    // Real-time Subscription Effect
+    useEffect(() => {
+        if (!supabase) return;
+
+        // Subscribe to site_settings changes
+        const channel = supabase
+            .channel('site_sync')
+            .on('postgres_changes', {
+                event: '*',
+                schema: 'public',
+                table: 'site_settings',
+                filter: 'id=eq.main'
+            }, (payload: any) => {
+                console.log('Remote change detected:', payload);
+                if (payload.new) {
+                    setServerData(payload.new);
+                    setSyncState('conflict');
+                }
+            })
+            .subscribe();
+
+        return () => {
+            supabase.removeChannel(channel);
+        };
+    }, []);
+
     const startSync = async () => {
         if (!supabase) {
             console.warn("Supabase not configured");

@@ -1,5 +1,7 @@
 import React, { useState, useEffect, Suspense, lazy } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { Routes, Route, useNavigate, useParams, useLocation } from 'react-router-dom';
+import { Search } from 'lucide-react';
 import { variants, transitions } from '../lib/motion-config';
 import { useSystem } from '../context/SystemContext';
 import { useContent } from '../context/ContentContext';
@@ -17,9 +19,9 @@ import InvoiceForm from '../components/dashboard/forms/InvoiceForm';
 import ProjectForm from '../components/dashboard/forms/ProjectForm';
 import ArticleModal from '../components/dashboard/modals/ArticleModal';
 import UnifiedCommand from '../components/dashboard/shared/UnifiedCommand';
-// import ServiceRequestForm from '../components/dashboard/forms/ServiceRequestForm'; // Checking if this exists
 
 // Lazy Load Content Components
+const MobileNav = React.lazy(() => import('../components/dashboard/layout/MobileNav'));
 const Overview = React.lazy(() => import('../components/dashboard/overview/Overview'));
 const ContentManager = React.lazy(() => import('../components/dashboard/modules/strategic-content/ContentManager'));
 const Projects = React.lazy(() => import('../components/dashboard/modules/project-studio/Projects'));
@@ -34,23 +36,27 @@ const AnalyticsDashboard = React.lazy(() => import('../components/dashboard/anal
 const SEOMaster = React.lazy(() => import('../components/dashboard/modules/seo-master/SEOMaster'));
 
 const DashboardPage: React.FC = () => {
-  const [activeTab, setActiveTab] = useState('overview');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [showDebug, setShowDebug] = useState(false);
 
-  const { activityLog, isLoading } = useSystem();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { activityLog } = useSystem();
   const { articles } = useContent();
-  const { clients, projects, invoices, addClient, addInvoice, addProject } = useBusiness();
-  const { isShieldMode } = useUI();
+  const { clients, projects, invoices, addClient } = useBusiness();
   const {
     isClientModalOpen, closeClientModal,
     isInvoiceModalOpen, closeInvoiceModal,
     isProjectModalOpen, closeProjectModal,
-    openCommandPalette, toggleCommandPalette
+    toggleCommandPalette
   } = useUI();
 
+  // Determine active tab from URL
+  const activeTabFromUrl = location.pathname.split('/').pop() || 'overview';
+  const currentTab = activeTabFromUrl === 'dashboard' ? 'overview' : activeTabFromUrl;
+
   const handleTabClick = (id: string) => {
-    setActiveTab(id);
+    navigate(id === 'overview' ? '/dashboard' : `/dashboard/${id}`);
     setMobileMenuOpen(false);
   };
 
@@ -73,10 +79,13 @@ const DashboardPage: React.FC = () => {
     };
   }, []);
 
-
   return (
-    <div className="h-screen w-screen bg-slate-950 overflow-hidden">
-      <div className="relative w-full h-full flex flex-col bg-slate-950/40 mesh-gradient backdrop-blur-3xl transition-all duration-500">
+    <div className="h-screen w-screen bg-[var(--bg-primary)] overflow-hidden">
+      {/* Decorative Background Elements */}
+      <div className="aurora-bg" />
+      <div className="noise-overlay" />
+
+      <div className="relative w-full h-full flex flex-col backdrop-blur-3xl transition-all duration-500">
 
         <DashboardHeader
           onOpenSidebar={() => setMobileMenuOpen(!mobileMenuOpen)}
@@ -99,7 +108,7 @@ const DashboardPage: React.FC = () => {
 
           {/* Sidebar */}
           <DashboardSidebar
-            activeTab={activeTab}
+            activeTab={currentTab}
             mobileMenuOpen={mobileMenuOpen}
             onTabChange={handleTabClick}
             showDebug={showDebug}
@@ -108,13 +117,13 @@ const DashboardPage: React.FC = () => {
 
           {/* Main Content */}
           <div
-            className="flex-1 overflow-y-auto bg-slate-950/50 custom-scrollbar scroll-smooth pb-32"
+            className="flex-1 overflow-y-auto bg-transparent custom-scrollbar scroll-smooth pb-32"
             dir="rtl"
           >
             <div className="dashboard-max-width p-4 sm:p-8 space-y-8 sm:space-y-12">
               <AnimatePresence mode="wait">
                 <motion.div
-                  key={activeTab}
+                  key={location.pathname}
                   initial="initial"
                   animate="animate"
                   exit="exit"
@@ -123,26 +132,47 @@ const DashboardPage: React.FC = () => {
                   className="min-h-full"
                 >
                   <Suspense fallback={<LoadingSpinner />}>
-                    {activeTab === 'overview' && <Overview />}
-                    {activeTab === 'projects' && <Projects />}
-                    {activeTab === 'services' && <ServicesList />}
-                    {activeTab === 'identity' && <SettingsLayout key="identity" initialTab="profile" />}
-                    {activeTab === 'content-manager' && <ContentManager />}
-                    {activeTab === 'branding' && <SettingsLayout key="branding" initialTab="brand" />}
-                    {activeTab === 'system' && <SettingsLayout key="system" initialTab="brand" />}
-                    {activeTab === 'clients' && <CRM />}
-                    {activeTab === 'requests' && <Requests />}
-                    {activeTab === 'financial-hub' && <FinancialHub />}
-                    {activeTab === 'billing' && <Billing />}
-                    {activeTab === 'decision-pages' && <DecisionPages />}
-                    {activeTab === 'seo-master' && <SEOMaster />}
-                    {activeTab === 'analytics' && <AnalyticsDashboard />}
+                    <Routes>
+                      <Route index element={<Overview />} />
+                      <Route path="projects" element={<Projects />} />
+                      <Route path="services" element={<ServicesList />} />
+                      <Route path="identity" element={<SettingsLayout key="identity" initialTab="profile" />} />
+                      <Route path="content-manager" element={<ContentManager />} />
+                      <Route path="branding" element={<SettingsLayout key="branding" initialTab="brand" />} />
+                      <Route path="system" element={<SettingsLayout key="system" initialTab="brand" />} />
+                      <Route path="clients" element={<CRM />} />
+                      <Route path="requests" element={<Requests />} />
+                      <Route path="financial-hub" element={<FinancialHub />} />
+                      <Route path="billing" element={<Billing />} />
+                      <Route path="decision-pages" element={<DecisionPages />} />
+                      <Route path="seo-master" element={<SEOMaster />} />
+                      <Route path="analytics" element={<AnalyticsDashboard />} />
+                    </Routes>
                   </Suspense>
                 </motion.div>
               </AnimatePresence>
             </div>
           </div>
         </div>
+
+        {/* Global Nav for Mobile */}
+        <Suspense fallback={null}>
+          <MobileNav
+            activeTab={currentTab}
+            onTabChange={handleTabClick}
+            onOpenMenu={() => setMobileMenuOpen(true)}
+          />
+        </Suspense>
+
+        {/* Mobile Quick Search FAB */}
+        <motion.button
+          initial={{ opacity: 0, scale: 0.5 }}
+          animate={{ opacity: 1, scale: 1 }}
+          onClick={toggleCommandPalette}
+          className="md:hidden fixed bottom-24 right-6 w-14 h-14 bg-indigo-600 text-white rounded-full shadow-2xl flex items-center justify-center z-[var(--z-nav)] active:scale-95 border border-white/20"
+        >
+          <Search size={22} />
+        </motion.button>
 
         {/* Global Modals */}
         <ClientForm
@@ -153,9 +183,6 @@ const DashboardPage: React.FC = () => {
         <InvoiceForm
           isOpen={isInvoiceModalOpen}
           onClose={closeInvoiceModal}
-        // Logic for saving invoice usually requires items, handled inside form or passed? 
-        // InvoiceForm usually takes onSave. Need to verify InvoiceForm props.
-        // Assuming simplified usage for Quick Action (New Empty).
         />
         <ProjectForm
           isOpen={isProjectModalOpen}

@@ -1,8 +1,15 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { SERVICES } from '../constants';
 import { Client, Project, Invoice, Expense, Service, ServiceRequest } from '../types';
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
 import Logger from '../lib/logger';
+
+// Hooks
+import { useClients } from '../lib/hooks/useClients';
+import { useProjects } from '../lib/hooks/useProjects';
+import { useInvoices } from '../lib/hooks/useInvoices';
+import { useExpenses } from '../lib/hooks/useExpenses';
+import { useRequests } from '../lib/hooks/useRequests';
 
 interface BusinessContextType {
     clients: Client[];
@@ -10,164 +17,103 @@ interface BusinessContextType {
     invoices: Invoice[];
     expenses: Expense[];
     services: Service[];
+    serviceRequests: ServiceRequest[];
+    budgets: any[];
     isLoading: boolean;
-    addClient: (client: Partial<Client>) => Promise<void>;
-    updateClient: (id: string, updates: Partial<Client>) => Promise<void>;
+
+    // Client Methods
+    addClient: (client: Partial<Client>) => Promise<any>;
+    updateClient: (id: string, updates: Partial<Client>) => Promise<any>;
     deleteClient: (id: string) => Promise<void>;
-    addProject: (project: Partial<Project>) => Promise<void>;
-    updateProject: (id: string, updates: Partial<Project>) => Promise<void>;
+
+    // Project Methods
+    addProject: (project: Partial<Project>) => Promise<any>;
+    updateProject: (id: string, updates: Partial<Project>) => Promise<any>;
     deleteProject: (id: string) => Promise<void>;
-    addInvoice: (invoice: Partial<Invoice>) => Promise<void>;
-    updateInvoice: (id: string, updates: Partial<Invoice>) => Promise<void>;
+
+    // Invoice Methods
+    addInvoice: (invoice: Partial<Invoice>) => Promise<any>;
+    updateInvoice: (id: string, updates: Partial<Invoice>) => Promise<any>;
     deleteInvoice: (id: string) => Promise<void>;
-    addExpense: (expense: Omit<Expense, 'id' | 'date'>) => Promise<void>;
-    updateExpense: (id: string, data: Partial<Expense>) => Promise<void>;
+
+    // Expense Methods
+    addExpense: (expense: Omit<Expense, 'id' | 'date'>) => Promise<any>;
+    updateExpense: (id: string, data: Partial<Expense>) => Promise<any>;
     deleteExpense: (id: string) => Promise<void>;
+
+    // Request Methods
+    addRequest: (request: Omit<ServiceRequest, 'id' | 'date'>) => Promise<any>;
+    updateRequest: (id: string, updates: Partial<ServiceRequest>) => Promise<any>;
+    deleteRequest: (id: string) => Promise<void>;
+
+    // Service Methods
     addService: (service: Partial<Service>) => Promise<void>;
     updateService: (id: string, updates: Partial<Service>) => Promise<void>;
     deleteService: (id: string) => Promise<void>;
-    serviceRequests: ServiceRequest[];
-    addRequest: (request: Omit<ServiceRequest, 'id' | 'date'>) => Promise<void>;
-    updateRequest: (id: string, updates: Partial<ServiceRequest>) => Promise<void>;
-    deleteRequest: (id: string) => Promise<void>;
-    budgets: any[];
+
+    // Budget Methods
     updateBudget: (id: string, updates: any) => Promise<void>;
 }
 
 const BusinessContext = createContext<BusinessContextType | null>(null);
 
 export const BusinessProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-    const [clients, setClients] = useState<Client[]>([]);
-    const [projects, setProjects] = useState<Project[]>([]);
-    const [invoices, setInvoices] = useState<Invoice[]>([]);
-    const [expenses, setExpenses] = useState<Expense[]>([]);
+    // Integrate Hooks
+    const clientState = useClients();
+    const projectState = useProjects();
+    const invoiceState = useInvoices();
+    const expenseState = useExpenses();
+    const requestState = useRequests();
+
+    // Additional States
     const [services, setServices] = useState<Service[]>(SERVICES);
-    const [serviceRequests, setServiceRequests] = useState<ServiceRequest[]>([]);
     const [budgets, setBudgets] = useState<any[]>([]);
     const [isLoading, setIsLoading] = useState(true);
 
+    // Initial Data Fetch
     useEffect(() => {
-        const fetchBusinessData = async () => {
-            if (!isSupabaseConfigured() || !supabase) {
-                // Mock data or development fallback
-                setBudgets([
-                    { id: '1', category: 'Marketing', spent: 12000, limit: 50000, currency: 'DZD' },
-                    { id: '2', category: 'Operations', spent: 45000, limit: 100000, currency: 'DZD' }
-                ]);
-                setIsLoading(false);
-                return;
-            }
-
+        const fetchAllData = async () => {
+            setIsLoading(true);
             try {
-                const [clientsRes, projectsRes, invoicesRes, expensesRes, servicesRes] = await Promise.all([
-                    supabase.from('clients').select('*'),
-                    supabase.from('projects').select('*'),
-                    supabase.from('invoices').select('*'),
-                    supabase.from('expenses').select('*'),
-                    supabase.from('services').select('*')
+                // Refresh all hook states
+                await Promise.all([
+                    clientState.refreshClients(),
+                    projectState.refreshProjects(),
+                    invoiceState.refreshInvoices(),
                 ]);
 
-                if (clientsRes.data) setClients(clientsRes.data.map((r: any) => ({ ...r, ...(r.data || {}) })));
-                if (projectsRes.data) setProjects(projectsRes.data.map((r: any) => ({ ...r, ...(r.data || {}) })));
-                if (invoicesRes.data) setInvoices(invoicesRes.data.map((r: any) => ({ ...r, ...(r.data || {}) })));
-                if (expensesRes.data) setExpenses(expensesRes.data.map((r: any) => ({ ...r, ...(r.data || {}) })));
-                if (servicesRes.data && servicesRes.data.length > 0) setServices(servicesRes.data.map((r: any) => ({ ...r, ...(r.data || {}) })));
+                if (isSupabaseConfigured() && supabase) {
+                    const [exp, req, srv] = await Promise.all([
+                        expenseState.refreshExpenses(),
+                        requestState.refreshRequests(),
+                        supabase.from('services').select('*')
+                    ]);
 
-                const requestsRes = await supabase.from('service_requests').select('*');
-                if (requestsRes.data) setServiceRequests(requestsRes.data.map((r: any) => ({ ...r, ...(r.data || {}) })));
+                    if (srv.data && srv.data.length > 0) {
+                        setServices(srv.data.map((r: any) => ({ ...r, ...(r.data || {}) })));
+                    }
+                } else {
+                    setBudgets([
+                        { id: '1', category: 'Marketing', spent: 12000, limit: 50000, currency: 'DZD' },
+                        { id: '2', category: 'Operations', spent: 45000, limit: 100000, currency: 'DZD' }
+                    ]);
+                }
             } catch (error) {
-                Logger.error("Business Sync Error", error);
+                Logger.error("Business Initialization Error", error);
             } finally {
                 setIsLoading(false);
             }
         };
 
-        fetchBusinessData();
+        fetchAllData();
     }, []);
 
-    const addClient = async (client: Partial<Client>) => {
-        const newClient = { ...client, id: 'c-' + Date.now() } as Client;
-        setClients(prev => [...prev, newClient]);
-        if (isSupabaseConfigured() && supabase) {
-            await supabase.from('clients').insert([{ id: newClient.id, data: newClient }]);
-        }
-    };
-
-    const updateClient = async (id: string, updates: Partial<Client>) => {
-        setClients(prev => prev.map(c => c.id === id ? { ...c, ...updates } : c));
-        if (isSupabaseConfigured() && supabase) {
-            const current = clients.find(c => c.id === id);
-            await supabase.from('clients').update({ data: { ...current, ...updates } }).eq('id', id);
-        }
-    };
-
-    const deleteClient = async (id: string) => {
-        setClients(prev => prev.filter(c => c.id !== id));
-        if (isSupabaseConfigured() && supabase) await supabase.from('clients').delete().eq('id', id);
-    };
-
-    // ... Project, Invoice, Expense implementations following same pattern ...
-    const addProject = async (project: Partial<Project>) => {
-        const newProject = { ...project, id: 'p-' + Date.now() } as Project;
-        setProjects(prev => [...prev, newProject]);
-        if (isSupabaseConfigured() && supabase) await supabase.from('projects').insert([{ id: newProject.id, data: newProject }]);
-    };
-
-    const updateProject = async (id: string, updates: Partial<Project>) => {
-        setProjects(prev => prev.map(p => p.id === id ? { ...p, ...updates } : p));
-        if (isSupabaseConfigured() && supabase) {
-            const current = projects.find(p => p.id === id);
-            await supabase.from('projects').update({ data: { ...current, ...updates } }).eq('id', id);
-        }
-    };
-
-    const deleteProject = async (id: string) => {
-        setProjects(prev => prev.filter(p => p.id !== id));
-        if (isSupabaseConfigured() && supabase) await supabase.from('projects').delete().eq('id', id);
-    };
-
-    const addInvoice = async (invoice: Partial<Invoice>) => {
-        const newInvoice = { ...invoice, id: 'inv-' + Date.now() } as Invoice;
-        setInvoices(prev => [...prev, newInvoice]);
-        if (isSupabaseConfigured() && supabase) await supabase.from('invoices').insert([{ id: newInvoice.id, data: newInvoice }]);
-    };
-
-    const updateInvoice = async (id: string, updates: Partial<Invoice>) => {
-        setInvoices(prev => prev.map(i => i.id === id ? { ...i, ...updates } : i));
-        if (isSupabaseConfigured() && supabase) {
-            const current = invoices.find(i => i.id === id);
-            await supabase.from('invoices').update({ data: { ...current, ...updates } }).eq('id', id);
-        }
-    };
-
-    const deleteInvoice = async (id: string) => {
-        setInvoices(prev => prev.filter(i => i.id !== id));
-        if (isSupabaseConfigured() && supabase) await supabase.from('invoices').delete().eq('id', id);
-    };
-
-    const addExpense = async (expense: Omit<Expense, 'id' | 'date'>) => {
-        const newExpense = { ...expense, id: 'exp-' + Date.now(), date: new Date().toISOString() } as Expense;
-        setExpenses(prev => [newExpense, ...prev]);
-        if (isSupabaseConfigured() && supabase) await supabase.from('expenses').insert([{ id: newExpense.id, data: newExpense }]);
-    };
-
-    const updateExpense = async (id: string, data: Partial<Expense>) => {
-        setExpenses(prev => prev.map(e => e.id === id ? { ...e, ...data } : e));
-        if (isSupabaseConfigured() && supabase) {
-            const current = expenses.find(e => e.id === id);
-            await supabase.from('expenses').update({ data: { ...current, ...data } }).eq('id', id);
-        }
-    };
-
-    const deleteExpense = async (id: string) => {
-        setExpenses(prev => prev.filter(e => e.id !== id));
-        if (isSupabaseConfigured() && supabase) await supabase.from('expenses').delete().eq('id', id);
-    };
-
+    // Service Management (Keeping here for now as it's small)
     const addService = async (service: Partial<Service>) => {
-        const newService = { ...service, id: 's-' + Date.now() } as Service;
+        const id = 's-' + Date.now();
+        const newService = { ...service, id } as Service;
         setServices(prev => [...prev, newService]);
-        if (isSupabaseConfigured() && supabase) await supabase.from('services').insert([{ id: newService.id, data: newService }]);
+        if (isSupabaseConfigured() && supabase) await supabase.from('services').insert([{ id, data: newService }]);
     };
 
     const updateService = async (id: string, updates: Partial<Service>) => {
@@ -183,74 +129,45 @@ export const BusinessProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         if (isSupabaseConfigured() && supabase) await supabase.from('services').delete().eq('id', id);
     };
 
-    const addRequest = async (request: Omit<ServiceRequest, 'id' | 'date'>) => {
-        const newRequest = {
-            ...request,
-            id: 'req-' + Date.now(),
-            date: new Date().toISOString(),
-            status: request.status || 'pending'
-        } as ServiceRequest;
-
-        setServiceRequests(prev => [newRequest, ...prev]);
-
-        if (isSupabaseConfigured() && supabase) {
-            await supabase.from('service_requests').insert([{ id: newRequest.id, data: newRequest }]);
-        }
-
-        // Trigger notification via LogService
-        import('../lib/log-service').then(({ LogService }) => {
-            LogService.info(`طلب خدمة جديد: ${newRequest.serviceTitle}`, 'crm', {
-                message: `تم استلام طلب من ${newRequest.clientName}`,
-                client: newRequest.clientName
-            });
-        });
-    };
-
-    const updateRequest = async (id: string, updates: Partial<ServiceRequest>) => {
-        setServiceRequests(prev => prev.map(r => r.id === id ? { ...r, ...updates } : r));
-        if (isSupabaseConfigured() && supabase) {
-            const current = serviceRequests.find(r => r.id === id);
-            await supabase.from('service_requests').update({ data: { ...current, ...updates } }).eq('id', id);
-        }
-    };
-
-    const deleteRequest = async (id: string) => {
-        setServiceRequests(prev => prev.filter(r => r.id !== id));
-        if (isSupabaseConfigured() && supabase) await supabase.from('service_requests').delete().eq('id', id);
-    };
-
     const updateBudget = async (id: string, updates: any) => {
         setBudgets(prev => prev.map(b => b.id === id ? { ...b, ...updates } : b));
     };
 
     return (
         <BusinessContext.Provider value={{
-            clients,
-            projects,
-            invoices,
-            expenses,
+            clients: clientState.clients,
+            projects: projectState.projects,
+            invoices: invoiceState.invoices,
+            expenses: expenseState.expenses,
+            serviceRequests: requestState.requests,
             services,
-            isLoading,
-            addClient,
-            updateClient,
-            deleteClient,
-            addProject,
-            updateProject,
-            deleteProject,
-            addInvoice,
-            updateInvoice,
-            deleteInvoice,
-            addExpense,
-            updateExpense,
-            deleteExpense,
+            budgets,
+            isLoading: isLoading || clientState.isLoading || projectState.isLoading || invoiceState.isLoading,
+
+            addClient: clientState.addClient,
+            updateClient: clientState.updateClient,
+            deleteClient: clientState.deleteClient,
+
+            addProject: projectState.addProject,
+            updateProject: projectState.updateProject,
+            deleteProject: projectState.deleteProject,
+
+            addInvoice: invoiceState.addInvoice,
+            updateInvoice: invoiceState.updateInvoice,
+            deleteInvoice: invoiceState.deleteInvoice,
+
+            addExpense: expenseState.addExpense,
+            updateExpense: expenseState.updateExpense,
+            deleteExpense: expenseState.deleteExpense,
+
+            addRequest: requestState.addRequest,
+            updateRequest: requestState.updateRequest,
+            deleteRequest: requestState.deleteRequest,
+
             addService,
             updateService,
             deleteService,
-            serviceRequests,
-            addRequest,
-            updateRequest,
-            deleteRequest,
-            budgets,
+
             updateBudget
         }}>
             {children}

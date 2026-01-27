@@ -1,5 +1,5 @@
 import React from 'react';
-import { Invoice, SiteData } from '../../../types';
+import { Invoice, SiteData } from '../../../../lib/types';
 import { Phone, Mail, MapPin } from 'lucide-react';
 
 interface InvoicePrintProps {
