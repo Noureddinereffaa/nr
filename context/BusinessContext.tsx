@@ -53,6 +53,9 @@ interface BusinessContextType {
 
     // Budget Methods
     updateBudget: (id: string, updates: any) => Promise<void>;
+
+    // Global Sync
+    refreshBusiness: () => Promise<void>;
 }
 
 const BusinessContext = createContext<BusinessContextType | null>(null);
@@ -71,42 +74,62 @@ export const BusinessProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     const [isLoading, setIsLoading] = useState(true);
 
     // Initial Data Fetch
-    useEffect(() => {
-        const fetchAllData = async () => {
-            setIsLoading(true);
-            try {
-                // Refresh all hook states
-                await Promise.all([
-                    clientState.refreshClients(),
-                    projectState.refreshProjects(),
-                    invoiceState.refreshInvoices(),
+    const fetchAllData = useCallback(async () => {
+        setIsLoading(true);
+        try {
+            // Refresh all hook states
+            await Promise.all([
+                clientState.refreshClients(),
+                projectState.refreshProjects(),
+                invoiceState.refreshInvoices(),
+            ]);
+
+            if (isSupabaseConfigured() && supabase) {
+                const [exp, req, srv] = await Promise.all([
+                    expenseState.refreshExpenses(),
+                    requestState.refreshRequests(),
+                    supabase.from('services').select('*')
                 ]);
 
-                if (isSupabaseConfigured() && supabase) {
-                    const [exp, req, srv] = await Promise.all([
-                        expenseState.refreshExpenses(),
-                        requestState.refreshRequests(),
-                        supabase.from('services').select('*')
-                    ]);
-
-                    if (srv.data && srv.data.length > 0) {
-                        setServices(srv.data.map((r: any) => ({ ...r, ...(r.data || {}) })));
-                    }
-                } else {
-                    setBudgets([
-                        { id: '1', category: 'Marketing', spent: 12000, limit: 50000, currency: 'DZD' },
-                        { id: '2', category: 'Operations', spent: 45000, limit: 100000, currency: 'DZD' }
-                    ]);
+                if (srv.data && srv.data.length > 0) {
+                    setServices(srv.data.map((r: any) => ({ ...r, ...(r.data || {}) })));
                 }
-            } catch (error) {
-                Logger.error("Business Initialization Error", error);
-            } finally {
-                setIsLoading(false);
+            } else {
+                setBudgets([
+                    { id: '1', category: 'Marketing', spent: 12000, limit: 50000, currency: 'DZD' },
+                    { id: '2', category: 'Operations', spent: 45000, limit: 100000, currency: 'DZD' }
+                ]);
             }
-        };
+        } catch (error) {
+            Logger.error("Business Initialization Error", error);
+        } finally {
+            setIsLoading(false);
+        }
+    }, [clientState, projectState, invoiceState, expenseState, requestState]);
 
+    useEffect(() => {
         fetchAllData();
+
+        if (isSupabaseConfigured() && supabase) {
+            const tables = ['clients', 'projects', 'invoices', 'expenses', 'service_requests', 'services'];
+            const channels = tables.map(table => {
+                return supabase
+                    .channel(`public:${table}`)
+                    .on('postgres_changes', { event: '*', schema: 'public', table }, () => {
+                        fetchAllData();
+                    })
+                    .subscribe();
+            });
+
+            return () => {
+                channels.forEach(channel => supabase.removeChannel(channel));
+            };
+        }
     }, []);
+
+    const refreshBusiness = async () => {
+        await fetchAllData();
+    };
 
     // Service Management (Keeping here for now as it's small)
     const addService = async (service: Partial<Service>) => {
@@ -168,7 +191,8 @@ export const BusinessProvider: React.FC<{ children: React.ReactNode }> = ({ chil
             updateService,
             deleteService,
 
-            updateBudget
+            updateBudget,
+            refreshBusiness
         }}>
             {children}
         </BusinessContext.Provider>

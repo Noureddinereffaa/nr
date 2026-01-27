@@ -11,14 +11,20 @@ import {
 import { motion, AnimatePresence } from 'framer-motion';
 import WritingWorkspace from './WritingWorkspace';
 
+import { useSync } from '../../../../context/SyncContext';
+
 const BlogManager: React.FC = () => {
     const { articles, addArticle, updateArticle, deleteArticle } = useContent();
     const { aiConfig } = useSystem();
     const { openArticleModal } = useUI();
+    const { syncState, startSync } = useSync();
 
-    // Stub for sync as it's not in the new modularized contexts yet
-    const syncArticlesToCloud = async () => console.log('Syncing articles...');
-    const syncStatus = { isSyncing: false, current: 0, total: 0, errorCount: 0 };
+    const isSyncing = syncState === 'syncing';
+    const syncStatus = { isSyncing, current: articles.length, total: articles.length, errorCount: 0 };
+
+    const syncArticlesToCloud = async () => {
+        await startSync();
+    };
 
     const [editingArticle, setEditingArticle] = useState<any | null>(null);
     const [searchQuery, setSearchQuery] = useState('');
@@ -105,39 +111,39 @@ const BlogManager: React.FC = () => {
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: i * 0.1 }}
                         key={i}
-                        className="bg-slate-900/40 border border-white/5 p-6 rounded-[2rem] backdrop-blur-md relative overflow-hidden group"
+                        className="bg-slate-900/40 border border-white/5 p-4 md:p-6 rounded-[1.5rem] md:rounded-[2rem] backdrop-blur-md relative overflow-hidden group"
                     >
                         <div className="absolute -right-4 -top-4 w-24 h-24 bg-white/5 rounded-full blur-2xl group-hover:bg-indigo-500/10 transition-all" />
-                        <div className="relative z-10">
-                            <div className="flex items-center gap-3 mb-4">
-                                <div className={`p-2 rounded-xl bg-slate-950 border border-white/10 ${stat.color}`}>
-                                    <stat.icon size={18} />
+                        <div className="relative z-10 text-right">
+                            <div className="flex items-center gap-2 mb-3 md:mb-4 justify-end">
+                                <span className="text-[9px] md:text-[10px] font-black text-slate-500 uppercase tracking-widest">{stat.label}</span>
+                                <div className={`p-1.5 md:p-2 rounded-lg md:rounded-xl bg-slate-950 border border-white/10 ${stat.color}`}>
+                                    <stat.icon size={16} />
                                 </div>
-                                <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">{stat.label}</span>
                             </div>
-                            <div className="flex items-end gap-2">
-                                <p className="text-3xl font-black text-white">{stat.value}</p>
-                                <p className="text-[9px] text-slate-600 font-bold mb-1.5 uppercase tracking-tighter">{stat.sub}</p>
+                            <div className="flex items-end gap-2 justify-end">
+                                <p className="text-2xl md:text-3xl font-black text-white">{stat.value}</p>
                             </div>
+                            <p className="text-[8px] md:text-[9px] text-slate-600 font-bold mt-1 uppercase tracking-tighter">{stat.sub}</p>
                         </div>
                     </motion.div>
                 ))}
             </div>
 
             {/* 1. STUDIO COMMAND HEADER */}
-            <div className="relative overflow-hidden rounded-[2rem] md:rounded-[3rem] bg-slate-900 border border-white/5 p-6 md:p-12">
+            <div className="relative overflow-hidden rounded-[2rem] md:rounded-[3rem] bg-slate-900 border border-white/5 p-4 sm:p-6 md:p-12">
                 <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-indigo-600/5 blur-[120px] rounded-full -mr-40 -mt-40 shrink-0" />
-                <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-8">
+                <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-6 md:gap-8">
                     <div className="text-right w-full lg:w-2/3">
-                        <div className="flex items-center gap-3 justify-end mb-6">
-                            <span className="px-4 py-1.5 bg-indigo-500/10 text-indigo-400 text-[8px] md:text-[10px] font-black uppercase tracking-[0.4em] rounded-xl border border-indigo-500/20">
+                        <div className="flex items-center gap-3 justify-end mb-4 md:mb-6">
+                            <span className="px-3 md:px-4 py-1.5 bg-indigo-500/10 text-indigo-400 text-[8px] md:text-[10px] font-black uppercase tracking-[0.4em] rounded-xl border border-indigo-500/20">
                                 Digital Empire Hub v4.8
                             </span>
                         </div>
-                        <h2 className="text-3xl md:text-7xl font-black text-white mb-6 leading-tight tracking-tighter">
+                        <h2 className="text-2xl sm:text-3xl md:text-7xl font-black text-white mb-4 md:mb-6 leading-tight tracking-tighter">
                             إدارة المحتوى السيادي
                         </h2>
-                        <p className="text-slate-400 text-sm md:text-lg max-w-2xl ml-auto leading-relaxed">
+                        <p className="text-slate-400 text-xs sm:text-sm md:text-lg max-w-2xl ml-auto leading-relaxed">
                             أدوات تحرير متقدمة، تحليلات أداء لحظية، وقدرات تخصيص لا محدودة. قُد إمبراطوريتك المعرفية من هنا.
                         </p>
                     </div>
@@ -227,13 +233,13 @@ const BlogManager: React.FC = () => {
             <div className="space-y-4" dir="rtl">
                 <div className="flex flex-col xl:flex-row gap-4">
                     <div className="relative flex-1">
-                        <Search className="absolute right-5 top-1/2 -translate-y-1/2 text-slate-500" size={20} />
+                        <Search className="absolute right-5 top-1/2 -translate-y-1/2 text-slate-500" size={18} />
                         <input
                             type="text"
-                            placeholder="ابحث في أعماق الأرشيف (العنوان أو المقتطف)..."
+                            placeholder="ابحث في الأرشيف..."
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
-                            className="w-full bg-slate-900 border border-white/5 pr-14 pl-8 py-5 rounded-[2rem] text-white text-base outline-none focus:border-indigo-500 transition-all shadow-inner"
+                            className="w-full bg-slate-900 border border-white/5 pr-12 pl-6 py-4 md:py-5 rounded-2xl md:rounded-[2rem] text-white text-sm md:text-base outline-none focus:border-indigo-500 transition-all shadow-inner"
                         />
                     </div>
 
@@ -302,7 +308,7 @@ const BlogManager: React.FC = () => {
 
             {/* 3. ARCHIVE GRID */}
             <div>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-8">
                     <AnimatePresence mode="popLayout">
                         {isLoading ? (
                             [...Array(6)].map((_, i) => (

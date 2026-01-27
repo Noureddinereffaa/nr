@@ -14,6 +14,7 @@ interface ContentContextType {
     addDecisionPage: (page: Omit<DecisionPage, 'id' | 'date'>) => Promise<void>;
     updateDecisionPage: (id: string, data: Partial<DecisionPage>) => Promise<void>;
     deleteDecisionPage: (id: string) => Promise<void>;
+    refreshContent: () => Promise<void>;
 }
 
 const ContentContext = createContext<ContentContextType | null>(null);
@@ -23,42 +24,69 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
     const [decisionPages, setDecisionPages] = useState<DecisionPage[]>([]);
     const [isLoading, setIsLoading] = useState(true);
 
+    const fetchContent = async () => {
+        if (!isSupabaseConfigured() || !supabase) {
+            setArticles(ARTICLES);
+            setIsLoading(false);
+            return;
+        }
+
+        try {
+            const [articlesRes, decisionPagesRes] = await Promise.all([
+                supabase.from('articles').select('*'),
+                supabase.from('decision_pages').select('*')
+            ]);
+
+            if (articlesRes.data) {
+                setArticles(articlesRes.data.map((row: any) => ({
+                    ...row,
+                    ...(row.data || {})
+                })));
+            }
+
+            if (decisionPagesRes.data) {
+                setDecisionPages(decisionPagesRes.data.map((row: any) => ({
+                    ...row,
+                    ...(row.data || {})
+                })));
+            }
+        } catch (error) {
+            Logger.error("Content Sync Error", error);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
     useEffect(() => {
-        const fetchContent = async () => {
-            if (!isSupabaseConfigured() || !supabase) {
-                setArticles(ARTICLES);
-                setIsLoading(false);
-                return;
-            }
-
-            try {
-                const [articlesRes, decisionPagesRes] = await Promise.all([
-                    supabase.from('articles').select('*'),
-                    supabase.from('decision_pages').select('*')
-                ]);
-
-                if (articlesRes.data) {
-                    setArticles(articlesRes.data.map((row: any) => ({
-                        ...row,
-                        ...(row.data || {})
-                    })));
-                }
-
-                if (decisionPagesRes.data) {
-                    setDecisionPages(decisionPagesRes.data.map((row: any) => ({
-                        ...row,
-                        ...(row.data || {})
-                    })));
-                }
-            } catch (error) {
-                Logger.error("Content Sync Error", error);
-            } finally {
-                setIsLoading(false);
-            }
-        };
-
         fetchContent();
+
+        if (isSupabaseConfigured() && supabase) {
+            // Real-time Subscriptions
+            const articlesChannel = supabase
+                .channel('public:articles')
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'articles' }, () => {
+                    fetchContent();
+                })
+                .subscribe();
+
+            const pagesChannel = supabase
+                .channel('public:decision_pages')
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'decision_pages' }, () => {
+                    fetchContent();
+                })
+                .subscribe();
+
+            return () => {
+                supabase.removeChannel(articlesChannel);
+                supabase.removeChannel(pagesChannel);
+            };
+        }
     }, []);
+
+    const refreshContent = async () => {
+        setIsLoading(true);
+        await fetchContent();
+    };
 
     const addArticle = async (article: Omit<Article, 'id' | 'date' | 'slug'>): Promise<string> => {
         const newId = crypto.randomUUID();
@@ -126,7 +154,8 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
         <ContentContext.Provider value={{
             articles, decisionPages, isLoading,
             addArticle, updateArticle, deleteArticle,
-            addDecisionPage, updateDecisionPage, deleteDecisionPage
+            addDecisionPage, updateDecisionPage, deleteDecisionPage,
+            refreshContent
         }}>
             {children}
         </ContentContext.Provider>

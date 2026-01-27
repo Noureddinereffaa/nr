@@ -35,7 +35,7 @@ const ContentManager: React.FC = () => {
             </div>
 
             {/* Content Area */}
-            <div className="flex-1 bg-slate-950/40 border border-white/5 rounded-[var(--border-radius-elite)] p-8 overflow-y-auto no-scrollbar relative overflow-hidden">
+            <div className="flex-1 bg-slate-950/40 border border-white/5 rounded-[var(--border-radius-elite)] p-4 md:p-8 overflow-y-auto no-scrollbar relative overflow-hidden">
                 <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-[var(--accent-indigo)] to-transparent opacity-20"></div>
                 {activeTab === 'articles' && <BlogManager />}
                 {activeTab === 'faqs' && <FAQManager />}

@@ -1,6 +1,8 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 import { useSystem } from './SystemContext';
+import { useContent } from './ContentContext';
+import { useBusiness } from './BusinessContext';
 
 type SyncState = 'idle' | 'syncing' | 'success' | 'error' | 'conflict';
 
@@ -45,6 +47,9 @@ export const SyncProvider: React.FC<{ children: React.ReactNode }> = ({ children
             supabase.removeChannel(channel);
         };
     }, []);
+
+    const { refreshContent } = useContent();
+    const { refreshBusiness } = useBusiness();
 
     const startSync = async () => {
         if (!supabase) {
@@ -107,6 +112,12 @@ export const SyncProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 });
 
             if (upsertError) throw upsertError;
+
+            // 4. Trigger Cross-Context Refresh
+            await Promise.all([
+                refreshContent(),
+                refreshBusiness()
+            ]);
 
             setLastSync(new Date());
             setSyncState('success');
