@@ -30,7 +30,7 @@ import {
 import { CompetitorData, SocialPost } from '../../../../types';
 
 const MarketingGrowth: React.FC = () => {
-    const { socialPosts, integrations, updateIntegration, addSocialPost, aiConfig, autopilot, updateSiteData, siteData } = useSystem();
+    const { socialPosts, integrations, updateIntegration, addSocialPost, aiConfig, autopilot, updateSiteData, siteData, analytics } = useSystem();
     const { articles, addArticle } = useContent();
     const [competitors, setCompetitors] = useState<CompetitorData[]>([]);
     const [isAnalyzing, setIsAnalyzing] = useState(false);
@@ -395,7 +395,7 @@ const MarketingGrowth: React.FC = () => {
                                     <div className="space-y-3">
                                         <div className="flex justify-between items-center">
                                             <span className="text-[10px] text-slate-500 font-bold">زيادة الزيارات</span>
-                                            <span className="text-emerald-400 font-black">+240%</span>
+                                            <span className="text-emerald-400 font-black">{analytics.visits.growth >= 0 ? '+' : ''}{analytics.visits.growth}%</span>
                                         </div>
                                         <div className="w-full h-1 bg-slate-800 rounded-full overflow-hidden">
                                             <div className="h-full bg-emerald-500 w-3/4"></div>

@@ -5,6 +5,7 @@ import { SiteData, SystemActivity, AIConfig, BrandIdentity, ContactInfo, SocialP
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
 import Logger from '../lib/logger';
 import { INTEGRATIONS } from '../constants';
+import { analyticsService, AnalyticsStats } from '../lib/services/analyticsService';
 
 interface SystemContextType {
     brand: BrandIdentity;
@@ -14,6 +15,7 @@ interface SystemContextType {
     socialPosts: SocialPost[];
     integrations: SocialIntegration[];
     isLoading: boolean;
+    analytics: AnalyticsStats;
     updateBrand: (brand: Partial<BrandIdentity>) => Promise<void>;
     updateContact: (contact: Partial<ContactInfo>) => Promise<void>;
     updateAIConfig: (config: Partial<AIConfig>) => Promise<void>;
@@ -115,6 +117,7 @@ export const SystemProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     const [activityLog, setActivityLog] = useState<SystemActivity[]>([]);
     const [socialPosts, setSocialPosts] = useState<SocialPost[]>([]);
     const [integrations, setIntegrations] = useState<SocialIntegration[]>([]);
+    const [analytics, setAnalytics] = useState<AnalyticsStats>(analyticsService.getMockStats());
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
@@ -125,10 +128,15 @@ export const SystemProvider: React.FC<{ children: React.ReactNode }> = ({ childr
             }
 
             try {
-                const [settingsRes, activityRes] = await Promise.all([
+                const [settingsRes, activityRes, analyticsStats] = await Promise.all([
                     supabase.from('site_settings').select('*').eq('id', 'main').maybeSingle(),
-                    supabase.from('activity_log').select('*').order('date', { ascending: false }).limit(50)
+                    supabase.from('activity_log').select('*').order('date', { ascending: false }).limit(50),
+                    analyticsService.getDashboardStats()
                 ]);
+
+                if (analyticsStats) {
+                    setAnalytics(analyticsStats);
+                }
 
                 if (settingsRes.data) {
                     const s = settingsRes.data;
@@ -160,6 +168,13 @@ export const SystemProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         };
 
         fetchSystemData();
+    }, []);
+
+    useEffect(() => {
+        const path = window.location.pathname;
+        if (!path.includes('/dashboard')) {
+            analyticsService.trackVisit(path);
+        }
     }, []);
 
     const updateBrand = async (updates: Partial<BrandIdentity>) => {
@@ -229,7 +244,7 @@ export const SystemProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
     return (
         <SystemContext.Provider value={{
-            brand, contactInfo, aiConfig, activityLog, socialPosts, integrations, isLoading,
+            brand, contactInfo, aiConfig, activityLog, socialPosts, integrations, isLoading, analytics,
             updateBrand, updateContact, updateAIConfig,
             faqs: siteData.faqs || [],
             process: siteData.process || [],

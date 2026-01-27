@@ -3,6 +3,13 @@ import { Invoice, Expense } from './finance';
 import { Article, SocialPost, ContentPlanItem, DecisionPage } from './content';
 import { NavigationItem, SiteSection, Stat, Testimonial, FAQItem, ProcessStep } from './ui';
 
+export interface AnalyticsStats {
+    visits: { total: number; growth: number };
+    revenue: { total: number; growth: number };
+    expenses: { total: number; growth: number };
+    conversions: { total: number; growth: number };
+}
+
 export interface SystemActivity {
     id: string;
     date: string;
@@ -268,6 +275,7 @@ export interface SiteData {
     faqs?: FAQItem[];
     process?: ProcessStep[];
     stats?: Stat[];
+    analytics?: AnalyticsStats;
 }
 
 export interface SocialIntegration {

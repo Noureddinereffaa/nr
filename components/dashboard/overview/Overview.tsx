@@ -12,7 +12,8 @@ import {
     ArrowUpRight,
     TrendingUp,
     ShieldCheck,
-    Briefcase
+    Briefcase,
+    Eye
 } from 'lucide-react';
 import Skeleton from '../../ui/Skeleton';
 import WidgetWrapper from '../widgets/WidgetWrapper';
@@ -21,7 +22,7 @@ import LoadingSpinner from '../../ui/LoadingSpinner';
 import { transitions, variants } from '../../../lib/motion-config';
 
 const Overview: React.FC = () => {
-    const { activityLog, aiConfig, isLoading } = useSystem();
+    const { activityLog, aiConfig, isLoading, analytics } = useSystem();
     const { articles } = useContent();
     const { clients, projects, invoices } = useBusiness();
 
@@ -108,10 +109,10 @@ const Overview: React.FC = () => {
             >
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
                     {[
-                        { label: 'إجمالي العملاء', val: (clients || []).length, icon: UserPlus },
+                        { label: 'إجمالي الزيارات', val: (analytics.visits.total || 0).toLocaleString(), icon: Eye },
                         { label: 'المشاريع', val: (projects || []).length, icon: Briefcase },
                         { label: 'الفواتير المعلقة', val: (invoices || []).filter(i => i.status === 'pending').length, icon: FileText },
-                        { label: 'مستوى الأمان', val: '99.9%', icon: ShieldCheck }
+                        { label: 'معدل التحويل', val: `${analytics.conversions.growth}% `, icon: ShieldCheck }
                     ].map((s, i) => (
                         <div key={i} className="flex flex-col gap-1">
                             <div className="flex items-center gap-2 text-[8px] text-slate-500 font-black uppercase tracking-widest">

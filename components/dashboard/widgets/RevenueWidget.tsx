@@ -1,10 +1,12 @@
 import React from 'react';
 import { TrendingUp, ArrowUpRight, DollarSign } from 'lucide-react';
+import { useSystem } from '../../../context/SystemContext';
 import { useBusiness } from '../../../context/BusinessContext';
 import { useUI } from '../../../context/UIContext';
 
 const RevenueWidget: React.FC = () => {
-    const { invoices, expenses } = useBusiness();
+    const { analytics } = useSystem();
+    const { invoices } = useBusiness();
     const { mask } = useUI();
     const totalPaid = (invoices || []).reduce((acc, inv) => inv.status === 'paid' ? acc + inv.total : acc, 0);
 
@@ -17,7 +19,7 @@ const RevenueWidget: React.FC = () => {
                     </div>
                     <div className="flex items-center gap-1 text-xs font-black text-emerald-500">
                         <TrendingUp size={14} />
-                        <span>+12.4%</span>
+                        <span>{analytics.revenue.growth >= 0 ? '+' : ''}{analytics.revenue.growth}%</span>
                     </div>
                 </div>
                 <div className="text-4xl font-black text-white tracking-tighter mb-1">

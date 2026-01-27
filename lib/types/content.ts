@@ -94,3 +94,13 @@ export interface DecisionPage {
         roiMultiplier: string;
     };
 }
+
+export interface CompetitorData {
+    id: string;
+    name: string;
+    website: string;
+    domainAuthority: number;
+    strength: string;
+    weakness: string;
+    topKeywords: string[];
+}

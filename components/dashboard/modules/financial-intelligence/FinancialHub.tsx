@@ -18,7 +18,7 @@ import { useUI } from '../../../../context/UIContext';
 import ExpenseForm from '../../forms/ExpenseForm';
 
 const FinancialHub: React.FC = () => {
-    const { siteData } = useSystem();
+    const { siteData, analytics } = useSystem();
     const { invoices, expenses, addExpense, deleteExpense } = useBusiness();
     const { isShieldMode, mask } = useUI();
     const [isAddingExpense, setIsAddingExpense] = useState(false);
@@ -80,7 +80,9 @@ const FinancialHub: React.FC = () => {
                         <div className="p-3 bg-[var(--accent-emerald)]/10 rounded-[var(--border-radius-elite)] text-[var(--accent-emerald)]">
                             <TrendingUp size={24} />
                         </div>
-                        <span className="text-[10px] font-black bg-[var(--accent-emerald)]/10 text-[var(--accent-emerald)] px-2 py-1 rounded-full">+12%</span>
+                        <span className="text-[10px] font-black bg-[var(--accent-emerald)]/10 text-[var(--accent-emerald)] px-2 py-1 rounded-full">
+                            {analytics.revenue.growth >= 0 ? '+' : ''}{analytics.revenue.growth}%
+                        </span>
                     </div>
                     <div className="text-right">
                         <p className="text-[var(--text-secondary)] text-xs font-bold uppercase tracking-widest mb-1">إجمالي الدخل</p>
@@ -94,7 +96,9 @@ const FinancialHub: React.FC = () => {
                         <div className="p-3 bg-red-500/10 rounded-[var(--border-radius-elite)] text-red-400">
                             <TrendingDown size={24} />
                         </div>
-                        <span className="text-[10px] font-black bg-red-500/10 text-red-400 px-2 py-1 rounded-full">-5%</span>
+                        <span className="text-[10px] font-black bg-red-500/10 text-red-400 px-2 py-1 rounded-full">
+                            {analytics.expenses.growth >= 0 ? '+' : ''}{analytics.expenses.growth}%
+                        </span>
                     </div>
                     <div className="text-right">
                         <p className="text-[var(--text-secondary)] text-xs font-bold uppercase tracking-widest mb-1">إجمالي المصاريف</p>
