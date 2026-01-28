@@ -29,6 +29,7 @@ export interface Invoice {
     subtotal: number;
     discount: number;
     total: number;
+    amount?: number; // Alias for total often used in UI
     status: 'draft' | 'pending' | 'paid' | 'overdue' | 'cancelled';
     payments: Payment[];
     currency: 'DZD' | 'EUR' | 'USD';

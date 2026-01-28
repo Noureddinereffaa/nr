@@ -5,9 +5,18 @@ import { NavigationItem, SiteSection, Stat, Testimonial, FAQItem, ProcessStep } 
 
 export interface AnalyticsStats {
     visits: { total: number; growth: number };
-    revenue: { total: number; growth: number };
+    revenue: {
+        total: number;
+        growth: number;
+        history: { name: string; value: number }[];
+    };
     expenses: { total: number; growth: number };
     conversions: { total: number; growth: number };
+    projects: {
+        active: number;
+        completed: number;
+        statusDistribution: { name: string; value: number; color: string }[];
+    };
 }
 
 export interface SystemActivity {

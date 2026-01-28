@@ -62,5 +62,53 @@ export const projectService = {
             const { error } = await supabase.from('projects').delete().eq('id', id);
             if (error) throw error;
         }
+    },
+
+    async getByCode(code: string): Promise<Project | null> {
+        if (!isSupabaseConfigured() || !supabase) return null;
+
+        // Try to find by ID first
+        let { data, error } = await supabase
+            .from('projects')
+            .select('*')
+            .eq('id', code)
+            .single();
+
+        // If not found by ID, try to find by specific access code in JSON data
+        // Note: usage of data->>accessCode depending on your JSON structure
+        if (!data) {
+            const { data: searchData } = await supabase
+                .from('projects')
+                .select('*')
+                .textSearch('data', `'${code}'`) // Simple text search as fallback or explicit JSON filter if properly indexed
+                .limit(1);
+
+            // A better approach for JSON column if we can't use complex filters without indexing:
+            // We might filter client-side if dataset is small, but for now let's rely on ID match
+            // or exact match if the user enters the ID.
+            // For "Sovereign" quality, we should encourage using the ID or a dedicated column.
+            // Let's assume we stick to IDs for now to be safe, or implement a filter if needed.
+            if (searchData && searchData.length > 0) {
+                data = searchData[0];
+            }
+        }
+
+        if (error && error.code !== 'PGRST116') { // PGRST116 is "No rows found"
+            console.error("Error fetching project by code:", error);
+            throw error;
+        }
+
+        if (!data) return null;
+
+        const r = data;
+        return {
+            ...r.data,
+            id: r.id,
+            title: r.title || r.data?.title,
+            client_id: r.client_id || r.data?.clientId,
+            clientId: r.client_id || r.data?.clientId,
+            status: r.status || r.data?.status || 'planning',
+            budget: Number(r.budget || r.data?.budget || 0)
+        };
     }
 };

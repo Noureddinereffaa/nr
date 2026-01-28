@@ -33,7 +33,9 @@ const Billing = React.lazy(() => import('../components/dashboard/modules/financi
 const FinancialHub = React.lazy(() => import('../components/dashboard/modules/financial-intelligence/FinancialHub'));
 const DecisionPages = React.lazy(() => import('../components/dashboard/modules/decision-pages/DecisionPages'));
 const AnalyticsDashboard = React.lazy(() => import('../components/dashboard/analytics/AnalyticsDashboard'));
+const AnalyticsDashboard = React.lazy(() => import('../components/dashboard/analytics/AnalyticsDashboard'));
 const SEOMaster = React.lazy(() => import('../components/dashboard/modules/seo-master/SEOMaster'));
+const CommunicationsHub = React.lazy(() => import('../components/dashboard/modules/communications/CommunicationsHub'));
 
 const DashboardPage: React.FC = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -147,6 +149,7 @@ const DashboardPage: React.FC = () => {
                       <Route path="decision-pages" element={<DecisionPages />} />
                       <Route path="seo-master" element={<SEOMaster />} />
                       <Route path="analytics" element={<AnalyticsDashboard />} />
+                      <Route path="communications" element={<CommunicationsHub />} />
                     </Routes>
                   </Suspense>
                 </motion.div>

@@ -1,4 +1,5 @@
 import React from 'react';
+import { Helmet } from 'react-helmet-async';
 
 interface JsonLdProps {
     data: Record<string, any>;
@@ -6,9 +7,10 @@ interface JsonLdProps {
 
 export const JsonLd: React.FC<JsonLdProps> = ({ data }) => {
     return (
-        <script
-            type="application/ld+json"
-            dangerouslySetInnerHTML={{ __html: JSON.stringify(data) }}
-        />
+        <Helmet>
+            <script type="application/ld+json">
+                {JSON.stringify(data)}
+            </script>
+        </Helmet>
     );
 };

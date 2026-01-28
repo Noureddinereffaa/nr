@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /dashboard
+Disallow: /client-portal
+
+Sitemap: https://nr-os.com/sitemap.xml

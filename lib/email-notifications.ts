@@ -4,41 +4,41 @@
  */
 
 interface EmailNotification {
-    to: string;
-    subject: string;
-    title: string;
-    message: string;
-    actionUrl?: string;
-    actionText?: string;
+  to: string;
+  subject: string;
+  title: string;
+  message: string;
+  actionUrl?: string;
+  actionText?: string;
 }
 
 /**
  * Send email notification via Supabase Edge Function
  */
 export async function sendEmailNotification(notification: EmailNotification): Promise<boolean> {
-    try {
-        // This would call a Supabase Edge Function
-        // For now, we'll use a simple fetch to a serverless function
-        const response = await fetch('/api/send-notification-email', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(notification)
-        });
+  try {
+    // This would call a Supabase Edge Function
+    // For now, we'll use a simple fetch to a serverless function
+    const response = await fetch('/api/send-notification-email', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(notification)
+    });
 
-        return response.ok;
-    } catch (error) {
-        console.error('Failed to send email notification:', error);
-        return false;
-    }
+    return response.ok;
+  } catch (error) {
+    console.error('Failed to send email notification:', error);
+    return false;
+  }
 }
 
 /**
  * Generate HTML email template
  */
 export function generateEmailHTML(notification: EmailNotification): string {
-    return `
+  return `
 <!DOCTYPE html>
 <html dir="rtl" lang="ar">
 <head>
@@ -135,7 +135,26 @@ export function generateEmailHTML(notification: EmailNotification): string {
  * Check if notification should trigger email
  */
 export function shouldSendEmail(type: string, metadata?: any): boolean {
-    // Send email for critical notifications only
-    const criticalTypes = ['error', 'crm', 'finance'];
-    return criticalTypes.includes(type) || metadata?.critical === true;
+  // Send email for critical notifications only
+  const criticalTypes = ['error', 'crm', 'finance'];
+  return criticalTypes.includes(type) || metadata?.critical === true;
+}
+
+/**
+ * Send Welcome Email to new client
+ */
+export async function sendWelcomeEmail(clientEmail: string, clientName: string, projectTitle: string, projectCode: string): Promise<boolean> {
+  // Determine base URL safely
+  const baseUrl = typeof window !== 'undefined' ? window.location.origin : 'https://nr-os.com';
+
+  return sendEmailNotification({
+    to: clientEmail,
+    subject: `مرحباً بك في مشروعك الجديد: ${projectTitle}`,
+    title: `أهلاً بك، ${clientName} 👋`,
+    message: `يسعدنا بدء العمل معك على مشروع "${projectTitle}".<br/>
+        لقد قمنا بإنشاء بوابة خاصة لمشروعك يمكنك من خلالها متابعة التقدم، الفواتير، والملفات.<br/><br/>
+        <strong>كود الدخول الخاص بك هو:</strong> <code style="background:#334155;padding:4px 8px;border-radius:4px;color:#cbd5e1">${projectCode}</code>`,
+    actionUrl: `${baseUrl}/portal?code=${projectCode}`,
+    actionText: 'الدخول إلى البوابة'
+  });
 }

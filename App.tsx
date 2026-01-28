@@ -1,5 +1,6 @@
 import React, { lazy, Suspense } from 'react';
 import { Routes, Route } from 'react-router-dom';
+import { HelmetProvider } from 'react-helmet-async';
 import { SystemProvider } from './context/SystemContext';
 import { ContentProvider } from './context/ContentContext';
 import { BusinessProvider } from './context/BusinessContext';
@@ -28,29 +29,31 @@ const LoadingFallback = () => (
 
 function App() {
   return (
-    <AuthProvider>
-      <SystemProvider>
-        <ContentProvider>
-          <BusinessProvider>
-            <UIProvider>
-              <SyncProvider>
-                <Suspense fallback={<LoadingFallback />}>
-                  <Routes>
-                    <Route path="/" element={<HomePage />} />
-                    <Route path="/dashboard/*" element={<DashboardPage />} />
-                    <Route path="/blog" element={<BlogPage />} />
-                    <Route path="/blog/:slug" element={<ArticlePage />} />
-                    <Route path="/reviews" element={<ReviewsPage />} />
-                    <Route path="/reviews/:id" element={<ReviewDetailsPage />} />
-                    <Route path="/portal" element={<ClientPortalPage />} />
-                  </Routes>
-                </Suspense>
-              </SyncProvider>
-            </UIProvider>
-          </BusinessProvider>
-        </ContentProvider>
-      </SystemProvider>
-    </AuthProvider>
+    <HelmetProvider>
+      <AuthProvider>
+        <SystemProvider>
+          <ContentProvider>
+            <BusinessProvider>
+              <UIProvider>
+                <SyncProvider>
+                  <Suspense fallback={<LoadingFallback />}>
+                    <Routes>
+                      <Route path="/" element={<HomePage />} />
+                      <Route path="/dashboard/*" element={<DashboardPage />} />
+                      <Route path="/blog" element={<BlogPage />} />
+                      <Route path="/blog/:slug" element={<ArticlePage />} />
+                      <Route path="/reviews" element={<ReviewsPage />} />
+                      <Route path="/reviews/:id" element={<ReviewDetailsPage />} />
+                      <Route path="/portal" element={<ClientPortalPage />} />
+                    </Routes>
+                  </Suspense>
+                </SyncProvider>
+              </UIProvider>
+            </BusinessProvider>
+          </ContentProvider>
+        </SystemProvider>
+      </AuthProvider>
+    </HelmetProvider>
   );
 }
 

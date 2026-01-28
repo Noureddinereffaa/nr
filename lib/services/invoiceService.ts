@@ -23,6 +23,29 @@ export const invoiceService = {
         }));
     },
 
+    async getByProjectId(projectId: string): Promise<Invoice[]> {
+        if (!isSupabaseConfigured() || !supabase) return [];
+
+        const { data, error } = await supabase
+            .from('invoices')
+            .select('*')
+            .eq('project_id', projectId) // Assuming project_id column exists based on getAll
+            .order('created_at', { ascending: false });
+
+        if (error) throw error;
+
+        return data.map((r: any) => ({
+            ...r.data,
+            id: r.id,
+            invoiceNumber: r.number || r.data?.invoiceNumber,
+            clientId: r.client_id || r.data?.clientId,
+            projectId: r.project_id || r.data?.projectId,
+            amount: Number(r.amount || r.data?.total || 0),
+            total: Number(r.amount || r.data?.total || 0),
+            status: r.status || r.data?.status || 'draft'
+        }));
+    },
+
     async create(invoice: Partial<Invoice>): Promise<Invoice> {
         const id = invoice.id || 'inv-' + Date.now();
         const newInvoice = { ...invoice, id } as Invoice;

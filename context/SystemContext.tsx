@@ -170,12 +170,14 @@ export const SystemProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         fetchSystemData();
     }, []);
 
+    // Track visits on route change
     useEffect(() => {
         const path = window.location.pathname;
         if (!path.includes('/dashboard')) {
             analyticsService.trackVisit(path);
         }
-    }, []);
+    }, [window.location.pathname]); // Listen to pathname changes
+
 
     const updateBrand = async (updates: Partial<BrandIdentity>) => {
         setBrand(prev => ({ ...prev, ...updates }));

@@ -1,78 +1,96 @@
-/**
- * Vercel Serverless Function for Email Notifications
- * Uses Resend API for sending emails
- */
+import { createClient } from '@supabase/supabase-js';
+
+const supabaseUrl = process.env.VITE_SUPABASE_URL;
+const supabaseKey = process.env.VITE_SUPABASE_ANON_KEY;
 
 export default async function handler(req: any, res: any) {
-    // Only allow POST requests
-    if (req.method !== 'POST') {
-        return res.status(405).json({ error: 'Method not allowed' });
+  if (req.method !== 'POST') {
+    return res.status(405).json({ error: 'Method not allowed' });
+  }
+
+  let supabase = null;
+  if (supabaseUrl && supabaseKey) {
+    supabase = createClient(supabaseUrl, supabaseKey);
+  }
+
+  const { to, subject, title, message, actionUrl, actionText } = req.body;
+
+  try {
+    if (!to || !subject || !title || !message) {
+      throw new Error('Missing required fields');
     }
 
-    try {
-        const { to, subject, title, message, actionUrl, actionText } = req.body;
+    const html = generateEmailHTML({ title, message, actionUrl, actionText });
+    const RESEND_API_KEY = process.env.RESEND_API_KEY;
 
-        // Validate required fields
-        if (!to || !subject || !title || !message) {
-            return res.status(400).json({ error: 'Missing required fields' });
-        }
-
-        // Generate HTML email
-        const html = generateEmailHTML({ title, message, actionUrl, actionText });
-
-        // Send email using Resend API
-        // Note: You need to set RESEND_API_KEY in environment variables
-        const RESEND_API_KEY = process.env.RESEND_API_KEY;
-
-        if (!RESEND_API_KEY) {
-            console.warn('RESEND_API_KEY not configured');
-            return res.status(200).json({
-                success: false,
-                message: 'Email service not configured'
-            });
-        }
-
-        const response = await fetch('https://api.resend.com/emails', {
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${RESEND_API_KEY}`,
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                from: 'NR-OS <notifications@nr-os.com>',
-                to: to,
-                subject: subject,
-                html: html
-            })
-        });
-
-        const data = await response.json();
-
-        if (!response.ok) {
-            throw new Error(data.message || 'Failed to send email');
-        }
-
-        return res.status(200).json({
-            success: true,
-            messageId: data.id
-        });
-
-    } catch (error: any) {
-        console.error('Email notification error:', error);
-        return res.status(500).json({
-            error: 'Failed to send email notification',
-            message: error.message
-        });
+    if (!RESEND_API_KEY) {
+      // Log failure to DB
+      if (supabase) {
+        await supabase.from('email_logs').insert([{
+          recipient: to,
+          subject: subject,
+          status: 'failed',
+          error_message: 'Configuration Error: RESEND_API_KEY missing'
+        }]);
+      }
+      console.warn('RESEND_API_KEY not configured');
+      return res.status(200).json({ success: false, message: 'Email service config missing' });
     }
+
+    const response = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${RESEND_API_KEY}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        from: 'NR-OS <notifications@nr-os.com>',
+        to, subject, html
+      })
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || 'Failed to send email');
+    }
+
+    // Log success to DB
+    if (supabase) {
+      await supabase.from('email_logs').insert([{
+        recipient: to,
+        subject: subject,
+        status: 'sent',
+        metadata: { resend_id: data.id }
+      }]);
+    }
+
+    return res.status(200).json({ success: true, messageId: data.id });
+
+  } catch (error: any) {
+    console.error('Email error:', error);
+
+    // Log failure to DB
+    if (supabase) {
+      await supabase.from('email_logs').insert([{
+        recipient: to || 'unknown',
+        subject: subject || 'unknown',
+        status: 'failed',
+        error_message: error.message
+      }]);
+    }
+
+    return res.status(500).json({ error: 'Failed to send', message: error.message });
+  }
 }
 
 function generateEmailHTML(params: {
-    title: string;
-    message: string;
-    actionUrl?: string;
-    actionText?: string;
+  title: string;
+  message: string;
+  actionUrl?: string;
+  actionText?: string;
 }): string {
-    return `
+  return `
 <!DOCTYPE html>
 <html dir="rtl" lang="ar">
 <head>

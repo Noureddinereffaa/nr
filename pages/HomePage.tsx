@@ -9,10 +9,34 @@ import Process from '../components/Process';
 import AutoEntrepreneurCard from '../components/AutoEntrepreneurCard';
 import Testimonials from '../components/Testimonials';
 import { ShieldCheck, Users, Briefcase, Zap } from 'lucide-react';
+import SEO from '../components/seo/SEO';
+import { JsonLd } from '../components/seo/JsonLd';
 
 const HomePage: React.FC = () => {
+  const structuredData = {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "name": "NR-OS",
+    "url": "https://nr-os.com",
+    "logo": "https://nr-os.com/logo.png",
+    "sameAs": [
+      "https://github.com/noureddinereffaa",
+      "https://linkedin.com/in/noureddinereffaa"
+    ],
+    "contactPoint": {
+      "@type": "ContactPoint",
+      "telephone": "+213-555-000-000",
+      "contactType": "customer service"
+    }
+  };
+
   return (
     <Layout>
+      <SEO
+        title="تطوير البرمجيات والأنظمة السيادية"
+        description="نحول الأفكار المعقدة إلى أنظمة رقمية سيادية. NR-OS هي وكالة تطوير برمجيات رائدة في الجزائر تتخصص في الأنظمة المتقدمة وحلول المؤسسات."
+      />
+      <JsonLd data={structuredData} />
       <div className="relative">
         <Hero />
 

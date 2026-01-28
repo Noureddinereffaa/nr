@@ -158,27 +158,32 @@ const FinancialHub: React.FC = () => {
                             {[1, 2, 3, 4].map(i => <div key={i} className="border-t border-white/20 w-full"></div>)}
                         </div>
 
-                        {[
-                            { m: 'Jun', i: 40, e: 20 }, { m: 'Jul', i: 60, e: 30 }, { m: 'Aug', i: 55, e: 45 },
-                            { m: 'Sep', i: 85, e: 35 }, { m: 'Oct', i: 70, e: 40 }, { m: 'Nov', i: 95, e: 50 }
-                        ].map((d, i) => (
-                            <div key={i} className="flex-1 flex flex-col items-center gap-2 group relative">
-                                <div className="w-full flex justify-center gap-1 items-end h-full">
-                                    <div
-                                        style={{ height: `${d.i}%` }}
-                                        className="w-1.5 md:w-3 bg-emerald-500/80 rounded-t-full group-hover:bg-emerald-400 transition-all duration-500 cursor-pointer"
-                                    ></div>
-                                    <div
-                                        style={{ height: `${d.e}%` }}
-                                        className="w-1.5 md:w-3 bg-red-500/80 rounded-t-full group-hover:bg-red-400 transition-all duration-500 cursor-pointer"
-                                    ></div>
+                        {(() => {
+                            const data = analytics.cashFlow || [];
+                            const maxVal = Math.max(
+                                ...data.map(d => Math.max(d.income, d.expense)),
+                                1000 // Minimum scaling
+                            );
+
+                            return data.map((d, i) => (
+                                <div key={i} className="flex-1 flex flex-col items-center gap-2 group relative">
+                                    <div className="w-full flex justify-center gap-1 items-end h-full">
+                                        <div
+                                            style={{ height: `${(d.income / maxVal) * 100}%` }}
+                                            className="w-1.5 md:w-3 bg-emerald-500/80 rounded-t-full group-hover:bg-emerald-400 transition-all duration-500 cursor-pointer"
+                                        ></div>
+                                        <div
+                                            style={{ height: `${(d.expense / maxVal) * 100}%` }}
+                                            className="w-1.5 md:w-3 bg-red-500/80 rounded-t-full group-hover:bg-red-400 transition-all duration-500 cursor-pointer"
+                                        ></div>
+                                    </div>
+                                    <span className="text-[10px] font-black text-slate-500">{d.month}</span>
+                                    <div className="absolute -top-12 left-1/2 -translate-x-1/2 bg-white text-slate-900 text-[10px] font-black px-2 py-1 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10 pointer-events-none">
+                                        +{(d.income / 1000).toFixed(1)}k / -{(d.expense / 1000).toFixed(1)}k
+                                    </div>
                                 </div>
-                                <span className="text-[10px] font-black text-slate-500">{d.m}</span>
-                                <div className="absolute -top-12 left-1/2 -translate-x-1/2 bg-white text-slate-900 text-[10px] font-black px-2 py-1 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10 pointer-events-none">
-                                    +{d.i}k / -{d.e}k
-                                </div>
-                            </div>
-                        ))}
+                            ));
+                        })()}
                     </div>
                 </div>
 

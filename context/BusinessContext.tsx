@@ -3,6 +3,7 @@ import { SERVICES } from '../constants';
 import { Client, Project, Invoice, Expense, Service, ServiceRequest } from '../types';
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
 import Logger from '../lib/logger';
+import { sendWelcomeEmail } from '../lib/email-notifications';
 
 // Hooks
 import { useClients } from '../lib/hooks/useClients';
@@ -156,6 +157,52 @@ export const BusinessProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         setBudgets(prev => prev.map(b => b.id === id ? { ...b, ...updates } : b));
     };
 
+    // Enhanced Project Addition with Automation
+    const addProject = async (project: Partial<Project>) => {
+        try {
+            const newProject = await projectState.addProject(project);
+
+            // Automation: Send Welcome Email if client exists
+            if (newProject && newProject.clientId) {
+                const client = clientState.clients.find(c => c.id === newProject.clientId);
+                if (client && client.email) {
+                    await sendWelcomeEmail(
+                        client.email,
+                        client.name,
+                        newProject.title,
+                        newProject.id
+                    ).catch(e => Logger.warn("Failed to send welcome email", e));
+
+                    Logger.info("Automation: Welcome Email Sent", { client: client.name });
+                }
+            }
+            return newProject;
+        } catch (error) {
+            throw error;
+        }
+    };
+
+    // Enhanced Invoice Update with Automation
+    const updateInvoice = async (id: string, updates: Partial<Invoice>) => {
+        try {
+            const updatedInvoice = await invoiceState.updateInvoice(id, updates);
+
+            // Automation: Invoice Paid -> Set Project to Active
+            if (updates.status === 'paid' && updatedInvoice && updatedInvoice.projectId) {
+                const project = projectState.projects.find(p => p.id === updatedInvoice.projectId);
+
+                // Only update if project is in planning phase
+                if (project && project.status === 'planning') {
+                    await projectState.updateProject(project.id, { status: 'in-progress' });
+                    Logger.info("Automation: Project Status Activated", { project: project.title });
+                }
+            }
+            return updatedInvoice;
+        } catch (error) {
+            throw error;
+        }
+    };
+
     return (
         <BusinessContext.Provider value={{
             clients: clientState.clients,
@@ -171,12 +218,12 @@ export const BusinessProvider: React.FC<{ children: React.ReactNode }> = ({ chil
             updateClient: clientState.updateClient,
             deleteClient: clientState.deleteClient,
 
-            addProject: projectState.addProject,
+            addProject, // Enhanced
             updateProject: projectState.updateProject,
             deleteProject: projectState.deleteProject,
 
             addInvoice: invoiceState.addInvoice,
-            updateInvoice: invoiceState.updateInvoice,
+            updateInvoice, // Enhanced
             deleteInvoice: invoiceState.deleteInvoice,
 
             addExpense: expenseState.addExpense,

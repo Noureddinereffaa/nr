@@ -148,6 +148,13 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
                             />
                         )}
                         <TabButton
+                            id="communications"
+                            label="مركز الاتصال"
+                            icon={MessageSquare}
+                            isActive={activeTab === 'communications'}
+                            onClick={onTabChange}
+                        />
+                        <TabButton
                             id="analytics"
                             label="التحليلات المتقدمة"
                             icon={TrendingUp}
@@ -157,7 +164,7 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
                         <TabButton
                             id="requests"
                             label="وارد المساعدة"
-                            icon={MessageSquare}
+                            icon={Shield}
                             isActive={activeTab === 'requests'}
                             onClick={onTabChange}
                         />
