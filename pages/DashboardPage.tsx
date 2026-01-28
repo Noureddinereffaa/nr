@@ -33,7 +33,6 @@ const Billing = React.lazy(() => import('../components/dashboard/modules/financi
 const FinancialHub = React.lazy(() => import('../components/dashboard/modules/financial-intelligence/FinancialHub'));
 const DecisionPages = React.lazy(() => import('../components/dashboard/modules/decision-pages/DecisionPages'));
 const AnalyticsDashboard = React.lazy(() => import('../components/dashboard/analytics/AnalyticsDashboard'));
-const AnalyticsDashboard = React.lazy(() => import('../components/dashboard/analytics/AnalyticsDashboard'));
 const SEOMaster = React.lazy(() => import('../components/dashboard/modules/seo-master/SEOMaster'));
 const CommunicationsHub = React.lazy(() => import('../components/dashboard/modules/communications/CommunicationsHub'));
 
