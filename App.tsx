@@ -16,6 +16,7 @@ const ArticlePage = lazy(() => import('./pages/ArticlePage'));
 const ReviewsPage = lazy(() => import('./pages/ReviewsPage'));
 const ReviewDetailsPage = lazy(() => import('./pages/ReviewDetailsPage'));
 const ClientPortalPage = lazy(() => import('./pages/ClientPortalPage'));
+const MarketingLandingPage = lazy(() => import('./pages/MarketingLandingPage'));
 
 // Loading fallback component
 const LoadingFallback = () => (
@@ -45,6 +46,7 @@ function App() {
                       <Route path="/reviews" element={<ReviewsPage />} />
                       <Route path="/reviews/:id" element={<ReviewDetailsPage />} />
                       <Route path="/portal" element={<ClientPortalPage />} />
+                      <Route path="/platform" element={<MarketingLandingPage />} />
                     </Routes>
                   </Suspense>
                 </SyncProvider>

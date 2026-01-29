@@ -1,24 +1,28 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Briefcase, Link as LinkIcon, Search, AlertTriangle, LayoutDashboard, Zap, LifeBuoy } from 'lucide-react';
+import { Briefcase, Link as LinkIcon, Search, AlertTriangle, LayoutDashboard, Zap, LifeBuoy, FileText, Clock, ArrowLeft, Paperclip } from 'lucide-react';
 import Layout from '../components/Layout';
 import { projectService } from '../lib/services/projectService';
 import { invoiceService } from '../lib/services/invoiceService';
-import { Project, Invoice } from '../lib/types';
+import { requestService } from '../lib/services/requestService';
+import { Project, Invoice, ServiceRequest } from '../lib/types';
 import PortalProjectView from '../components/portal/PortalProjectView';
 import PortalRequestForm from '../components/portal/PortalRequestForm';
 import PortalSupport from '../components/portal/PortalSupport';
+import PortalRequestTracking from '../components/portal/PortalRequestTracking';
 
 const ClientPortalPage: React.FC = () => {
     const [projectCode, setProjectCode] = useState('');
     const [project, setProject] = useState<Project | null>(null);
     const [invoices, setInvoices] = useState<Invoice[]>([]);
+    const [requests, setRequests] = useState<ServiceRequest[]>([]);
+    const [selectedRequest, setSelectedRequest] = useState<ServiceRequest | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState('');
     const [isFound, setIsFound] = useState(false);
 
     // Tab State
-    const [activeTab, setActiveTab] = useState<'overview' | 'request' | 'support'>('overview');
+    const [activeTab, setActiveTab] = useState<'overview' | 'request' | 'my-requests' | 'support'>('overview');
 
     const handleSearch = async () => {
         if (!projectCode.trim()) return;
@@ -45,6 +49,23 @@ const ClientPortalPage: React.FC = () => {
             setIsLoading(false);
         }
     };
+
+    // Fetch service requests when project is found
+    useEffect(() => {
+        if (project) {
+            const fetchRequests = async () => {
+                try {
+                    const allRequests = await requestService.getAll();
+                    // Filter by project ID
+                    const projectRequests = allRequests.filter(r => r.projectId === project.id);
+                    setRequests(projectRequests);
+                } catch (error) {
+                    console.error('Failed to fetch requests:', error);
+                }
+            };
+            fetchRequests();
+        }
+    }, [project]);
 
     const calculateProgress = (project: Project) => {
         if (!project.milestones || project.milestones.length === 0) return 0;
@@ -151,6 +172,14 @@ const ClientPortalPage: React.FC = () => {
                                     onClick={() => setActiveTab('request')}
                                 />
                                 <PortalTab
+                                    id="my-requests"
+                                    label="طلباتي"
+                                    icon={FileText}
+                                    active={activeTab === 'my-requests'}
+                                    onClick={() => setActiveTab('my-requests')}
+                                    badge={requests.length > 0 ? requests.length : undefined}
+                                />
+                                <PortalTab
                                     id="support"
                                     label="الدعم الفني"
                                     icon={LifeBuoy}
@@ -161,30 +190,152 @@ const ClientPortalPage: React.FC = () => {
 
                             {/* Main Content Area */}
                             <AnimatePresence mode="wait">
-                                <motion.div
-                                    key={activeTab}
-                                    initial={{ opacity: 0, y: 10 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    exit={{ opacity: 0, y: -10 }}
-                                    transition={{ duration: 0.3 }}
-                                >
-                                    {activeTab === 'overview' && (
-                                        <PortalProjectView
-                                            project={project}
-                                            invoices={invoices}
-                                            calculateProgress={calculateProgress}
-                                        />
-                                    )}
-                                    {activeTab === 'request' && (
+                                {activeTab === 'overview' && (
+                                    <motion.div
+                                        key="overview"
+                                        initial={{ opacity: 0, x: -20 }}
+                                        animate={{ opacity: 1, x: 0 }}
+                                        exit={{ opacity: 0, x: 20 }}
+                                    >
+                                        <PortalProjectView project={project} invoices={invoices} calculateProgress={calculateProgress} />
+                                    </motion.div>
+                                )}
+
+                                {activeTab === 'request' && (
+                                    <motion.div
+                                        key="request"
+                                        initial={{ opacity: 0, x: -20 }}
+                                        animate={{ opacity: 1, x: 0 }}
+                                        exit={{ opacity: 0, x: 20 }}
+                                    >
                                         <PortalRequestForm
                                             project={project}
-                                            onSuccess={() => setActiveTab('overview')}
+                                            onSuccess={() => {
+                                                // Refresh requests after submission
+                                                requestService.getAll().then(all => {
+                                                    const projectRequests = all.filter(r => r.projectId === project.id);
+                                                    setRequests(projectRequests);
+                                                });
+                                                setActiveTab('my-requests'); // Changed from 'overview' to 'my-requests'
+                                            }}
                                         />
-                                    )}
-                                    {activeTab === 'support' && (
+                                    </motion.div>
+                                )}
+
+                                {activeTab === 'my-requests' && (
+                                    <motion.div
+                                        key="my-requests"
+                                        initial={{ opacity: 0, x: -20 }}
+                                        animate={{ opacity: 1, x: 0 }}
+                                        exit={{ opacity: 0, x: 20 }}
+                                        className="space-y-6"
+                                        dir="rtl"
+                                    >
+                                        {selectedRequest ? (
+                                            <div>
+                                                <button
+                                                    onClick={() => setSelectedRequest(null)}
+                                                    className="mb-6 flex items-center gap-2 text-indigo-400 hover:text-indigo-300 transition-colors"
+                                                >
+                                                    <ArrowLeft size={16} className="rotate-180" />
+                                                    العودة للقائمة
+                                                </button>
+                                                <PortalRequestTracking request={selectedRequest} />
+                                            </div>
+                                        ) : (
+                                            <div className="space-y-6">
+                                                <div className="flex items-center justify-between">
+                                                    <h3 className="text-2xl font-black text-white">طلباتي</h3>
+                                                    <span className="text-slate-500 text-sm">
+                                                        {requests.length} طلب
+                                                    </span>
+                                                </div>
+
+                                                {requests.length === 0 ? (
+                                                    <div className="text-center py-16 bg-slate-900 border border-white/5 rounded-3xl">
+                                                        <FileText size={48} className="mx-auto mb-4 text-slate-600" />
+                                                        <p className="text-slate-400 text-lg font-bold">لم تقم بإرسال أي طلبات بعد</p>
+                                                        <p className="text-slate-600 text-sm mt-2">استخدم تبويب "طلب جديد" لإرسال طلب خدمة</p>
+                                                    </div>
+                                                ) : (
+                                                    <div className="grid gap-4">
+                                                        {requests.map((request) => {
+                                                            const statusColors = {
+                                                                new: 'bg-blue-500/10 text-blue-400 border-blue-500/20',
+                                                                review: 'bg-amber-500/10 text-amber-400 border-amber-500/20',
+                                                                proposal: 'bg-purple-500/10 text-purple-400 border-purple-500/20',
+                                                                negotiation: 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20',
+                                                                accepted: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
+                                                                rejected: 'bg-red-500/10 text-red-400 border-red-500/20',
+                                                                completed: 'bg-green-500/10 text-green-400 border-green-500/20'
+                                                            };
+
+                                                            const statusLabels = {
+                                                                new: 'جديد',
+                                                                review: 'قيد المراجعة',
+                                                                proposal: 'عرض سعر',
+                                                                negotiation: 'تفاوض',
+                                                                accepted: 'مقبول',
+                                                                rejected: 'مرفوض',
+                                                                completed: 'مكتمل'
+                                                            };
+
+                                                            return (
+                                                                <button
+                                                                    key={request.id}
+                                                                    onClick={() => setSelectedRequest(request)}
+                                                                    className="w-full text-right bg-slate-900 border border-white/5 rounded-2xl p-6 hover:border-indigo-500/30 transition-all group"
+                                                                >
+                                                                    <div className="flex items-start justify-between gap-4 mb-4">
+                                                                        <div className="flex-1">
+                                                                            <h4 className="text-white font-bold text-lg group-hover:text-indigo-400 transition-colors">
+                                                                                {request.serviceTitle}
+                                                                            </h4>
+                                                                            <p className="text-slate-500 text-sm mt-1">
+                                                                                {request.category && <span className="mr-2">📁 {request.category}</span>}
+                                                                                {request.date && (
+                                                                                    <span className="flex items-center gap-1 mt-1">
+                                                                                        <Clock size={12} />
+                                                                                        {new Date(request.date).toLocaleDateString('ar-DZ')}
+                                                                                    </span>
+                                                                                )}
+                                                                            </p>
+                                                                        </div>
+                                                                        <span className={`px-4 py-2 rounded-xl text-xs font-bold uppercase border ${statusColors[request.status]}`}>
+                                                                            {statusLabels[request.status]}
+                                                                        </span>
+                                                                    </div>
+                                                                    {request.message && (
+                                                                        <p className="text-slate-400 text-sm leading-relaxed line-clamp-2">
+                                                                            {request.message}
+                                                                        </p>
+                                                                    )}
+                                                                    {request.attachments && request.attachments.length > 0 && (
+                                                                        <div className="mt-3 flex items-center gap-2 text-xs text-slate-500">
+                                                                            <Paperclip size={14} />
+                                                                            {request.attachments.length} مرفق
+                                                                        </div>
+                                                                    )}
+                                                                </button>
+                                                            );
+                                                        })}
+                                                    </div>
+                                                )}
+                                            </div>
+                                        )}
+                                    </motion.div>
+                                )}
+
+                                {activeTab === 'support' && (
+                                    <motion.div
+                                        key="support"
+                                        initial={{ opacity: 0, x: -20 }}
+                                        animate={{ opacity: 1, x: 0 }}
+                                        exit={{ opacity: 0, x: 20 }}
+                                    >
                                         <PortalSupport project={project} />
-                                    )}
-                                </motion.div>
+                                    </motion.div>
+                                )}
                             </AnimatePresence>
 
                         </motion.div>
@@ -195,16 +346,21 @@ const ClientPortalPage: React.FC = () => {
     );
 };
 
-const PortalTab = ({ id, label, icon: Icon, active, onClick }: any) => (
+const PortalTab = ({ id, label, icon: Icon, active, onClick, badge }: any) => (
     <button
         onClick={onClick}
-        className={`flex items-center gap-2 px-6 py-3 rounded-xl font-bold transition-all ${active
-                ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/20'
-                : 'text-slate-500 hover:text-white hover:bg-white/5'
+        className={`relative flex items-center gap-2 px-6 py-3 rounded-xl font-bold transition-all ${active
+            ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/20'
+            : 'text-slate-500 hover:text-white hover:bg-white/5'
             }`}
     >
         <Icon size={18} />
         {label}
+        {badge !== undefined && badge > 0 && (
+            <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs font-black rounded-full flex items-center justify-center">
+                {badge}
+            </span>
+        )}
     </button>
 );
 

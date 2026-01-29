@@ -14,11 +14,17 @@ import {
     UserPlus,
     Trash2,
     DollarSign,
-    Target
+    Target,
+    Clock,
+    FileText,
+    Paperclip,
+    Download
 } from 'lucide-react';
 import { ServiceRequest } from '../../../../types';
 import { useBusiness } from '../../../../context/BusinessContext';
 import { useUI } from '../../../../context/UIContext';
+import Timeline from '../../../shared/Timeline';
+import { fileUploadService } from '../../../../lib/services/fileUploadService';
 
 interface RequestDetailProps {
     request: ServiceRequest;
@@ -29,6 +35,8 @@ const RequestDetail: React.FC<RequestDetailProps> = ({ request, onClose }) => {
     const { updateRequest, deleteRequest, addClient } = useBusiness();
     const { addToast, addNotification } = useUI();
     const [isConverting, setIsConverting] = useState(false);
+    const [internalNotes, setInternalNotes] = useState(request.internalNotes || '');
+    const [isSavingNotes, setIsSavingNotes] = useState(false);
 
     const handleStatusChange = async (newStatus: ServiceRequest['status']) => {
         try {
@@ -45,6 +53,18 @@ const RequestDetail: React.FC<RequestDetailProps> = ({ request, onClose }) => {
             addToast(`تم تحديث الأولوية إلى: ${newPriority}`, 'success');
         } catch (error) {
             addToast('فشل في تحديث الأولوية', 'error');
+        }
+    };
+
+    const handleSaveNotes = async () => {
+        setIsSavingNotes(true);
+        try {
+            await updateRequest(request.id, { internalNotes });
+            addToast('تم حفظ الملاحظات', 'success');
+        } catch (error) {
+            addToast('فشل في حفظ الملاحظات', 'error');
+        } finally {
+            setIsSavingNotes(false);
         }
     };
 
@@ -187,6 +207,80 @@ const RequestDetail: React.FC<RequestDetailProps> = ({ request, onClose }) => {
                             </h5>
                             <div className="p-6 bg-slate-950 border border-white/5 rounded-[2rem] text-slate-400 leading-loose font-medium">
                                 {request.projectDetails || request.message || "لا توجد تفاصيل إضافية مسجلة لهذا الطلب."}
+                            </div>
+                        </div>
+
+                        {/* Attachments */}
+                        {request.attachments && request.attachments.length > 0 && (
+                            <div className="space-y-4">
+                                <h5 className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] flex items-center gap-2">
+                                    <Paperclip size={14} className="text-emerald-500" />
+                                    المرفقات ({request.attachments.length})
+                                </h5>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                    {request.attachments.map((att, idx) => (
+                                        <div key={att.id || idx} className="flex items-center justify-between p-4 bg-slate-950 border border-white/5 rounded-xl hover:border-indigo-500/30 transition-all group">
+                                            <div className="flex items-center gap-3 flex-1 min-w-0">
+                                                <div className="text-2xl">
+                                                    {fileUploadService.getFileIcon(att.fileType)}
+                                                </div>
+                                                <div className="flex-1 min-w-0">
+                                                    <p className="text-white text-sm font-medium truncate">{att.fileName}</p>
+                                                    <p className="text-slate-500 text-xs">
+                                                        {fileUploadService.formatFileSize(att.fileSize)}
+                                                        {' • '}
+                                                        {att.uploadedBy === 'client' ? 'العميل' : 'الإدارة'}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                            <a
+                                                href={att.fileUrl}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="p-2 bg-indigo-500/10 text-indigo-400 rounded-lg hover:bg-indigo-500/20 transition-all"
+                                            >
+                                                <Download size={16} />
+                                            </a>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Timeline */}
+                        {request.timelineEvents && request.timelineEvents.length > 0 && (
+                            <div className="space-y-4">
+                                <h5 className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] flex items-center gap-2">
+                                    <Clock size={14} className="text-purple-500" />
+                                    الخط الزمني
+                                </h5>
+                                <div className="bg-slate-950 border border-white/5 rounded-[2rem] p-6">
+                                    <Timeline events={request.timelineEvents} />
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Internal Notes (Admin Only) */}
+                        <div className="space-y-4">
+                            <h5 className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] flex items-center gap-2">
+                                <FileText size={14} className="text-amber-500" />
+                                ملاحظات داخلية (محمي - للإدارة فقط)
+                            </h5>
+                            <div className="bg-amber-500/5 border border-amber-500/20 rounded-[2rem] p-6 space-y-4">
+                                <textarea
+                                    value={internalNotes}
+                                    onChange={(e) => setInternalNotes(e.target.value)}
+                                    className="w-full bg-slate-950 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-amber-500 transition-colors resize-none font-medium"
+                                    rows={4}
+                                    placeholder="أضف ملاحظات داخلية حول هذا الطلب... (لن يراها العميل)"
+                                />
+                                <button
+                                    onClick={handleSaveNotes}
+                                    disabled={isSavingNotes}
+                                    className="px-6 py-2 bg-amber-500 hover:bg-amber-600 disabled:bg-slate-700 text-white rounded-xl font-bold text-sm transition-all"
+                                >
+                                    {isSavingNotes ? 'جاري الحفظ...' : 'حفظ الملاحظات'}
+                                </button>
                             </div>
                         </div>
 

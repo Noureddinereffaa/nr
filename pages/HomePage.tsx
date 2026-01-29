@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import Layout from '../components/Layout';
 import Hero from '../components/Hero';
 import Services from '../components/Services';
@@ -8,7 +9,7 @@ import Contact from '../components/Contact';
 import Process from '../components/Process';
 import AutoEntrepreneurCard from '../components/AutoEntrepreneurCard';
 import Testimonials from '../components/Testimonials';
-import { ShieldCheck, Users, Briefcase, Zap } from 'lucide-react';
+import { ShieldCheck, Users, Briefcase, Zap, ArrowLeft } from 'lucide-react';
 import SEO from '../components/seo/SEO';
 import { JsonLd } from '../components/seo/JsonLd';
 
@@ -61,6 +62,37 @@ const HomePage: React.FC = () => {
               ))}
             </div>
           </div>
+        </div>
+
+        {/* Platform Promotion Banner */}
+        <div className="container mx-auto px-4 mb-24">
+          <Link to="/platform" className="block group">
+            <div className="relative overflow-hidden glass-effect border border-indigo-500/20 rounded-[2.5rem] p-1">
+              <div className="absolute inset-0 bg-gradient-to-r from-indigo-600/10 via-purple-600/10 to-pink-600/10 opacity-50"></div>
+              <div className="relative flex flex-col md:flex-row items-center justify-between gap-6 p-8 md:p-10">
+                <div className="flex flex-col md:flex-row items-center gap-6 text-center md:text-right">
+                  <div className="w-16 h-16 rounded-2xl bg-indigo-500/10 flex items-center justify-center text-indigo-400 group-hover:scale-110 transition-transform duration-500 shadow-xl shadow-indigo-500/10">
+                    <Zap size={32} className="animate-pulse" />
+                  </div>
+                  <div>
+                    <h3 className="text-xl md:text-3xl font-black text-white mb-2 tracking-tight">
+                      اكتشف <span className="text-indigo-400">منصة هاني</span> الرقمية الجديدة
+                    </h3>
+                    <p className="text-slate-400 text-sm md:text-lg font-medium">
+                      الحل المتكامل للتسويق والنمو السريع لعملك في السوق الجزائري
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-4">
+                  <span className="hidden md:block text-[10px] font-black text-slate-500 uppercase tracking-widest pl-4 border-l border-white/10">متاح الآن</span>
+                  <div className="bg-white text-slate-950 px-8 py-4 rounded-2xl font-black uppercase tracking-widest text-xs group-hover:bg-indigo-50 transition-all flex items-center gap-2 shadow-xl shadow-white/5">
+                    اكتشف المزايا
+                    <ArrowLeft size={16} className="rotate-180 group-hover:translate-x-1 transition-transform" />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </Link>
         </div>
 
         <div className="space-y-0">

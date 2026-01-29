@@ -33,6 +33,25 @@ export interface RequestMessage {
     date: string;
 }
 
+export interface RequestAttachment {
+    id: string;
+    fileName: string;
+    fileUrl: string;
+    fileType: string;
+    fileSize: number;
+    uploadedBy: 'client' | 'admin';
+    uploadedAt: string;
+}
+
+export interface RequestTimelineEvent {
+    id: string;
+    timestamp: string;
+    type: 'status_change' | 'message' | 'attachment' | 'note' | 'payment' | 'created';
+    description: string;
+    actor: 'client' | 'admin' | 'system';
+    metadata?: any;
+}
+
 export interface ServiceRequest {
     id: string;
     serviceId?: string;
@@ -51,6 +70,13 @@ export interface ServiceRequest {
     messages?: RequestMessage[];
     value?: number;
     message?: string;
+    projectId?: string;  // Link to associated project
+    attachments?: RequestAttachment[];  // Enhanced: Full attachment objects
+    timelineEvents?: RequestTimelineEvent[];  // New: Timeline tracking
+    internalNotes?: string;  // New: Admin-only notes
+    estimatedCompletion?: string;  // New: Expected completion date
+    source?: 'web' | 'portal' | 'portal_support' | 'api';  // New: Track request source
+    category?: string;  // New: Request category/type
 }
 
 export interface ProjectTask {
