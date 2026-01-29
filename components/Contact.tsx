@@ -1,6 +1,8 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useSystem } from '../context/SystemContext';
-import { Mail, MessageSquare, MapPin, Send, Phone, MessageCircle, ExternalLink } from 'lucide-react';
+import { Mail, MessageSquare, MapPin, Send, Phone, MessageCircle, ExternalLink, Loader2, CheckCircle2 } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { requestService } from '../lib/services/requestService';
 
 const Contact: React.FC = () => {
   const { contactInfo } = useSystem();
@@ -9,6 +11,42 @@ const Contact: React.FC = () => {
   const whatsappUrl = contactInfo?.whatsapp?.startsWith('http')
     ? contactInfo.whatsapp
     : `https://wa.me/${(contactInfo?.whatsapp || '').replace(/\D/g, '')}`;
+
+  const [isLoading, setIsLoading] = useState(false);
+  const [status, setStatus] = useState<'idle' | 'success' | 'error'>('idle');
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    category: 'تطوير أعمال وإدارة أتمتة',
+    message: ''
+  });
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+    setStatus('idle');
+
+    try {
+      await requestService.create({
+        clientName: formData.name,
+        clientEmail: formData.email,
+        clientPhone: '', // Not collected in this simplified form
+        serviceTitle: formData.category,
+        message: formData.message,
+        category: formData.category,
+        priority: 'medium',
+        source: 'web',
+        status: 'new'
+      });
+      setStatus('success');
+      setFormData({ name: '', email: '', category: 'تطوير أعمال وإدارة أتمتة', message: '' });
+    } catch (error) {
+      console.error('Contact submission failed:', error);
+      setStatus('error');
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const contactMethods = [
     {
@@ -120,11 +158,14 @@ const Contact: React.FC = () => {
                     <p className="text-[9px] md:text-[10px] text-slate-500 font-bold uppercase tracking-[0.3em]">Project Submission Engine v1.0</p>
                   </div>
 
-                  <form className="space-y-6 sm:space-y-8 text-right" dir="rtl">
+                  <form onSubmit={handleSubmit} className="space-y-6 sm:space-y-8 text-right" dir="rtl">
                     <div className="space-y-3">
                       <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest pr-2">الاسم الكامل</label>
                       <input
                         type="text"
+                        required
+                        value={formData.name}
+                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                         className="w-full bg-slate-950/80 border border-white/10 rounded-[var(--border-radius-elite)] px-5 sm:px-6 py-4 sm:py-5 text-base text-white focus:border-[var(--accent-indigo)] focus:bg-slate-950 outline-none transition-all shadow-inner"
                         placeholder="الاسم واللقب..."
                       />
@@ -133,6 +174,9 @@ const Contact: React.FC = () => {
                       <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest pr-2">البريد الإلكتروني</label>
                       <input
                         type="email"
+                        required
+                        value={formData.email}
+                        onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                         className="w-full bg-slate-950/80 border border-white/10 rounded-[var(--border-radius-elite)] px-5 sm:px-6 py-4 sm:py-5 text-base text-white focus:border-[var(--accent-indigo)] focus:bg-slate-950 outline-none transition-all shadow-inner"
                         placeholder="example@mail.com"
                       />
@@ -141,7 +185,11 @@ const Contact: React.FC = () => {
                     <div className="space-y-3">
                       <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest pr-2">مجال المشروع</label>
                       <div className="relative">
-                        <select className="w-full bg-slate-950/80 border border-white/10 rounded-[var(--border-radius-elite)] px-5 sm:px-6 py-4 sm:py-5 text-base text-white focus:border-[var(--accent-indigo)] focus:bg-slate-950 outline-none appearance-none transition-all cursor-pointer">
+                        <select
+                          value={formData.category}
+                          onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                          className="w-full bg-slate-950/80 border border-white/10 rounded-[var(--border-radius-elite)] px-5 sm:px-6 py-4 sm:py-5 text-base text-white focus:border-[var(--accent-indigo)] focus:bg-slate-950 outline-none appearance-none transition-all cursor-pointer"
+                        >
                           <option>تطوير أعمال وإدارة أتمتة</option>
                           <option>تجارة إلكترونية ودفع إلكتروني</option>
                           <option>بناء هوية بصرية وعلامة تجارية</option>
@@ -157,16 +205,59 @@ const Contact: React.FC = () => {
                     <div className="space-y-3">
                       <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest pr-2">تفاصيل الرؤية والأهداف</label>
                       <textarea
+                        required
                         rows={6}
+                        value={formData.message}
+                        onChange={(e) => setFormData({ ...formData, message: e.target.value })}
                         className="w-full bg-slate-950/80 border border-white/10 rounded-[var(--border-radius-elite)] px-5 sm:px-6 py-4 sm:py-5 text-base text-white focus:border-[var(--accent-indigo)] focus:bg-slate-950 outline-none transition-all shadow-inner resize-none"
                         placeholder="اشرح لنا فكرتك، المشاكل التي تواجهها، والأهداف التي تريد تحقيقها..."
                       ></textarea>
                     </div>
 
-                    <button type="submit" className="w-full group bg-white hover:bg-[var(--accent-indigo)] text-slate-950 hover:text-white py-4 sm:py-6 rounded-[var(--border-radius-elite)] font-black text-base flex items-center justify-center gap-4 transition-all shadow-2xl active:scale-[0.98] min-h-[56px]">
-                      إرسال رسالتك الآن
-                      <Send size={20} className="group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
-                    </button>
+                    <AnimatePresence>
+                      {status === 'success' ? (
+                        <motion.div
+                          initial={{ opacity: 0, scale: 0.95 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          className="p-6 rounded-[var(--border-radius-elite)] bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-center space-y-3"
+                        >
+                          <div className="w-12 h-12 rounded-full bg-emerald-500/20 flex items-center justify-center mx-auto">
+                            <CheckCircle2 size={24} />
+                          </div>
+                          <h4 className="font-black text-lg text-white">تم استلام طلبك بنجاح!</h4>
+                          <p className="text-xs leading-relaxed">
+                            لقد أرسلنا لك كود الدخول إلى الإيميل. يمكنك الآن متابعة مراحل تنفيذ طلبك عبر بوابة العميل.
+                          </p>
+                          <a
+                            href="/portal"
+                            className="inline-block mt-4 text-emerald-400 font-black text-xs uppercase tracking-widest border-b border-emerald-500/30 hover:border-emerald-500 transition-all"
+                          >
+                            اذهب إلى بوابة العميل
+                          </a>
+                        </motion.div>
+                      ) : (
+                        <button
+                          type="submit"
+                          disabled={isLoading}
+                          className="w-full group bg-white hover:bg-[var(--accent-indigo)] text-slate-950 hover:text-white py-4 sm:py-6 rounded-[var(--border-radius-elite)] font-black text-base flex items-center justify-center gap-4 transition-all shadow-2xl active:scale-[0.98] min-h-[56px] disabled:opacity-50"
+                        >
+                          {isLoading ? (
+                            <Loader2 size={24} className="animate-spin text-slate-900" />
+                          ) : (
+                            <>
+                              إرسال رسالتك الآن
+                              <Send size={20} className="group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
+                            </>
+                          )}
+                        </button>
+                      )}
+                    </AnimatePresence>
+
+                    {status === 'error' && (
+                      <p className="text-red-400 text-xs font-bold text-center">
+                        حدث خطأ أثناء الإرسال. يرجى المحاولة مرة أخرى أو التواصل عبر الواتساب.
+                      </p>
+                    )}
                   </form>
                 </div>
               </div>

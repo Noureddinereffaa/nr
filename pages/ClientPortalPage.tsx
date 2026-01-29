@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Briefcase, Link as LinkIcon, Search, AlertTriangle, LayoutDashboard, Zap, LifeBuoy, FileText, Clock, ArrowLeft, Paperclip, Bell } from 'lucide-react';
+import { Briefcase, Link as LinkIcon, Search, AlertTriangle, LayoutDashboard, Zap, LifeBuoy, FileText, Clock, ArrowLeft, Paperclip, Bell, Loader2 } from 'lucide-react';
 import Layout from '../components/Layout';
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
 import { useUI } from '../context/UIContext';
@@ -23,6 +23,9 @@ const ClientPortalPage: React.FC = () => {
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState('');
     const [isFound, setIsFound] = useState(false);
+    const [loginMethod, setLoginMethod] = useState<'code' | 'email'>('code');
+    const [email, setEmail] = useState('');
+    const [foundProjects, setFoundProjects] = useState<Project[]>([]);
 
     const { addToast } = useUI();
 
@@ -50,6 +53,53 @@ const ClientPortalPage: React.FC = () => {
         } catch (err) {
             console.error(err);
             setError('حدث خطأ أثناء الاتصال بالنظام. يرجى المحاولة لاحقاً.');
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const handleEmailLookup = async () => {
+        if (!email.trim() || !email.includes('@')) {
+            setError('يرجى إدخال بريد إلكتروني صحيح.');
+            return;
+        }
+
+        setIsLoading(true);
+        setError('');
+        setFoundProjects([]);
+
+        try {
+            const projects = await projectService.getByEmail(email.trim().toLowerCase());
+
+            if (projects.length === 0) {
+                setError('لم نجد أي طلبات مرتبطة بهذا البريد الإلكتروني.');
+            } else if (projects.length === 1) {
+                // Direct login if only one project
+                setProject(projects[0]);
+                const foundInvoices = await invoiceService.getByProjectId(projects[0].id);
+                setInvoices(foundInvoices);
+                setIsFound(true);
+            } else {
+                // Show selection list
+                setFoundProjects(projects);
+            }
+        } catch (err) {
+            console.error(err);
+            setError('حدث خطأ أثناء البحث. يرجى المحاولة لاحقاً.');
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const selectProject = async (proj: Project) => {
+        setIsLoading(true);
+        try {
+            setProject(proj);
+            const foundInvoices = await invoiceService.getByProjectId(proj.id);
+            setInvoices(foundInvoices);
+            setIsFound(true);
+        } catch (err) {
+            console.error(err);
         } finally {
             setIsLoading(false);
         }
@@ -129,38 +179,102 @@ const ClientPortalPage: React.FC = () => {
                         <div className="max-w-2xl mx-auto text-center space-y-8">
                             <div className="space-y-4">
                                 <h1 className="text-4xl md:text-6xl font-black text-white uppercase tracking-tighter">بوابة العميل</h1>
-                                <p className="text-slate-400 text-lg">أدخل كود المشروع الخاص بك لمتابعة التقدم والتحميلات</p>
+                            </div>
+
+                            <div className="flex justify-center gap-4 mb-8">
+                                <button
+                                    onClick={() => { setLoginMethod('code'); setError(''); }}
+                                    className={`px-6 py-2 rounded-full text-xs font-black uppercase tracking-widest transition-all ${loginMethod === 'code' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/20' : 'bg-white/5 text-slate-500'}`}
+                                >
+                                    كود المشروع
+                                </button>
+                                <button
+                                    onClick={() => { setLoginMethod('email'); setError(''); }}
+                                    className={`px-6 py-2 rounded-full text-xs font-black uppercase tracking-widest transition-all ${loginMethod === 'email' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/20' : 'bg-white/5 text-slate-500'}`}
+                                >
+                                    البريد الإلكتروني
+                                </button>
                             </div>
 
                             <div className="relative group">
                                 <div className="absolute -inset-1 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-3xl blur opacity-25 group-hover:opacity-100 transition duration-1000"></div>
                                 <div className="relative flex items-center bg-slate-900 border border-white/10 rounded-3xl p-2 gap-2">
-                                    <input
-                                        type="text"
-                                        placeholder="كود المشروع (مثال: p-123456)"
-                                        value={projectCode}
-                                        onChange={(e) => setProjectCode(e.target.value)}
-                                        className="flex-1 bg-transparent border-none text-white px-6 py-4 outline-none font-mono"
-                                        onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-                                        aria-label="كود المشروع"
-                                    />
-                                    <button
-                                        onClick={handleSearch}
-                                        disabled={isLoading}
-                                        aria-label="دخول للبوابة"
-                                        className="bg-white text-slate-950 px-8 py-4 rounded-2xl font-black uppercase tracking-widest text-xs hover:bg-indigo-50 transition-all flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                                    >
-                                        {isLoading ? (
-                                            <div className="w-4 h-4 border-2 border-slate-950 border-t-transparent rounded-full animate-spin"></div>
-                                        ) : (
-                                            <>
-                                                <Search size={18} />
+                                    {loginMethod === 'code' ? (
+                                        <>
+                                            <input
+                                                type="text"
+                                                placeholder="كود المشروع (مثال: p-123456)"
+                                                value={projectCode}
+                                                onChange={(e) => setProjectCode(e.target.value)}
+                                                className="flex-1 bg-transparent border-none text-white px-6 py-4 outline-none font-mono text-right"
+                                                onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+                                                aria-label="كود المشروع"
+                                            />
+                                            <button
+                                                onClick={handleSearch}
+                                                disabled={isLoading}
+                                                className="bg-white text-slate-950 px-8 py-4 rounded-2xl font-black uppercase tracking-widest text-xs hover:bg-indigo-50 transition-all flex items-center gap-2 disabled:opacity-50"
+                                            >
+                                                {isLoading ? <Loader2 size={16} className="animate-spin" /> : <Search size={18} />}
                                                 دخول
-                                            </>
-                                        )}
-                                    </button>
+                                            </button>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <input
+                                                type="email"
+                                                placeholder="example@mail.com"
+                                                value={email}
+                                                onChange={(e) => setEmail(e.target.value)}
+                                                className="flex-1 bg-transparent border-none text-white px-6 py-4 outline-none text-right font-medium"
+                                                onKeyDown={(e) => e.key === 'Enter' && handleEmailLookup()}
+                                                aria-label="البريد الإلكتروني"
+                                            />
+                                            <button
+                                                onClick={handleEmailLookup}
+                                                disabled={isLoading}
+                                                className="bg-white text-slate-950 px-8 py-4 rounded-2xl font-black uppercase tracking-widest text-xs hover:bg-indigo-50 transition-all flex items-center gap-2 disabled:opacity-50"
+                                            >
+                                                {isLoading ? <Loader2 size={16} className="animate-spin" /> : <Search size={18} />}
+                                                بحث
+                                            </button>
+                                        </>
+                                    )}
                                 </div>
                             </div>
+
+                            {foundProjects.length > 0 && (
+                                <motion.div
+                                    initial={{ opacity: 0, y: 10 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    className="bg-slate-900/50 border border-white/5 rounded-3xl p-6 text-right space-y-4"
+                                >
+                                    <h3 className="text-white font-black text-lg">اختر المشروع المرجو متابعته:</h3>
+                                    <div className="grid gap-3">
+                                        {foundProjects.map(proj => (
+                                            <button
+                                                key={proj.id}
+                                                onClick={() => selectProject(proj)}
+                                                className="w-full flex items-center justify-between p-4 bg-white/5 border border-white/5 rounded-2xl hover:border-indigo-500/30 transition-all group"
+                                            >
+                                                <div className="flex items-center gap-3">
+                                                    <div className="w-10 h-10 rounded-xl bg-indigo-500/10 flex items-center justify-center text-indigo-400 group-hover:scale-110 transition-transform">
+                                                        <Briefcase size={18} />
+                                                    </div>
+                                                    <div className="text-right">
+                                                        <p className="text-white font-bold">{proj.title}</p>
+                                                        <p className="text-[10px] text-slate-500 font-mono uppercase">CODE: {proj.id}</p>
+                                                    </div>
+                                                </div>
+                                                <span className={`px-3 py-1 rounded-lg text-[10px] font-bold uppercase ${proj.status === 'completed' ? 'bg-green-500/10 text-green-400' : 'bg-indigo-500/10 text-indigo-400'
+                                                    }`}>
+                                                    {proj.status}
+                                                </span>
+                                            </button>
+                                        ))}
+                                    </div>
+                                </motion.div>
+                            )}
 
                             {error && (
                                 <div className="bg-amber-500/10 text-amber-500 px-4 py-3 rounded-xl border border-amber-500/20 flex items-center justify-center gap-2">

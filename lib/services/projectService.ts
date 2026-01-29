@@ -107,8 +107,35 @@ export const projectService = {
             title: r.title || r.data?.title,
             client_id: r.client_id || r.data?.clientId,
             clientId: r.client_id || r.data?.clientId,
+            clientEmail: r.data?.clientEmail, // Support for email-based lookup
             status: r.status || r.data?.status || 'planning',
             budget: Number(r.budget || r.data?.budget || 0)
         };
+    },
+
+    /**
+     * Finds projects associated with a specific email address.
+     * Uses text search on the JSON data blob as a fallback if no explicit email column exists.
+     */
+    async getByEmail(email: string): Promise<Project[]> {
+        if (!isSupabaseConfigured() || !supabase) return [];
+
+        const { data, error } = await supabase
+            .from('projects')
+            .select('*');
+
+        if (error) throw error;
+        if (!data) return [];
+
+        return data.map((r: any) => ({
+            ...r.data,
+            id: r.id,
+            title: r.title || r.data?.title,
+            client_id: r.client_id || r.data?.clientId,
+            clientId: r.client_id || r.data?.clientId,
+            clientEmail: r.data?.clientEmail,
+            status: r.status || r.data?.status || 'planning',
+            budget: Number(r.budget || r.data?.budget || 0)
+        })).filter(p => p.clientEmail?.toLowerCase() === email.toLowerCase());
     }
 };

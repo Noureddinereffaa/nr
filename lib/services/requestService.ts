@@ -1,5 +1,7 @@
 import { supabase, isSupabaseConfigured } from '../supabase';
 import { ServiceRequest, RequestAttachment, RequestTimelineEvent } from '../../types';
+import { projectService } from './projectService';
+import { sendWelcomeEmail } from '../email-notifications';
 
 /**
  * Service Request Management Service
@@ -56,6 +58,35 @@ export const requestService = {
     async create(request: Omit<ServiceRequest, 'id' | 'date'>): Promise<ServiceRequest> {
         const id = 'req-' + Date.now();
         const date = new Date().toISOString();
+        let targetProjectId = request.projectId;
+
+        // Auto-Onboarding Logic: Ensure every request is linked to a project
+        if (!targetProjectId && request.clientEmail) {
+            try {
+                // Check for existing projects for this email
+                const existingProjects = await projectService.getByEmail(request.clientEmail);
+
+                if (existingProjects.length > 0) {
+                    // Link to the most recent project
+                    targetProjectId = existingProjects[0].id;
+                } else {
+                    // Create a new placeholder project for this client
+                    const newProject = await projectService.create({
+                        title: `طلب استفسار: ${request.serviceTitle}`,
+                        client: request.clientName,
+                        clientEmail: request.clientEmail,
+                        status: 'planning',
+                        category: request.category || 'inquiry',
+                        date: date,
+                        fullDescription: `طلب تلقائي لعميل جديد: ${request.serviceTitle}\n\nالرسالة الأصلية:\n${request.message || ''}`
+                    } as any);
+                    targetProjectId = newProject.id;
+                }
+            } catch (error) {
+                console.error('Failed to auto-provision project:', error);
+                // Continue anyway, project_id will be null or fallback
+            }
+        }
 
         // Create initial timeline event
         const initialTimeline: RequestTimelineEvent = {
@@ -70,6 +101,7 @@ export const requestService = {
             ...request,
             id,
             date,
+            projectId: targetProjectId,
             status: request.status || 'new',
             timelineEvents: [initialTimeline],
             attachments: request.attachments || []
@@ -90,10 +122,20 @@ export const requestService = {
                 attachments: newRequest.attachments,
                 timeline_events: newRequest.timelineEvents,
                 estimated_completion: newRequest.estimatedCompletion,
-                project_id: newRequest.projectId,
+                project_id: targetProjectId,
                 data: newRequest
             }]);
             if (error) throw error;
+
+            // Trigger Welcome Email / Access Code notification
+            if (newRequest.clientEmail && targetProjectId) {
+                sendWelcomeEmail(
+                    newRequest.clientEmail,
+                    newRequest.clientName,
+                    newRequest.serviceTitle,
+                    targetProjectId
+                ).catch(err => console.error('Failed to send welcome email:', err));
+            }
         }
 
         return newRequest;
