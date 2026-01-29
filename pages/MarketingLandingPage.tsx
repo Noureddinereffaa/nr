@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 import Layout from '../components/Layout';
 import SEO from '../components/seo/SEO';
+import { NOUREDDINE_DATA } from '../lib/constants/site-identity';
 
 const MarketingLandingPage: React.FC = () => {
     const [activeQuestion, setActiveQuestion] = useState<number | null>(null);
@@ -103,7 +104,7 @@ const MarketingLandingPage: React.FC = () => {
         }
     ];
 
-    const whatsappNumber = "213123456789";
+    const whatsappNumber = "213557585066";
     const whatsappLink = (msg: string) => `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(msg)}`;
 
     return (

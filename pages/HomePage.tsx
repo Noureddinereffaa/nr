@@ -26,7 +26,7 @@ const HomePage: React.FC = () => {
     ],
     "contactPoint": {
       "@type": "ContactPoint",
-      "telephone": "+213-555-000-000",
+      "telephone": "+213-557-585-066",
       "contactType": "customer service"
     }
   };

@@ -45,8 +45,8 @@ export const SystemProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         templateId: 'premium-glass'
     });
     const [contactInfo, setContactInfo] = useState<ContactInfo>({
-        phone: '+213 555 000 000',
-        whatsapp: 'https://wa.me/213555000000',
+        phone: '+213 557 585 066',
+        whatsapp: 'https://wa.me/213557585066',
         email: 'contact@reffaa.com',
         address: 'باتنة، الجزائر',
         socials: { linkedin: '', facebook: '' }
@@ -75,8 +75,8 @@ export const SystemProvider: React.FC<{ children: React.ReactNode }> = ({ childr
             templateId: 'premium-glass'
         },
         contactInfo: {
-            phone: '+213 555 000 000',
-            whatsapp: 'https://wa.me/213555000000',
+            phone: '+213 557 585 066',
+            whatsapp: 'https://wa.me/213557585066',
             email: 'contact@reffaa.com',
             address: 'باتنة، الجزائر',
             socials: { linkedin: '', facebook: '' }

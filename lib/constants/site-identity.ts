@@ -9,7 +9,7 @@ export const NOUREDDINE_DATA = {
     photoUrl: "https://www2.0zz0.com/2025/12/17/16/907136235.jpg",
     bio: "نحن لا نصمم واجهات فقط، نحن نهندس أنظمة مبيعات أوتوماتيكية وندير مشاريعك من الصفر لضمان الهيمنة على السوق الرقمي.",
     socials: {
-        whatsapp: "https://wa.me/213555000000",
+        whatsapp: "https://wa.me/213557585066",
         email: "contact@reffaa.com",
         linkedin: "https://linkedin.com/in/noureddine-reffaa",
         facebook: "https://facebook.com/noureddine.reffaa"
