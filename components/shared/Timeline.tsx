@@ -1,13 +1,30 @@
-import React from 'react';
+import React, { useState, useMemo } from 'react';
 import { Clock, CheckCircle, MessageSquare, Paperclip, AlertCircle, DollarSign, FileText } from 'lucide-react';
 import { RequestTimelineEvent } from '../../lib/types';
 
+/**
+ * Props for the Timeline component.
+ */
 export interface TimelineProps {
+    /** Array of timeline events to display, sorted automatically by the component (newest first) */
     events: RequestTimelineEvent[];
+    /** Optional CSS class names for the container */
     className?: string;
 }
 
 const Timeline: React.FC<TimelineProps> = ({ events, className = '' }) => {
+    const [displayLimit, setDisplayLimit] = useState(5);
+
+    const sortedEvents = useMemo(() => {
+        if (!events) return [];
+        return [...events].sort((a, b) =>
+            new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+        );
+    }, [events]);
+
+    const visibleEvents = sortedEvents.slice(0, displayLimit);
+    const hasMore = sortedEvents.length > displayLimit;
+
     const getEventIcon = (type: RequestTimelineEvent['type']) => {
         switch (type) {
             case 'status_change':
@@ -90,14 +107,11 @@ const Timeline: React.FC<TimelineProps> = ({ events, className = '' }) => {
         );
     }
 
-    // Sort events by timestamp (newest first)
-    const sortedEvents = [...events].sort((a, b) =>
-        new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
-    );
+    // Memoized sorted events for performance
 
     return (
         <div className={`space-y-4 ${className}`} dir="rtl">
-            {sortedEvents.map((event, index) => (
+            {visibleEvents.map((event, index) => (
                 <div key={event.id || index} className="flex gap-4 group">
                     {/* Timeline Line */}
                     <div className="flex flex-col items-center">
@@ -140,8 +154,17 @@ const Timeline: React.FC<TimelineProps> = ({ events, className = '' }) => {
                     </div>
                 </div>
             ))}
+
+            {hasMore && (
+                <button
+                    onClick={() => setDisplayLimit(prev => prev + 10)}
+                    className="w-full py-4 text-sm font-bold text-slate-500 hover:text-white bg-white/5 hover:bg-white/10 rounded-2xl transition-all border border-dashed border-white/10 hover:border-white/20"
+                >
+                    عرض المزيد من الأحداث ({sortedEvents.length - displayLimit})
+                </button>
+            )}
         </div>
     );
 };
 
-export default Timeline;
+export default React.memo(Timeline);

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import {
     X,
@@ -25,6 +25,8 @@ import { useBusiness } from '../../../../context/BusinessContext';
 import { useUI } from '../../../../context/UIContext';
 import Timeline from '../../../shared/Timeline';
 import { fileUploadService } from '../../../../lib/services/fileUploadService';
+import { supabase, isSupabaseConfigured } from '../../../../lib/supabase';
+import { requestService } from '../../../../lib/services/requestService';
 
 interface RequestDetailProps {
     request: ServiceRequest;
@@ -35,12 +37,58 @@ const RequestDetail: React.FC<RequestDetailProps> = ({ request, onClose }) => {
     const { updateRequest, deleteRequest, addClient } = useBusiness();
     const { addToast, addNotification } = useUI();
     const [isConverting, setIsConverting] = useState(false);
+    const [currentRequest, setCurrentRequest] = useState(request);
     const [internalNotes, setInternalNotes] = useState(request.internalNotes || '');
     const [isSavingNotes, setIsSavingNotes] = useState(false);
 
+    // Sync current request when prop changes
+    useEffect(() => {
+        setCurrentRequest(request);
+        setInternalNotes(request.internalNotes || '');
+    }, [request]);
+
+    // Setup Real-time subscription for this specific request
+    useEffect(() => {
+        if (!isSupabaseConfigured() || !supabase || !request.id) return;
+
+        const channel = supabase
+            .channel(`admin-request-realtime-${request.id}`)
+            .on(
+                'postgres_changes',
+                {
+                    event: '*',
+                    schema: 'public',
+                    table: 'service_requests',
+                    filter: `id=eq.${request.id}`
+                },
+                async (payload: any) => {
+                    console.log('Admin real-time update:', payload);
+
+                    if (payload.event === 'UPDATE') {
+                        // Fetch fresh data for this request to ensure complex objects (attachments, timeline) are correct
+                        try {
+                            const all = await requestService.getAll();
+                            const fresh = all.find(r => r.id === request.id);
+                            if (fresh) {
+                                setCurrentRequest(fresh);
+                                addToast('تم تحديث البيانات لحظياً', 'info');
+                            }
+                        } catch (err) {
+                            console.error('Failed to refresh request data:', err);
+                        }
+                    }
+                }
+            )
+            .subscribe();
+
+        return () => {
+            supabase.removeChannel(channel);
+        };
+    }, [request.id]);
+
     const handleStatusChange = async (newStatus: ServiceRequest['status']) => {
         try {
-            await updateRequest(request.id, { status: newStatus });
+            await updateRequest(currentRequest.id, { status: newStatus });
             addToast(`تم تحديث الحالة إلى: ${newStatus}`, 'success');
         } catch (error) {
             addToast('فشل في تحديث الحالة', 'error');
@@ -49,7 +97,7 @@ const RequestDetail: React.FC<RequestDetailProps> = ({ request, onClose }) => {
 
     const handlePriorityChange = async (newPriority: ServiceRequest['priority']) => {
         try {
-            await updateRequest(request.id, { priority: newPriority });
+            await updateRequest(currentRequest.id, { priority: newPriority });
             addToast(`تم تحديث الأولوية إلى: ${newPriority}`, 'success');
         } catch (error) {
             addToast('فشل في تحديث الأولوية', 'error');
@@ -59,7 +107,7 @@ const RequestDetail: React.FC<RequestDetailProps> = ({ request, onClose }) => {
     const handleSaveNotes = async () => {
         setIsSavingNotes(true);
         try {
-            await updateRequest(request.id, { internalNotes });
+            await updateRequest(currentRequest.id, { internalNotes });
             addToast('تم حفظ الملاحظات', 'success');
         } catch (error) {
             addToast('فشل في حفظ الملاحظات', 'error');
@@ -74,22 +122,22 @@ const RequestDetail: React.FC<RequestDetailProps> = ({ request, onClose }) => {
             try {
                 // 1. Create client
                 await addClient({
-                    name: request.clientName,
-                    email: request.clientEmail,
-                    phone: request.clientPhone,
-                    company: request.company,
+                    name: currentRequest.clientName,
+                    email: currentRequest.clientEmail,
+                    phone: currentRequest.clientPhone,
+                    company: currentRequest.company,
                     status: 'active',
-                    value: request.value || 0,
-                    notes: `تم التحويل من طلب خدمة: ${request.serviceTitle}\n${request.projectDetails || ''}`,
-                    tags: ['محول من طلب', request.serviceTitle]
+                    value: currentRequest.value || 0,
+                    notes: `تم التحويل من طلب خدمة: ${currentRequest.serviceTitle}\n${currentRequest.projectDetails || ''}`,
+                    tags: ['محول من طلب', currentRequest.serviceTitle]
                 });
 
                 // 2. Update request status
-                await updateRequest(request.id, { status: 'accepted' });
+                await updateRequest(currentRequest.id, { status: 'accepted' });
 
                 addNotification({
                     title: 'تم تحويل الطلب بنجاح',
-                    message: `العميل ${request.clientName} أصبح الآن جزءاً من قاعدة بيانات الـ CRM.`,
+                    message: `العميل ${currentRequest.clientName} أصبح الآن جزءاً من قاعدة بيانات الـ CRM.`,
                     type: 'success'
                 });
 
@@ -138,19 +186,19 @@ const RequestDetail: React.FC<RequestDetailProps> = ({ request, onClose }) => {
                             <MessageSquare size={32} />
                         </div>
                         <h3 className="text-3xl font-black tracking-tighter mb-2 leading-none uppercase">Service<br />Request</h3>
-                        <p className="text-indigo-100 font-bold text-xs uppercase tracking-widest opacity-80">Ref: {request.id}</p>
+                        <p className="text-indigo-100 font-bold text-xs uppercase tracking-widest opacity-80">Ref: {currentRequest.id}</p>
                     </div>
 
                     <div className="relative z-10 space-y-6">
                         <div className="p-4 bg-white/10 backdrop-blur-md rounded-2xl border border-white/10">
                             <p className="text-[10px] font-black uppercase tracking-widest text-indigo-200 mb-1">Status</p>
-                            <p className="text-xl font-black">{statusMap[request.status]}</p>
+                            <p className="text-xl font-black">{statusMap[currentRequest.status]}</p>
                         </div>
                         <div className="p-4 bg-white/10 backdrop-blur-md rounded-2xl border border-white/10">
                             <p className="text-[10px] font-black uppercase tracking-widest text-indigo-200 mb-1">Priority</p>
                             <div className="flex items-center gap-2">
-                                <div className={`w-2 h-2 rounded-full ${request.priority === 'high' ? 'bg-red-400' : request.priority === 'medium' ? 'bg-amber-400' : 'bg-slate-400'}`}></div>
-                                <p className="text-xl font-black uppercase">{request.priority || 'medium'}</p>
+                                <div className={`w-2 h-2 rounded-full ${currentRequest.priority === 'high' ? 'bg-red-400' : currentRequest.priority === 'medium' ? 'bg-amber-400' : 'bg-slate-400'}`}></div>
+                                <p className="text-xl font-black uppercase">{currentRequest.priority || 'medium'}</p>
                             </div>
                         </div>
                     </div>
@@ -165,8 +213,8 @@ const RequestDetail: React.FC<RequestDetailProps> = ({ request, onClose }) => {
                                 <User className="text-indigo-400" size={24} />
                             </div>
                             <div>
-                                <h4 className="text-2xl font-black text-white">{request.clientName}</h4>
-                                <p className="text-slate-500 font-bold text-sm tracking-wide">{request.serviceTitle}</p>
+                                <h4 className="text-2xl font-black text-white">{currentRequest.clientName}</h4>
+                                <p className="text-slate-500 font-bold text-sm tracking-wide">{currentRequest.serviceTitle}</p>
                             </div>
                         </div>
                         <button
@@ -183,19 +231,19 @@ const RequestDetail: React.FC<RequestDetailProps> = ({ request, onClose }) => {
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div className="p-4 bg-slate-950/50 border border-white/5 rounded-2xl flex items-center gap-4">
                                 <Mail className="text-slate-600" size={20} />
-                                <div className="text-left font-mono text-sm text-slate-300">{request.clientEmail}</div>
+                                <div className="text-left font-mono text-sm text-slate-300">{currentRequest.clientEmail}</div>
                             </div>
                             <div className="p-4 bg-slate-950/50 border border-white/5 rounded-2xl flex items-center gap-4">
                                 <Phone className="text-slate-600" size={20} />
-                                <div className="text-left font-mono text-sm text-slate-300">{request.clientPhone}</div>
+                                <div className="text-left font-mono text-sm text-slate-300">{currentRequest.clientPhone}</div>
                             </div>
                             <div className="p-4 bg-slate-950/50 border border-white/5 rounded-2xl flex items-center gap-4">
                                 <Calendar className="text-slate-600" size={20} />
-                                <div className="text-slate-300 font-bold block">{new Date(request.date).toLocaleString('ar-EG')}</div>
+                                <div className="text-slate-300 font-bold block">{new Date(currentRequest.date).toLocaleString('ar-EG')}</div>
                             </div>
                             <div className="p-4 bg-slate-950/50 border border-white/5 rounded-2xl flex items-center gap-4">
                                 <DollarSign className="text-emerald-500" size={20} />
-                                <div className="text-emerald-400 font-black">{request.value?.toLocaleString() || 0} DZD</div>
+                                <div className="text-emerald-400 font-black">{currentRequest.value?.toLocaleString() || 0} DZD</div>
                             </div>
                         </div>
 
@@ -206,19 +254,19 @@ const RequestDetail: React.FC<RequestDetailProps> = ({ request, onClose }) => {
                                 تفاصيل ومواصفات المشروع
                             </h5>
                             <div className="p-6 bg-slate-950 border border-white/5 rounded-[2rem] text-slate-400 leading-loose font-medium">
-                                {request.projectDetails || request.message || "لا توجد تفاصيل إضافية مسجلة لهذا الطلب."}
+                                {currentRequest.projectDetails || currentRequest.message || "لا توجد تفاصيل إضافية مسجلة لهذا الطلب."}
                             </div>
                         </div>
 
                         {/* Attachments */}
-                        {request.attachments && request.attachments.length > 0 && (
+                        {currentRequest.attachments && currentRequest.attachments.length > 0 && (
                             <div className="space-y-4">
                                 <h5 className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] flex items-center gap-2">
                                     <Paperclip size={14} className="text-emerald-500" />
-                                    المرفقات ({request.attachments.length})
+                                    المرفقات ({currentRequest.attachments.length})
                                 </h5>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                                    {request.attachments.map((att, idx) => (
+                                    {currentRequest.attachments.map((att, idx) => (
                                         <div key={att.id || idx} className="flex items-center justify-between p-4 bg-slate-950 border border-white/5 rounded-xl hover:border-indigo-500/30 transition-all group">
                                             <div className="flex items-center gap-3 flex-1 min-w-0">
                                                 <div className="text-2xl">
@@ -248,14 +296,14 @@ const RequestDetail: React.FC<RequestDetailProps> = ({ request, onClose }) => {
                         )}
 
                         {/* Timeline */}
-                        {request.timelineEvents && request.timelineEvents.length > 0 && (
+                        {currentRequest.timelineEvents && currentRequest.timelineEvents.length > 0 && (
                             <div className="space-y-4">
                                 <h5 className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] flex items-center gap-2">
                                     <Clock size={14} className="text-purple-500" />
                                     الخط الزمني
                                 </h5>
                                 <div className="bg-slate-950 border border-white/5 rounded-[2rem] p-6">
-                                    <Timeline events={request.timelineEvents} />
+                                    <Timeline events={currentRequest.timelineEvents} />
                                 </div>
                             </div>
                         )}
@@ -293,7 +341,7 @@ const RequestDetail: React.FC<RequestDetailProps> = ({ request, onClose }) => {
                                         <button
                                             key={s}
                                             onClick={() => handleStatusChange(s)}
-                                            className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase transition-all border ${request.status === s
+                                            className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase transition-all border ${currentRequest.status === s
                                                 ? 'bg-indigo-600 border-indigo-500 text-white'
                                                 : 'bg-white/5 border-white/5 text-slate-500 hover:text-white'}`}
                                         >
@@ -309,7 +357,7 @@ const RequestDetail: React.FC<RequestDetailProps> = ({ request, onClose }) => {
                                         <button
                                             key={p}
                                             onClick={() => handlePriorityChange(p)}
-                                            className={`flex-1 py-4 rounded-2xl text-[10px] font-black uppercase transition-all border ${request.priority === p
+                                            className={`flex-1 py-4 rounded-2xl text-[10px] font-black uppercase transition-all border ${currentRequest.priority === p
                                                 ? priorityColors[p]
                                                 : 'bg-white/5 border-white/5 text-slate-500 hover:text-white'}`}
                                         >
@@ -326,7 +374,7 @@ const RequestDetail: React.FC<RequestDetailProps> = ({ request, onClose }) => {
                         <button
                             onClick={() => {
                                 if (window.confirm('هل أنت متأكد من حذف هذا الطلب؟')) {
-                                    deleteRequest(request.id);
+                                    deleteRequest(currentRequest.id);
                                     onClose();
                                 }
                             }}
@@ -339,13 +387,13 @@ const RequestDetail: React.FC<RequestDetailProps> = ({ request, onClose }) => {
                         <div className="flex gap-3 w-full md:w-auto">
                             <button
                                 onClick={handleConvertToClient}
-                                disabled={isConverting || request.status === 'accepted'}
+                                disabled={isConverting || currentRequest.status === 'accepted'}
                                 className={`flex-1 md:flex-none flex items-center justify-center gap-3 px-8 py-5 rounded-2xl font-black text-sm shadow-2xl transition-all active:scale-95
-                                    ${request.status === 'accepted'
+                                    ${currentRequest.status === 'accepted'
                                         ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 cursor-not-allowed'
                                         : 'bg-white text-slate-950 hover:shadow-[0_0_50px_rgba(255,255,255,0.2)]'}`}
                             >
-                                {request.status === 'accepted' ? (
+                                {currentRequest.status === 'accepted' ? (
                                     <>
                                         <CheckCircle size={20} />
                                         تم التحويل للـ CRM

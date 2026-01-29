@@ -2,13 +2,23 @@ import React, { useCallback, useState } from 'react';
 import { Upload, X, File, Image as ImageIcon, FileText, Archive, AlertCircle, Check } from 'lucide-react';
 import { fileUploadService, UploadResult } from '../../lib/services/fileUploadService';
 
+/**
+ * Props for the FileUploader component.
+ */
 export interface FileUploaderProps {
+    /** Callback function triggered after successful file uploads */
     onFilesUploaded?: (results: UploadResult[]) => void;
+    /** Maximum number of files allowed to be selected at once (default: 5) */
     maxFiles?: number;
+    /** Maximum size for each file in Megabytes (default: 10) */
     maxSizeMB?: number;
+    /** Array of allowed MIME types (e.g., ['image/png', 'application/pdf']) */
     allowedTypes?: string[];
+    /** HTML accept attribute for the file input (e.g., '.jpg,.pdf') */
     accept?: string;
+    /** Whether to allow selecting multiple files (default: true) */
     multiple?: boolean;
+    /** Optional CSS class names for the container */
     className?: string;
 }
 
@@ -135,8 +145,8 @@ const FileUploader: React.FC<FileUploaderProps> = ({
                 onDragOver={handleDragOver}
                 onDrop={handleDrop}
                 className={`relative border-2 border-dashed rounded-2xl p-8 text-center transition-all cursor-pointer ${isDragging
-                        ? 'border-indigo-500 bg-indigo-500/5'
-                        : 'border-white/10 bg-slate-950/50 hover:border-indigo-500/50'
+                    ? 'border-indigo-500 bg-indigo-500/5'
+                    : 'border-white/10 bg-slate-950/50 hover:border-indigo-500/50'
                     }`}
             >
                 <input

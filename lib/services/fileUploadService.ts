@@ -35,11 +35,20 @@ const DEFAULT_OPTIONS: FileUploadOptions = {
 };
 
 /**
- * File Upload Service for handling file uploads to Supabase Storage
+ * File Upload Service
+ * 
+ * Provides a standardized way to handle file uploads throughout the application.
+ * Supports validation, Supabase Storage integration, and local simulation for development.
+ * 
+ * @module fileUploadService
  */
 export const fileUploadService = {
     /**
-     * Upload a file to Supabase Storage
+     * Uploads a single file to Supabase Storage or simulates it if not configured.
+     * 
+     * @param {File} file - The browser File object to upload.
+     * @param {FileUploadOptions} [options={}] - Custom upload options (bucket, folder, etc.).
+     * @returns {Promise<UploadResult>} The result of the upload operation including the public URL.
      */
     async uploadFile(file: File, options: FileUploadOptions = {}): Promise<UploadResult> {
         const opts = { ...DEFAULT_OPTIONS, ...options };
@@ -102,7 +111,11 @@ export const fileUploadService = {
     },
 
     /**
-     * Upload multiple files
+     * Uploads multiple files sequentially.
+     * 
+     * @param {File[]} files - Array of File objects.
+     * @param {FileUploadOptions} [options={}] - Shared upload options for all files.
+     * @returns {Promise<UploadResult[]>} Array of upload results.
      */
     async uploadFiles(files: File[], options: FileUploadOptions = {}): Promise<UploadResult[]> {
         const results: UploadResult[] = [];
@@ -116,7 +129,11 @@ export const fileUploadService = {
     },
 
     /**
-     * Validate file before upload
+     * Validates a file against size and type constraints.
+     * 
+     * @param {File} file - The File object to validate.
+     * @param {FileUploadOptions} [options={}] - Validation constraints.
+     * @returns {{ valid: boolean; error?: string }} An object indicating if the file is valid.
      */
     validateFile(file: File, options: FileUploadOptions = {}): { valid: boolean; error?: string } {
         const opts = { ...DEFAULT_OPTIONS, ...options };
@@ -144,7 +161,11 @@ export const fileUploadService = {
     },
 
     /**
-     * Delete file from storage
+     * Deletes a file from Supabase Storage.
+     * 
+     * @param {string} filePath - The path to the file within the bucket.
+     * @param {string} [bucket='attachments'] - The storage bucket name.
+     * @returns {Promise<boolean>} Success indicator.
      */
     async deleteFile(filePath: string, bucket: string = 'attachments'): Promise<boolean> {
         if (!isSupabaseConfigured() || !supabase) {
@@ -166,7 +187,10 @@ export const fileUploadService = {
     },
 
     /**
-     * Get file type icon
+     * Returns a representative emoji icon for the given MIME type.
+     * 
+     * @param {string} fileType - The MIME type of the file.
+     * @returns {string} An emoji string.
      */
     getFileIcon(fileType: string): string {
         if (fileType.startsWith('image/')) return '🖼️';
@@ -177,7 +201,10 @@ export const fileUploadService = {
     },
 
     /**
-     * Format file size for display
+     * Formats file size from bytes to a human-readable string (e.g., 2.5 MB).
+     * 
+     * @param {number} bytes - Size in bytes.
+     * @returns {string} Formatted size string.
      */
     formatFileSize(bytes: number): string {
         if (bytes === 0) return '0 Bytes';
@@ -188,7 +215,11 @@ export const fileUploadService = {
     },
 
     /**
-     * Simulate upload for development/testing
+     * Simulates a file upload by generating a local Object URL.
+     * Useful for development without Supabase credentials.
+     * 
+     * @param {File} file - The file to "upload".
+     * @returns {UploadResult} A successful upload result with a local blob URL.
      */
     simulateUpload(file: File): UploadResult {
         return {

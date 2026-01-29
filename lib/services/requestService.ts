@@ -1,7 +1,21 @@
 import { supabase, isSupabaseConfigured } from '../supabase';
 import { ServiceRequest, RequestAttachment, RequestTimelineEvent } from '../../types';
 
+/**
+ * Service Request Management Service
+ * 
+ * Handles all CRUD operations and business logic for service requests.
+ * Integrates with Supabase for data persistence and manages automated timeline events.
+ * 
+ * @module requestService
+ */
 export const requestService = {
+    /**
+     * Fetches all service requests from the database.
+     * Maps both legacy JSON data and modern structured columns for backward compatibility.
+     * 
+     * @returns {Promise<ServiceRequest[]>} Array of service requests sorted by creation date.
+     */
     async getAll(): Promise<ServiceRequest[]> {
         if (!isSupabaseConfigured() || !supabase) return [];
         // Select both structured and data columns for resilience
@@ -28,10 +42,17 @@ export const requestService = {
             internalNotes: r.internal_notes || r.data?.internalNotes,
             estimatedCompletion: r.estimated_completion || r.data?.estimatedCompletion,
             source: r.source || r.data?.source || 'web',
-            category: r.category || r.data?.category
+            category: r.category || r.data?.category,
+            projectId: r.project_id || r.data?.projectId
         }));
     },
 
+    /**
+     * Creates a new service request and initializes its timeline.
+     * 
+     * @param {Omit<ServiceRequest, 'id' | 'date'>} request - The request data (excluding auto-generated fields).
+     * @returns {Promise<ServiceRequest>} The newly created request object.
+     */
     async create(request: Omit<ServiceRequest, 'id' | 'date'>): Promise<ServiceRequest> {
         const id = 'req-' + Date.now();
         const date = new Date().toISOString();
@@ -69,6 +90,7 @@ export const requestService = {
                 attachments: newRequest.attachments,
                 timeline_events: newRequest.timelineEvents,
                 estimated_completion: newRequest.estimatedCompletion,
+                project_id: newRequest.projectId,
                 data: newRequest
             }]);
             if (error) throw error;
@@ -77,6 +99,14 @@ export const requestService = {
         return newRequest;
     },
 
+    /**
+     * Updates an existing service request and automatically records timeline events for status changes.
+     * 
+     * @param {string} id - The unique identifier of the request.
+     * @param {Partial<ServiceRequest>} updates - The fields to update.
+     * @param {ServiceRequest} currentData - The current state of the request (used for diffing and timeline).
+     * @returns {Promise<ServiceRequest>} The updated request object.
+     */
     async update(id: string, updates: Partial<ServiceRequest>, currentData: ServiceRequest): Promise<ServiceRequest> {
         const updatedRequest = { ...currentData, ...updates };
 
@@ -105,6 +135,7 @@ export const requestService = {
                 timeline_events: updatedRequest.timelineEvents,
                 internal_notes: updatedRequest.internalNotes,
                 estimated_completion: updatedRequest.estimatedCompletion,
+                project_id: updatedRequest.projectId,
                 data: updatedRequest,
                 updated_at: new Date().toISOString()
             }).eq('id', id);
@@ -114,6 +145,12 @@ export const requestService = {
         return updatedRequest;
     },
 
+    /**
+     * Permanently deletes a service request.
+     * 
+     * @param {string} id - The unique identifier of the request.
+     * @returns {Promise<void>}
+     */
     async delete(id: string): Promise<void> {
         if (isSupabaseConfigured() && supabase) {
             const { error } = await supabase.from('service_requests').delete().eq('id', id);
@@ -121,7 +158,14 @@ export const requestService = {
         }
     },
 
-    // New: Add attachment to request
+    /**
+     * Adds an attachment to a request and records it in the timeline.
+     * 
+     * @param {string} requestId - The request ID.
+     * @param {RequestAttachment} attachment - The attachment object to add.
+     * @param {ServiceRequest} currentData - Current request data.
+     * @returns {Promise<ServiceRequest>} Updated request.
+     */
     async addAttachment(requestId: string, attachment: RequestAttachment, currentData: ServiceRequest): Promise<ServiceRequest> {
         const attachments = [...(currentData.attachments || []), attachment];
 
@@ -141,34 +185,64 @@ export const requestService = {
         }, currentData);
     },
 
-    // New: Remove attachment from request
+    /**
+     * Removes an attachment from a request.
+     * 
+     * @param {string} requestId - The request ID.
+     * @param {string} attachmentId - The ID of the attachment to remove.
+     * @param {ServiceRequest} currentData - Current request data.
+     * @returns {Promise<ServiceRequest>} Updated request.
+     */
     async removeAttachment(requestId: string, attachmentId: string, currentData: ServiceRequest): Promise<ServiceRequest> {
         const attachments = (currentData.attachments || []).filter(a => a.id !== attachmentId);
         return this.update(requestId, { attachments }, currentData);
     },
 
-    // New: Add timeline event
+    /**
+     * Manually adds a custom event to the request timeline.
+     * 
+     * @param {string} requestId - The request ID.
+     * @param {RequestTimelineEvent} event - The timeline event object.
+     * @param {ServiceRequest} currentData - Current request data.
+     * @returns {Promise<ServiceRequest>} Updated request.
+     */
     async addTimelineEvent(requestId: string, event: RequestTimelineEvent, currentData: ServiceRequest): Promise<ServiceRequest> {
         const timelineEvents = [...(currentData.timelineEvents || []), event];
         return this.update(requestId, { timelineEvents }, currentData);
     },
 
-    // New: Get timeline for a request
+    /**
+     * Retrieves the request timeline sorted by timestamp (newest first).
+     * 
+     * @param {ServiceRequest} request - The request object.
+     * @returns {RequestTimelineEvent[]} Sorted array of timeline events.
+     */
     getTimeline(request: ServiceRequest): RequestTimelineEvent[] {
         return (request.timelineEvents || []).sort((a, b) =>
             new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
         );
     },
 
-    // New: Update internal notes (admin only)
+    /**
+     * Updates internal notes for administrative use. Included in the timeline as a silent update.
+     * 
+     * @param {string} requestId - The request ID.
+     * @param {string} notes - The internal notes text.
+     * @param {ServiceRequest} currentData - Current request data.
+     * @returns {Promise<ServiceRequest>} Updated request.
+     */
     async updateInternalNotes(requestId: string, notes: string, currentData: ServiceRequest): Promise<ServiceRequest> {
         return this.update(requestId, { internalNotes: notes }, currentData);
     },
 
-    // New: Get requests by client email
+    /**
+     * Filters requests by client email for portal use.
+     * 
+     * @param {string} clientEmail - The client's email address.
+     * @returns {Promise<ServiceRequest[]>} Filtered array of requests.
+     */
     async getRequestsByClient(clientEmail: string): Promise<ServiceRequest[]> {
         const allRequests = await this.getAll();
         return allRequests.filter(r => r.clientEmail === clientEmail);
     }
 };
-
