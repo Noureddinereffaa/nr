@@ -76,10 +76,10 @@ const HomePage: React.FC = () => {
                   </div>
                   <div>
                     <h3 className="text-xl md:text-3xl font-black text-white mb-2 tracking-tight">
-                      اكتشف <span className="text-indigo-400">منصة هاني</span> الرقمية الجديدة
+                      رؤية <span className="text-indigo-400">نورالدين رفعة</span> الرقمية
                     </h3>
                     <p className="text-slate-400 text-sm md:text-lg font-medium">
-                      الحل المتكامل للتسويق والنمو السريع لعملك في السوق الجزائري
+                      الحل الشامل لرقمنة منشأتك والتحول نحو الاقتصاد الذكي بأحدث التقنيات
                     </p>
                   </div>
                 </div>
