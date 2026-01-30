@@ -353,5 +353,32 @@ export const requestService = {
         };
 
         await this.addTimelineEvent(requestId, timelineEvent, currentData);
+    },
+
+    /**
+     * Adds a client message to the request timeline and triggers an admin notification.
+     */
+    async addClientMessage(requestId: string, messageContent: string, currentData: ServiceRequest): Promise<ServiceRequest> {
+        const timelineEvent: RequestTimelineEvent = {
+            id: 'evt-' + Date.now(),
+            timestamp: new Date().toISOString(),
+            type: 'message',
+            description: messageContent,
+            actor: 'client',
+            metadata: { fullMessage: messageContent }
+        };
+
+        // Add the new event to the existing timeline (already handled by update logic if we use that, 
+        // but here we want to follow the pattern of adding a timeline event)
+        const updatedTimelineEvents = [...(currentData.timelineEvents || []), timelineEvent];
+
+        // Trigger admin notification
+        notificationService.create({
+            title: 'رسالة جديدة من العميل 💬',
+            message: `وصلت رسالة جديدة من العميل بخصوص الطلب #${requestId}: "${messageContent.substring(0, 50)}${messageContent.length > 50 ? '...' : ''}"`,
+            type: 'info'
+        }).catch(err => console.error('[requestService] Failed to send admin notification for new message:', err));
+
+        return this.update(requestId, { timelineEvents: updatedTimelineEvents }, currentData);
     }
 };
