@@ -45,14 +45,32 @@ export default async function handler(req: any, res: any) {
       },
       body: JSON.stringify({
         from: 'NR-OS <notifications@nr-os.com>',
-        to, subject, html
+        to,
+        subject,
+        html,
+        tags: [
+          { name: 'category', value: 'notification' },
+          { name: 'origin', value: 'nr-os-platform' }
+        ]
       })
     });
 
     const data = await response.json();
 
     if (!response.ok) {
-      throw new Error(data.message || 'Failed to send email');
+      const errorMsg = data.message || `Resend API Error: ${response.status} ${response.statusText}`;
+      console.error('[Email API] Resend rejection:', errorMsg, data);
+
+      if (supabase) {
+        await supabase.from('email_logs').insert([{
+          recipient: to,
+          subject: subject,
+          status: 'failed',
+          error_message: errorMsg,
+          metadata: { resend_response: data, status_code: response.status }
+        }]);
+      }
+      throw new Error(errorMsg);
     }
 
     // Log success to DB
@@ -61,23 +79,29 @@ export default async function handler(req: any, res: any) {
         recipient: to,
         subject: subject,
         status: 'sent',
-        metadata: { resend_id: data.id }
+        metadata: { resend_id: data.id, timestamp: new Date().toISOString() }
       }]);
     }
 
+    console.log(`[Email API] Successfully sent to ${to}: ${data.id}`);
     return res.status(200).json({ success: true, messageId: data.id });
 
   } catch (error: any) {
-    console.error('Email error:', error);
+    console.error('[Email API] Fatal Error:', error);
 
-    // Log failure to DB
+    // Log failure to DB if not already logged
     if (supabase) {
-      await supabase.from('email_logs').insert([{
-        recipient: to || 'unknown',
-        subject: subject || 'unknown',
-        status: 'failed',
-        error_message: error.message
-      }]);
+      try {
+        await supabase.from('email_logs').insert([{
+          recipient: to || 'unknown',
+          subject: subject || 'unknown',
+          status: 'failed',
+          error_message: error.message || 'Unknown fatal error',
+          metadata: { stack: error.stack }
+        }]);
+      } catch (logErr) {
+        console.error('[Email API] Failed to log error to DB:', logErr);
+      }
     }
 
     return res.status(500).json({ error: 'Failed to send', message: error.message });

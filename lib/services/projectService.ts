@@ -70,64 +70,52 @@ export const projectService = {
     async getByCode(code: string): Promise<Project | null> {
         if (!isSupabaseConfigured() || !supabase) return null;
 
-        // Try to find by ID first
-        let { data, error } = await supabase
+        // Optimized lookup for production: Check ID first (primary way portal works)
+        const { data, error } = await supabase
             .from('projects')
             .select('*')
-            .eq('id', code)
+            .eq('id', code.trim())
             .single();
 
-        // If not found by ID, try to find by specific access code in JSON data
-        // Note: usage of data->>accessCode depending on your JSON structure
-        if (!data) {
-            const { data: searchData } = await supabase
-                .from('projects')
-                .select('*')
-                .textSearch('data', `'${code}'`) // Simple text search as fallback or explicit JSON filter if properly indexed
-                .limit(1);
-
-            // A better approach for JSON column if we can't use complex filters without indexing:
-            // We might filter client-side if dataset is small, but for now let's rely on ID match
-            // or exact match if the user enters the ID.
-            // For "Sovereign" quality, we should encourage using the ID or a dedicated column.
-            // Let's assume we stick to IDs for now to be safe, or implement a filter if needed.
-            if (searchData && searchData.length > 0) {
-                data = searchData[0];
-            }
-        }
-
-        if (error && error.code !== 'PGRST116') { // PGRST116 is "No rows found"
-            console.error("Error fetching project by code:", error);
+        if (error && error.code !== 'PGRST116') {
+            console.error("[projectService] Error fetching project by code:", error);
             throw error;
         }
 
         if (!data) return null;
 
-        const r = data;
         return {
-            ...r.data,
-            id: r.id,
-            title: r.title || r.data?.title,
-            client_id: r.client_id || r.data?.clientId,
-            clientId: r.client_id || r.data?.clientId,
-            clientEmail: r.data?.clientEmail, // Support for email-based lookup
-            status: r.status || r.data?.status || 'planning',
-            budget: Number(r.budget || r.data?.budget || 0)
+            ...data.data,
+            id: data.id,
+            title: data.title || data.data?.title,
+            client_id: data.client_id || data.data?.clientId,
+            clientId: data.client_id || data.data?.clientId,
+            clientEmail: data.data?.clientEmail,
+            status: data.status || data.data?.status || 'planning',
+            budget: Number(data.budget || data.data?.budget || 0)
         };
     },
 
     /**
      * Finds projects associated with a specific email address.
-     * Uses text search on the JSON data blob as a fallback if no explicit email column exists.
+     * Uses optimized JSONB filtering for production performance.
      */
     async getByEmail(email: string): Promise<Project[]> {
         if (!isSupabaseConfigured() || !supabase) return [];
 
+        const normalizedEmail = email.trim().toLowerCase();
+
+        // Database-side filtering on the JSONB field 'data->>clientEmail'
         const { data, error } = await supabase
             .from('projects')
-            .select('*');
+            .select('*')
+            .or(`data->>clientEmail.eq.${normalizedEmail}`);
 
-        if (error) throw error;
+        if (error) {
+            console.error("[projectService] Failed to fetch by email:", error);
+            throw error;
+        }
+
         if (!data) return [];
 
         return data.map((r: any) => ({
@@ -139,7 +127,7 @@ export const projectService = {
             clientEmail: r.data?.clientEmail,
             status: r.status || r.data?.status || 'planning',
             budget: Number(r.budget || r.data?.budget || 0)
-        })).filter(p => p.clientEmail?.toLowerCase() === email.toLowerCase());
+        }));
     },
 
     /**

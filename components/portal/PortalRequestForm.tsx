@@ -66,9 +66,9 @@ const PortalRequestForm: React.FC<PortalRequestFormProps> = ({ project, onSucces
 
         try {
             await requestService.create({
-                clientName: project.client_id || project.client || 'Client',
-                clientEmail: 'client@portal.com', // In real app, fetch from auth
-                clientPhone: '+213 XXX XXX XXX', // In real app, fetch from auth
+                clientName: project.client || project.clientId || project.client_id || 'Client',
+                clientEmail: project.clientEmail || 'client@portal.com',
+                clientPhone: '',
                 serviceTitle: formData.serviceTitle,
                 message: formData.message,
                 priority: formData.priority,
@@ -130,8 +130,8 @@ const PortalRequestForm: React.FC<PortalRequestFormProps> = ({ project, onSucces
                                 type="button"
                                 onClick={() => setFormData({ ...formData, category: cat.id })}
                                 className={`p-3 rounded-xl text-xs font-bold transition-all border ${formData.category === cat.id
-                                        ? 'bg-indigo-500/20 border-indigo-500 text-indigo-400'
-                                        : 'bg-slate-950 border-white/10 text-slate-500 hover:bg-white/5'
+                                    ? 'bg-indigo-500/20 border-indigo-500 text-indigo-400'
+                                    : 'bg-slate-950 border-white/10 text-slate-500 hover:bg-white/5'
                                     }`}
                             >
                                 <div className="text-2xl mb-1">{cat.icon}</div>
@@ -168,8 +168,8 @@ const PortalRequestForm: React.FC<PortalRequestFormProps> = ({ project, onSucces
                                 type="button"
                                 onClick={() => setFormData({ ...formData, budget: range.value })}
                                 className={`p-3 rounded-xl text-xs font-bold transition-all border text-right ${formData.budget === range.value
-                                        ? 'bg-emerald-500/20 border-emerald-500 text-emerald-400'
-                                        : 'bg-slate-950 border-white/10 text-slate-500 hover:bg-white/5'
+                                    ? 'bg-emerald-500/20 border-emerald-500 text-emerald-400'
+                                    : 'bg-slate-950 border-white/10 text-slate-500 hover:bg-white/5'
                                     }`}
                             >
                                 {range.label}
@@ -204,12 +204,12 @@ const PortalRequestForm: React.FC<PortalRequestFormProps> = ({ project, onSucces
                                 type="button"
                                 onClick={() => setFormData({ ...formData, priority: p as any })}
                                 className={`flex-1 py-3 rounded-xl text-xs font-bold uppercase transition-all border ${formData.priority === p
-                                        ? p === 'high'
-                                            ? 'bg-red-500/20 border-red-500 text-red-500'
-                                            : p === 'medium'
-                                                ? 'bg-amber-500/20 border-amber-500 text-amber-500'
-                                                : 'bg-emerald-500/20 border-emerald-500 text-emerald-500'
-                                        : 'bg-slate-950 border-white/10 text-slate-500 hover:bg-white/5'
+                                    ? p === 'high'
+                                        ? 'bg-red-500/20 border-red-500 text-red-500'
+                                        : p === 'medium'
+                                            ? 'bg-amber-500/20 border-amber-500 text-amber-500'
+                                            : 'bg-emerald-500/20 border-emerald-500 text-emerald-500'
+                                    : 'bg-slate-950 border-white/10 text-slate-500 hover:bg-white/5'
                                     }`}
                             >
                                 {p === 'high' ? 'مستعجل' : p === 'medium' ? 'عادي' : 'منخفض'}
@@ -278,8 +278,8 @@ const PortalRequestForm: React.FC<PortalRequestFormProps> = ({ project, onSucces
                         type="submit"
                         disabled={isLoading}
                         className={`w-full py-4 rounded-xl font-bold flex items-center justify-center gap-2 transition-all ${status === 'success'
-                                ? 'bg-emerald-500 text-white hover:bg-emerald-600'
-                                : 'bg-indigo-600 text-white hover:bg-indigo-500'
+                            ? 'bg-emerald-500 text-white hover:bg-emerald-600'
+                            : 'bg-indigo-600 text-white hover:bg-indigo-500'
                             } disabled:opacity-50 disabled:cursor-not-allowed shadow-lg`}
                     >
                         {isLoading ? (

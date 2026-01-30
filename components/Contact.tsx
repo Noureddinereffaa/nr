@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useSystem } from '../context/SystemContext';
 import { Mail, MessageSquare, MapPin, Send, Phone, MessageCircle, ExternalLink, Loader2, CheckCircle2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -6,6 +7,7 @@ import { requestService } from '../lib/services/requestService';
 
 const Contact: React.FC = () => {
   const { contactInfo } = useSystem();
+  const navigate = useNavigate();
 
   // Build WhatsApp URL from phone number if not a full URL
   const whatsappUrl = contactInfo?.whatsapp?.startsWith('http')
@@ -42,6 +44,11 @@ const Contact: React.FC = () => {
       if (result) {
         setStatus('success');
         setFormData({ name: '', email: '', category: 'تطوير أعمال وإدارة أتمتة', message: '' });
+
+        // Auto-redirect after 3 seconds so they can read the message
+        setTimeout(() => {
+          navigate('/portal');
+        }, 3000);
       } else {
         throw new Error('No data returned from service');
       }

@@ -124,45 +124,52 @@ export const requestService = {
         } as ServiceRequest;
 
         if (isSupabaseConfigured() && supabase) {
-            const { error: insertError } = await supabase.from('service_requests').insert([{
-                id,
-                client_name: newRequest.clientName,
-                service_title: newRequest.serviceTitle,
-                client_email: newRequest.clientEmail,
-                client_phone: newRequest.clientPhone,
-                status: newRequest.status,
-                priority: newRequest.priority || 'medium',
-                value: newRequest.value || 0,
-                category: newRequest.category,
-                source: newRequest.source || 'web',
-                attachments: newRequest.attachments,
-                timeline_events: newRequest.timelineEvents,
-                estimated_completion: newRequest.estimatedCompletion,
-                project_id: targetProjectId,
-                client_id: targetClientId,
-                data: { ...newRequest, clientId: targetClientId, projectId: targetProjectId }
-            }]);
-            if (insertError) {
-                console.error('[requestService] Supabase insert error:', insertError);
-                throw insertError;
-            }
+            try {
+                const { error: insertError } = await supabase.from('service_requests').insert([{
+                    id,
+                    client_name: newRequest.clientName,
+                    service_title: newRequest.serviceTitle,
+                    client_email: newRequest.clientEmail,
+                    client_phone: newRequest.clientPhone,
+                    status: newRequest.status,
+                    priority: newRequest.priority || 'medium',
+                    value: newRequest.value || 0,
+                    category: newRequest.category,
+                    source: newRequest.source || 'web',
+                    attachments: newRequest.attachments,
+                    timeline_events: newRequest.timelineEvents,
+                    estimated_completion: newRequest.estimatedCompletion,
+                    project_id: targetProjectId,
+                    client_id: targetClientId,
+                    data: { ...newRequest, clientId: targetClientId, projectId: targetProjectId }
+                }]);
 
-            // 1. Trigger Welcome Email / Access Code notification to Client
-            if (newRequest.clientEmail && targetProjectId) {
-                sendWelcomeEmail(
-                    newRequest.clientEmail,
-                    newRequest.clientName,
-                    newRequest.serviceTitle,
-                    targetProjectId
-                ).catch(err => console.error('Failed to send welcome email:', err));
-            }
+                if (insertError) {
+                    console.error('[requestService] Database insertion failed:', insertError);
+                    throw new Error(`تعذر حفظ الطلب في قاعدة البيانات: ${insertError.message}`);
+                }
 
-            // 2. Trigger Admin System Notification
-            notificationService.create({
-                title: 'طلب خدمة جديد 🆕',
-                message: `وصل طلب جديد من ${newRequest.clientName} بخصوص "${newRequest.serviceTitle}"`,
-                type: 'success'
-            }).catch(err => console.error('Failed to create admin notification:', err));
+                // 1. Trigger Welcome Email / Access Code notification to Client
+                if (newRequest.clientEmail && targetProjectId) {
+                    sendWelcomeEmail(
+                        newRequest.clientEmail,
+                        newRequest.clientName,
+                        newRequest.serviceTitle,
+                        targetProjectId
+                    ).catch(err => console.error('[requestService] Failed to send welcome email:', err));
+                }
+
+                // 2. Trigger Admin System Notification
+                notificationService.create({
+                    title: 'طلب خدمة جديد 🆕',
+                    message: `وصل طلب جديد من ${newRequest.clientName} بخصوص "${newRequest.serviceTitle}"`,
+                    type: 'success'
+                }).catch(err => console.error('[requestService] Failed to create admin notification:', err));
+
+            } catch (err: any) {
+                console.error('[requestService] Critical failure in create sequence:', err);
+                throw err;
+            }
         }
 
         return newRequest;

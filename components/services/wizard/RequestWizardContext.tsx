@@ -1,4 +1,6 @@
 import React, { createContext, useContext, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { requestService } from '../../../lib/services/requestService';
 
 interface WizardData {
     serviceId: string;
@@ -52,18 +54,31 @@ export const RequestWizardProvider: React.FC<{ children: React.ReactNode; initia
         setData(prev => ({ ...prev, ...updates }));
     };
 
+    const navigate = useNavigate();
+
     const submitRequest = async () => {
         setIsSubmitting(true);
         try {
-            // Simulator: Simulate API call
-            await new Promise(resolve => setTimeout(resolve, 2000));
-            console.log("Submitting Request:", data);
+            const result = await requestService.create({
+                clientName: data.clientName,
+                clientEmail: data.clientEmail,
+                clientPhone: data.clientPhone,
+                serviceTitle: data.serviceTitle,
+                message: data.projectDetails,
+                category: data.serviceTitle, // Use title as category
+                priority: 'medium',
+                source: 'web',
+                status: 'new'
+            });
 
-            // Should integrate with BusinessContext or Supabase here
-
-            onClose();
+            if (result) {
+                onClose();
+                // Redirect to portal so they can see their new project
+                navigate('/portal');
+            }
         } catch (error) {
             console.error("Submission failed", error);
+            // Optionally add toast here if context is available
         } finally {
             setIsSubmitting(false);
         }
