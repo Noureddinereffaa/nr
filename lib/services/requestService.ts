@@ -3,7 +3,7 @@ import { ServiceRequest, RequestAttachment, RequestTimelineEvent } from '../../t
 import { projectService } from './projectService';
 import { clientService } from './clientService';
 import { notificationService } from './notificationService';
-import { sendWelcomeEmail } from '../email-notifications';
+import { sendWelcomeEmail, sendEmailNotification } from '../email-notifications';
 
 /**
  * Service Request Management Service
@@ -72,7 +72,6 @@ export const requestService = {
                 let client = await clientService.getByEmail(normalizedEmail);
                 if (!client) {
                     client = await clientService.create({
-                        id: `c-${Date.now()}`,
                         name: request.clientName,
                         email: normalizedEmail,
                         phone: request.clientPhone || '',
@@ -90,11 +89,10 @@ export const requestService = {
                         console.log(`[Onboarding] Existing project found: ${targetProjectId}`);
                     } else {
                         const newProject = await projectService.create({
-                            id: `p-${Date.now()}`,
                             title: `طلب استفسار: ${request.serviceTitle}`,
                             client: request.clientName,
-                            client_id: targetClientId, // SQL Standard
-                            clientId: targetClientId,  // Type Standard
+                            client_id: targetClientId,
+                            clientId: targetClientId,
                             clientEmail: normalizedEmail,
                             status: 'planning',
                             category: request.category || 'inquiry',
@@ -107,9 +105,11 @@ export const requestService = {
                         console.log(`[Onboarding] New project created: ${targetProjectId}`);
                     }
                 }
-            } catch (error) {
+            } catch (error: any) {
                 console.error('[Onboarding] Error during atomic linking:', error);
-                // We proceed to create the request even if linking fails to avoid data loss
+                // Critical: If linking fails, we need to know why. 
+                // Don't swallow errors if they are related to db constraints
+                if (error.code && error.message) throw error;
             }
         }
 
@@ -124,7 +124,7 @@ export const requestService = {
         } as ServiceRequest;
 
         if (isSupabaseConfigured() && supabase) {
-            const { error } = await supabase.from('service_requests').insert([{
+            const { error: insertError } = await supabase.from('service_requests').insert([{
                 id,
                 client_name: newRequest.clientName,
                 service_title: newRequest.serviceTitle,
@@ -140,9 +140,12 @@ export const requestService = {
                 estimated_completion: newRequest.estimatedCompletion,
                 project_id: targetProjectId,
                 client_id: targetClientId,
-                data: { ...newRequest, clientId: targetClientId }
+                data: { ...newRequest, clientId: targetClientId, projectId: targetProjectId }
             }]);
-            if (error) throw error;
+            if (insertError) {
+                console.error('[requestService] Supabase insert error:', insertError);
+                throw insertError;
+            }
 
             // 1. Trigger Welcome Email / Access Code notification to Client
             if (newRequest.clientEmail && targetProjectId) {
@@ -310,5 +313,38 @@ export const requestService = {
     async getRequestsByClient(clientEmail: string): Promise<ServiceRequest[]> {
         const allRequests = await this.getAll();
         return allRequests.filter(r => r.clientEmail === clientEmail);
+    },
+
+    /**
+     * Sends a direct reply to the client via email and logs it in the timeline.
+     * 
+     * @param {string} requestId - The request ID.
+     * @param {string} message - The message content.
+     * @param {ServiceRequest} currentData - Current request data.
+     */
+    async sendReply(requestId: string, message: string, currentData: ServiceRequest): Promise<void> {
+        if (!currentData.clientEmail) throw new Error('Client email is missing');
+
+        // 1. Send Email Notification
+        await sendEmailNotification({
+            to: currentData.clientEmail,
+            subject: `تحديث من NR-OS: ${currentData.serviceTitle}`,
+            title: 'رسالة جديدة بخصوص طلبك',
+            message: message,
+            actionUrl: `https://nr-os.com/portal`,
+            actionText: 'فتح بوابة العملاء'
+        });
+
+        // 2. Record in Timeline
+        const timelineEvent: RequestTimelineEvent = {
+            id: 'evt-' + Date.now(),
+            timestamp: new Date().toISOString(),
+            type: 'crm',
+            description: `تم إرسال رد إلكتروني للعميل: ${message.substring(0, 50)}${message.length > 50 ? '...' : ''}`,
+            actor: 'admin',
+            metadata: { fullMessage: message }
+        };
+
+        await this.addTimelineEvent(requestId, timelineEvent, currentData);
     }
 };

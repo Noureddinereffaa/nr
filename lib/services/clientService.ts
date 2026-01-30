@@ -1,5 +1,7 @@
 import { supabase, isSupabaseConfigured } from '../supabase';
-import { Client } from '../../types';
+import { Client, Project, ServiceRequest } from '../../types';
+import { projectService } from './projectService';
+import { requestService } from './requestService';
 
 export const clientService = {
     async getAll(): Promise<Client[]> {
@@ -53,7 +55,7 @@ export const clientService = {
         const newClient = { ...client, id } as Client;
 
         if (isSupabaseConfigured() && supabase) {
-            const { error } = await supabase.from('clients').insert([{
+            const { error: insertError } = await supabase.from('clients').insert([{
                 id,
                 name: newClient.name,
                 email: newClient.email,
@@ -63,7 +65,10 @@ export const clientService = {
                 value: newClient.value || 0,
                 data: newClient
             }]);
-            if (error) throw error;
+            if (insertError) {
+                console.error('[clientService] Supabase insert error:', insertError);
+                throw insertError;
+            }
         }
 
         return newClient;
@@ -94,5 +99,47 @@ export const clientService = {
             const { error } = await supabase.from('clients').delete().eq('id', id);
             if (error) throw error;
         }
+    },
+
+    /**
+     * Retrieves a client's full profile including all associated projects and service requests.
+     */
+    async getClientFullProfile(clientId: string): Promise<{
+        client: Client;
+        projects: Project[];
+        requests: ServiceRequest[];
+    } | null> {
+        if (!isSupabaseConfigured() || !supabase) return null;
+
+        // 1. Get Client Data
+        const { data: clientData, error: clientError } = await supabase
+            .from('clients')
+            .select('*')
+            .eq('id', clientId)
+            .single();
+
+        if (clientError || !clientData) return null;
+
+        const client: Client = {
+            ...clientData.data,
+            id: clientData.id,
+            name: clientData.name || clientData.data?.name,
+            email: clientData.email || clientData.data?.email,
+            phone: clientData.phone || clientData.data?.phone,
+            status: clientData.status || clientData.data?.status || 'lead',
+            value: Number(clientData.value || clientData.data?.value || 0)
+        };
+
+        // 2. Get Associated Projects (using the email or ID)
+        const projects = await projectService.getProjectsByClientId(clientId);
+
+        // 3. Get Associated Requests (using the email)
+        const requests = await requestService.getRequestsByClient(client.email);
+
+        return {
+            client,
+            projects,
+            requests
+        };
     }
 };

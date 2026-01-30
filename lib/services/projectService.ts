@@ -25,7 +25,7 @@ export const projectService = {
         const newProject = { ...project, id } as Project;
 
         if (isSupabaseConfigured() && supabase) {
-            const { error } = await supabase.from('projects').insert([{
+            const { error: insertError } = await supabase.from('projects').insert([{
                 id,
                 title: newProject.title,
                 client_id: newProject.clientId || newProject.client_id,
@@ -33,7 +33,10 @@ export const projectService = {
                 budget: newProject.budget || 0,
                 data: newProject
             }]);
-            if (error) throw error;
+            if (insertError) {
+                console.error('[projectService] Supabase insert error:', insertError);
+                throw insertError;
+            }
         }
 
         return newProject;
@@ -137,5 +140,30 @@ export const projectService = {
             status: r.status || r.data?.status || 'planning',
             budget: Number(r.budget || r.data?.budget || 0)
         })).filter(p => p.clientEmail?.toLowerCase() === email.toLowerCase());
+    },
+
+    /**
+     * Retrieves all projects associated with a specific client ID.
+     */
+    async getProjectsByClientId(clientId: string): Promise<Project[]> {
+        if (!isSupabaseConfigured() || !supabase) return [];
+
+        const { data, error } = await supabase
+            .from('projects')
+            .select('*')
+            .eq('client_id', clientId);
+
+        if (error) throw error;
+        if (!data) return [];
+
+        return data.map((r: any) => ({
+            ...r.data,
+            id: r.id,
+            title: r.title || r.data?.title,
+            client_id: r.client_id || r.data?.clientId,
+            clientId: r.client_id || r.data?.clientId,
+            status: r.status || r.data?.status || 'planning',
+            budget: Number(r.budget || r.data?.budget || 0)
+        }));
     }
 };

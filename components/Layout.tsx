@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Menu, X, Zap, Mail, Linkedin, Facebook, ChevronLeft, Bot, Sparkles, MessageCircle, ArrowRight } from 'lucide-react';
+import { Menu, X, Zap, Mail, Linkedin, Facebook, ChevronLeft, Bot, Sparkles, MessageCircle, ArrowRight, LogIn, LayoutDashboard } from 'lucide-react';
 import { useSystem } from '../context/SystemContext';
 import { useBusiness } from '../context/BusinessContext';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -141,12 +141,22 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                   <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-0 h-0.5 bg-indigo-500 transition-all duration-300 group-hover/link:w-full"></span>
                 </button>
               ))}
-              <button
-                onClick={() => navigate('/portal')}
-                className="glow-accent bg-slate-900 border border-indigo-500/30 text-indigo-400 px-6 sm:px-8 py-3 sm:py-3.5 rounded-xl sm:rounded-2xl text-[10px] sm:text-[11px] font-black transition-all shadow-2xl flex items-center gap-2 sm:gap-3 active:scale-95 group/portal"
-              >
-                بوابة العميل
-              </button>
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={() => navigate('/portal')}
+                  className="glow-accent bg-indigo-600/10 border border-indigo-500/30 text-indigo-400 px-5 py-2.5 rounded-xl text-[10px] font-black transition-all hover:bg-indigo-600 hover:text-white active:scale-95 flex items-center gap-2 group/portal"
+                >
+                  <LogIn size={14} />
+                  بوابة العميل
+                </button>
+                <button
+                  onClick={() => navigate('/dashboard')}
+                  className="w-10 h-10 rounded-xl bg-slate-900 border border-white/5 flex items-center justify-center text-slate-600 hover:text-white hover:border-indigo-500/50 transition-all active:scale-95 group/admin"
+                  title="لوحة المدير"
+                >
+                  <LayoutDashboard size={18} />
+                </button>
+              </div>
               <button
                 onClick={(e) => scrollToSection(e, '#assistant')}
                 className="glow-accent bg-white text-slate-950 px-6 sm:px-8 py-3 sm:py-3.5 rounded-xl sm:rounded-2xl text-[10px] sm:text-[11px] font-black transition-all shadow-2xl flex items-center gap-2 sm:gap-3 active:scale-95 group/btn"

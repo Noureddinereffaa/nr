@@ -229,16 +229,19 @@ const Contact: React.FC = () => {
                           <div className="w-12 h-12 rounded-full bg-emerald-500/20 flex items-center justify-center mx-auto">
                             <CheckCircle2 size={24} />
                           </div>
-                          <h4 className="font-black text-lg text-white">تم استلام طلبك بنجاح!</h4>
+                          <h4 className="font-black text-lg text-white">تم استلام طلبك وبناء ملفك بنجاح!</h4>
                           <p className="text-xs leading-relaxed">
-                            لقد أرسلنا لك كود الدخول إلى الإيميل. يمكنك الآن متابعة مراحل تنفيذ طلبك عبر بوابة العميل.
+                            لقد قمت بإنشاء حساب خاص بك وتفعيل مساحة عمل لمشروعك. لقد أرسلنا لك كود الدخول الخاص بك إلى البريد الإلكتروني.
                           </p>
-                          <a
-                            href="/portal"
-                            className="inline-block mt-4 text-emerald-400 font-black text-xs uppercase tracking-widest border-b border-emerald-500/30 hover:border-emerald-500 transition-all"
-                          >
-                            اذهب إلى بوابة العميل
-                          </a>
+                          <div className="pt-4 flex flex-col gap-3">
+                            <a
+                              href="/portal"
+                              className="w-full bg-emerald-500 text-slate-950 py-3 rounded-xl font-black text-xs uppercase tracking-widest hover:bg-emerald-400 transition-all text-center"
+                            >
+                              اذهب لمتابعة طلبك الآن
+                            </a>
+                            <p className="text-[10px] text-slate-500">يمكنك تسجيل الدخول باستخدام البريد الإلكتروني: <span className="text-white">{formData.email}</span></p>
+                          </div>
                         </motion.div>
                       ) : (
                         <button

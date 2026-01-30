@@ -46,7 +46,7 @@ export interface RequestAttachment {
 export interface RequestTimelineEvent {
     id: string;
     timestamp: string;
-    type: 'status_change' | 'message' | 'attachment' | 'note' | 'payment' | 'created';
+    type: 'status_change' | 'message' | 'attachment' | 'note' | 'payment' | 'created' | 'crm' | 'automated';
     description: string;
     actor: 'client' | 'admin' | 'system';
     metadata?: any;

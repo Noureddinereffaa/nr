@@ -1,12 +1,14 @@
 import React from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useSystem } from '../context/SystemContext';
 import { useUI } from '../context/UIContext';
-import { ArrowLeft, Sparkles, Shield, Layout as LayoutIcon, Zap, Globe, MousePointer2, Bot } from 'lucide-react';
+import { ArrowLeft, Sparkles, Shield, Layout as LayoutIcon, Zap, Globe, MousePointer2, Bot, LogIn } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 const Hero: React.FC = () => {
   const { brand, contactInfo, aiConfig, siteData } = useSystem();
   const { openChat } = useUI();
+  const navigate = useNavigate();
 
   // DERIVE profile with multi-layer fallback for precision
   const p = (siteData?.profile || {}) as any;
@@ -105,6 +107,19 @@ const Hero: React.FC = () => {
                   اكتشف خدماتنا النخبوية
                   <ArrowLeft size={20} className="sm:w-[24px] sm:h-[24px] group-hover:-translate-x-2 transition-transform" />
                 </span>
+              </button>
+
+              <button
+                onClick={(e) => { e.preventDefault(); navigate('/portal'); }}
+                className={`px-6 sm:px-8 md:px-10 py-4 sm:py-5 rounded-xl sm:rounded-2xl font-black text-base sm:text-lg md:text-xl active:scale-95 transition-all flex items-center justify-center gap-2 sm:gap-3 md:gap-4 min-h-[56px] ${isCyber
+                  ? 'bg-black text-indigo-400 border border-indigo-500/30'
+                  : isMinimalist
+                    ? 'bg-white text-slate-950 border border-slate-200'
+                    : 'glass-card text-white hover:bg-white/5 border border-white/10'
+                  }`}
+              >
+                <LogIn size={20} className={`sm:w-[24px] sm:h-[24px] ${isCyber ? 'text-indigo-400' : 'text-indigo-500'}`} />
+                بوابة العملاء
               </button>
 
               <button

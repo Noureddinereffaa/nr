@@ -18,7 +18,8 @@ import {
     Clock,
     FileText,
     Paperclip,
-    Download
+    Download,
+    Send
 } from 'lucide-react';
 import { ServiceRequest } from '../../../../types';
 import { useBusiness } from '../../../../context/BusinessContext';
@@ -40,6 +41,9 @@ const RequestDetail: React.FC<RequestDetailProps> = ({ request, onClose }) => {
     const [currentRequest, setCurrentRequest] = useState(request);
     const [internalNotes, setInternalNotes] = useState(request.internalNotes || '');
     const [isSavingNotes, setIsSavingNotes] = useState(false);
+    const [replyMessage, setReplyMessage] = useState('');
+    const [isSendingReply, setIsSendingReply] = useState(false);
+    const [showReplyBox, setShowReplyBox] = useState(false);
 
     // Sync current request when prop changes
     useEffect(() => {
@@ -113,6 +117,33 @@ const RequestDetail: React.FC<RequestDetailProps> = ({ request, onClose }) => {
             addToast('فشل في حفظ الملاحظات', 'error');
         } finally {
             setIsSavingNotes(false);
+        }
+    };
+
+    const handleSendReply = async () => {
+        if (!replyMessage.trim()) return;
+        setIsSendingReply(true);
+        try {
+            await requestService.sendReply(currentRequest.id, replyMessage, currentRequest);
+            addToast('تم إرسال الرد للعميل بنجاح', 'success');
+            setReplyMessage('');
+            setShowReplyBox(false);
+
+            // Refresh to show timeline update
+            const fresh = await requestService.getAll();
+            const matching = fresh.find(r => r.id === currentRequest.id);
+            if (matching) setCurrentRequest(matching);
+
+            addNotification({
+                title: 'تم إرسال رد',
+                message: `تم إخطار ${currentRequest.clientName} بردك عبر البريد الإلكتروني.`,
+                type: 'info'
+            });
+        } catch (error) {
+            console.error('Reply error:', error);
+            addToast('فشل في إرسال الرد', 'error');
+        } finally {
+            setIsSendingReply(false);
         }
     };
 
@@ -324,10 +355,55 @@ const RequestDetail: React.FC<RequestDetailProps> = ({ request, onClose }) => {
                         {/* Timeline */}
                         {currentRequest.timelineEvents && currentRequest.timelineEvents.length > 0 && (
                             <div className="space-y-4">
-                                <h5 className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] flex items-center gap-2">
-                                    <Clock size={14} className="text-purple-500" />
-                                    الخط الزمني
+                                <h5 className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] flex items-center justify-between">
+                                    <div className="flex items-center gap-2">
+                                        <Clock size={14} className="text-purple-500" />
+                                        الخط الزمني للتواصل
+                                    </div>
+                                    <button
+                                        onClick={() => setShowReplyBox(!showReplyBox)}
+                                        className="text-indigo-400 hover:text-indigo-300 transition-colors"
+                                    >
+                                        {showReplyBox ? 'إلغاء الرد' : '+ إضافة رد مباشر'}
+                                    </button>
                                 </h5>
+
+                                {showReplyBox && (
+                                    <motion.div
+                                        initial={{ opacity: 0, y: -10 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        className="p-6 bg-indigo-500/5 border border-indigo-500/20 rounded-[2rem] space-y-4"
+                                    >
+                                        <textarea
+                                            value={replyMessage}
+                                            onChange={(e) => setReplyMessage(e.target.value)}
+                                            className="w-full bg-slate-950 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-indigo-500 transition-colors resize-none font-medium text-sm"
+                                            rows={3}
+                                            placeholder="اكتب ردك هنا... سيصل للعميل كرسالة بريد إلكتروني رسمية."
+                                        />
+                                        <div className="flex justify-end gap-3">
+                                            <button
+                                                onClick={() => setShowReplyBox(false)}
+                                                className="px-4 py-2 text-slate-500 hover:text-slate-300 font-bold text-xs"
+                                            >
+                                                تجاهل
+                                            </button>
+                                            <button
+                                                onClick={handleSendReply}
+                                                disabled={isSendingReply || !replyMessage.trim()}
+                                                className="px-6 py-2 bg-indigo-600 hover:bg-indigo-500 disabled:bg-slate-700 text-white rounded-xl font-black text-xs transition-all flex items-center gap-2"
+                                            >
+                                                {isSendingReply ? 'جاري الإرسال...' : (
+                                                    <>
+                                                        إرسال الرد
+                                                        <Send size={14} />
+                                                    </>
+                                                )}
+                                            </button>
+                                        </div>
+                                    </motion.div>
+                                )}
+
                                 <div className="bg-slate-950 border border-white/5 rounded-[2rem] p-6">
                                     <Timeline events={currentRequest.timelineEvents} />
                                 </div>
