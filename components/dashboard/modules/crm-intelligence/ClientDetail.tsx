@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useBusiness } from '../../../../context/BusinessContext';
 import { useUI } from '../../../../context/UIContext';
 import { Client } from '../../../../types';
-import { X, Save, Trash2, Phone, Mail, Globe, MapPin, Tag, Calendar, User, DollarSign, FileText, Briefcase } from 'lucide-react';
+import { X, Save, Trash2, Phone, Mail, Globe, MapPin, Tag, Calendar, User, DollarSign, FileText, Briefcase, MessageCircle, Upload, File, Loader2 } from 'lucide-react';
+import { storageService } from '../../../../lib/services/storageService';
 
 interface ClientDetailProps {
     client: Client;
@@ -34,6 +35,48 @@ const ClientDetail: React.FC<ClientDetailProps> = ({ client, onClose }) => {
         if (window.confirm('هل أنت متأكد من حذف هذا العميل؟')) {
             deleteClient(client.id);
             onClose();
+        }
+    };
+
+    const [isUploading, setIsUploading] = useState(false);
+
+    const openWhatsApp = () => {
+        const phone = formData.phone.replace(/\+/g, '').replace(/\s/g, '');
+        const text = encodeURIComponent(`مرحباً ${formData.name}، معك فريق NR-OS بخصوص استفسارك...`);
+        window.open(`https://wa.me/${phone}?text=${text}`, '_blank');
+    };
+
+    const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        setIsUploading(true);
+        try {
+            const fileName = `${client.id}/${Date.now()}_${file.name}`;
+            const publicUrl = await storageService.uploadFile('attachments', fileName, file);
+
+            if (publicUrl) {
+                const newAttachment = {
+                    id: Math.random().toString(36).substr(2, 9),
+                    fileName: file.name,
+                    fileUrl: publicUrl,
+                    fileType: file.type,
+                    fileSize: file.size,
+                    uploadedBy: 'admin' as const,
+                    uploadedAt: new Date().toISOString()
+                };
+
+                // In a real app, we would update the client's data in the DB to include this attachment
+                // For now, we update local state to show the link
+                setFormData(prev => ({
+                    ...prev,
+                    notes: (prev.notes || '') + `\n[File Uploaded: ${file.name}]`
+                }));
+            }
+        } catch (error) {
+            console.error('File upload failed:', error);
+        } finally {
+            setIsUploading(false);
         }
     };
 
@@ -129,6 +172,16 @@ const ClientDetail: React.FC<ClientDetailProps> = ({ client, onClose }) => {
                         </div>
                     </div>
 
+                    <div className="flex gap-4">
+                        <button
+                            onClick={openWhatsApp}
+                            className="flex-1 flex items-center justify-center gap-2 bg-emerald-600/10 border border-emerald-500/20 text-emerald-400 py-4 rounded-xl font-bold hover:bg-emerald-600/20 transition-all"
+                        >
+                            <MessageCircle size={20} />
+                            تواصل واتساب
+                        </button>
+                    </div>
+
                     {/* Status & Value */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="space-y-2">
@@ -191,6 +244,26 @@ const ClientDetail: React.FC<ClientDetailProps> = ({ client, onClose }) => {
                             className="w-full bg-slate-950 border border-white/10 rounded-lg p-3 text-white h-24 outline-none resize-none"
                             placeholder="اكتب أي ملاحظات هنا..."
                         />
+                    </div>
+
+                    {/* Modern File Management Section */}
+                    <div className="space-y-4 pt-4 border-t border-white/5">
+                        <div className="flex justify-between items-center">
+                            <h3 className="text-sm font-black text-white uppercase tracking-widest flex items-center gap-2">
+                                <FileText size={16} className="text-indigo-400" />
+                                المستندات والتعاقدات
+                            </h3>
+                            <label className="cursor-pointer bg-white/5 hover:bg-white/10 px-3 py-1.5 rounded-lg border border-white/5 text-[10px] font-bold text-white transition-all flex items-center gap-2">
+                                {isUploading ? <Loader2 size={12} className="animate-spin" /> : <Upload size={12} />}
+                                {isUploading ? 'جاري الرفع...' : 'رفع ملف جديد'}
+                                <input type="file" className="hidden" onChange={handleFileUpload} disabled={isUploading} />
+                            </label>
+                        </div>
+
+                        <div className="p-4 bg-slate-950/50 border border-dashed border-white/10 rounded-2xl flex flex-col items-center justify-center text-center">
+                            <File size={24} className="text-slate-700 mb-2" />
+                            <p className="text-[10px] text-slate-500 font-medium">اسحب الملفات هنا أو اضغط لرفع العقود، الهوية، أو متطلبات المناقصة.</p>
+                        </div>
                     </div>
 
                     {/* Linked Projects Section */}

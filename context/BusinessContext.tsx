@@ -163,8 +163,9 @@ export const BusinessProvider: React.FC<{ children: React.ReactNode }> = ({ chil
             const newProject = await projectState.addProject(project);
 
             // Automation: Send Welcome Email if client exists
-            if (newProject && newProject.clientId) {
-                const client = clientState.clients.find(c => c.id === newProject.clientId);
+            if (newProject && (newProject.clientId || newProject.client_id)) {
+                const targetId = newProject.clientId || newProject.client_id;
+                const client = clientState.clients.find(c => c.id === targetId);
                 if (client && client.email) {
                     await sendWelcomeEmail(
                         client.email,

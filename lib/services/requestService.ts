@@ -66,12 +66,15 @@ export const requestService = {
         // Auto-Onboarding Logic: Ensure every request is linked to a Client profile and a Project
         if (request.clientEmail) {
             try {
+                const normalizedEmail = request.clientEmail.toLowerCase();
+
                 // 1. Identify or Create Client Account
-                let client = await clientService.getByEmail(request.clientEmail);
+                let client = await clientService.getByEmail(normalizedEmail);
                 if (!client) {
                     client = await clientService.create({
+                        id: `c-${Date.now()}`,
                         name: request.clientName,
-                        email: request.clientEmail.toLowerCase(),
+                        email: normalizedEmail,
                         phone: request.clientPhone || '',
                         status: 'lead'
                     });
@@ -81,27 +84,31 @@ export const requestService = {
 
                 // 2. Identify or Create Project Access
                 if (!targetProjectId) {
-                    const existingProjects = await projectService.getByEmail(request.clientEmail);
+                    const existingProjects = await projectService.getByEmail(normalizedEmail);
                     if (existingProjects.length > 0) {
                         targetProjectId = existingProjects[0].id;
+                        console.log(`[Onboarding] Existing project found: ${targetProjectId}`);
                     } else {
                         const newProject = await projectService.create({
+                            id: `p-${Date.now()}`,
                             title: `طلب استفسار: ${request.serviceTitle}`,
                             client: request.clientName,
                             client_id: targetClientId, // SQL Standard
                             clientId: targetClientId,  // Type Standard
-                            clientEmail: request.clientEmail.toLowerCase(),
+                            clientEmail: normalizedEmail,
                             status: 'planning',
                             category: request.category || 'inquiry',
                             date: date,
-                            fullDescription: `طلب تلقائي لعميل جديد: ${request.serviceTitle}\n\nالرسالة الأصلية:\n${request.message || ''}`
+                            fullDescription: `طلب تلقائي لعميل جديد: ${request.serviceTitle}\n\nالرسالة الأصلية:\n${request.message || ''}`,
+                            technologies: [],
+                            gallery: []
                         } as any);
                         targetProjectId = newProject.id;
                         console.log(`[Onboarding] New project created: ${targetProjectId}`);
                     }
                 }
             } catch (error) {
-                console.error('[Onboarding] Error during auto-linking:', error);
+                console.error('[Onboarding] Error during atomic linking:', error);
                 // We proceed to create the request even if linking fails to avoid data loss
             }
         }
