@@ -71,6 +71,7 @@ export interface ServiceRequest {
     value?: number;
     message?: string;
     projectId?: string;  // Link to associated project
+    clientId?: string;   // Link to associated client
     attachments?: RequestAttachment[];  // Enhanced: Full attachment objects
     timelineEvents?: RequestTimelineEvent[];  // New: Timeline tracking
     internalNotes?: string;  // New: Admin-only notes

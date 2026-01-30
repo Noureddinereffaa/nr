@@ -141,7 +141,12 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                   <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-0 h-0.5 bg-indigo-500 transition-all duration-300 group-hover/link:w-full"></span>
                 </button>
               ))}
-              <div className="h-6 w-px bg-white/10 mx-2"></div>
+              <button
+                onClick={() => navigate('/portal')}
+                className="glow-accent bg-slate-900 border border-indigo-500/30 text-indigo-400 px-6 sm:px-8 py-3 sm:py-3.5 rounded-xl sm:rounded-2xl text-[10px] sm:text-[11px] font-black transition-all shadow-2xl flex items-center gap-2 sm:gap-3 active:scale-95 group/portal"
+              >
+                بوابة العميل
+              </button>
               <button
                 onClick={(e) => scrollToSection(e, '#assistant')}
                 className="glow-accent bg-white text-slate-950 px-6 sm:px-8 py-3 sm:py-3.5 rounded-xl sm:rounded-2xl text-[10px] sm:text-[11px] font-black transition-all shadow-2xl flex items-center gap-2 sm:gap-3 active:scale-95 group/btn"
@@ -198,6 +203,13 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                 transition={{ delay: 0.6 }}
                 className="mt-auto pt-8 sm:pt-10 md:pt-12"
               >
+                <button
+                  onClick={() => { setIsMenuOpen(false); navigate('/portal'); }}
+                  className="w-full bg-slate-900 border border-indigo-500/30 text-indigo-400 py-5 sm:py-6 rounded-2xl sm:rounded-3xl font-black text-lg sm:text-xl shadow-[0_20px_50px_rgba(79,70,229,0.1)] flex items-center justify-center gap-3 sm:gap-4 active:scale-95 transition-all mb-4 min-h-[56px]"
+                >
+                  بوابة العميل
+                </button>
+
                 <button
                   onClick={(e) => scrollToSection(e, '#assistant')}
                   className="w-full bg-indigo-600 text-white py-5 sm:py-6 rounded-2xl sm:rounded-3xl font-black text-lg sm:text-xl shadow-[0_20px_50px_rgba(79,70,229,0.3)] flex items-center justify-center gap-3 sm:gap-4 active:scale-95 transition-all mb-8 sm:mb-10 md:mb-12 min-h-[56px]"

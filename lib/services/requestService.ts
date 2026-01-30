@@ -1,6 +1,7 @@
 import { supabase, isSupabaseConfigured } from '../supabase';
 import { ServiceRequest, RequestAttachment, RequestTimelineEvent } from '../../types';
 import { projectService } from './projectService';
+import { clientService } from './clientService';
 import { sendWelcomeEmail } from '../email-notifications';
 
 /**
@@ -59,32 +60,44 @@ export const requestService = {
         const id = 'req-' + Date.now();
         const date = new Date().toISOString();
         let targetProjectId = request.projectId;
+        let targetClientId = request.clientId;
 
-        // Auto-Onboarding Logic: Ensure every request is linked to a project
-        if (!targetProjectId && request.clientEmail) {
+        // Auto-Onboarding Logic: Ensure every request is linked to a Client profile and a Project
+        if (request.clientEmail) {
             try {
-                // Check for existing projects for this email
-                const existingProjects = await projectService.getByEmail(request.clientEmail);
+                // 1. Identify or Create Client Account
+                let client = await clientService.getByEmail(request.clientEmail);
+                if (!client) {
+                    client = await clientService.create({
+                        name: request.clientName,
+                        email: request.clientEmail,
+                        phone: request.clientPhone || '',
+                        status: 'lead'
+                    });
+                }
+                targetClientId = client.id;
 
-                if (existingProjects.length > 0) {
-                    // Link to the most recent project
-                    targetProjectId = existingProjects[0].id;
-                } else {
-                    // Create a new placeholder project for this client
-                    const newProject = await projectService.create({
-                        title: `طلب استفسار: ${request.serviceTitle}`,
-                        client: request.clientName,
-                        clientEmail: request.clientEmail,
-                        status: 'planning',
-                        category: request.category || 'inquiry',
-                        date: date,
-                        fullDescription: `طلب تلقائي لعميل جديد: ${request.serviceTitle}\n\nالرسالة الأصلية:\n${request.message || ''}`
-                    } as any);
-                    targetProjectId = newProject.id;
+                // 2. Identify or Create Project Access
+                if (!targetProjectId) {
+                    const existingProjects = await projectService.getByEmail(request.clientEmail);
+                    if (existingProjects.length > 0) {
+                        targetProjectId = existingProjects[0].id;
+                    } else {
+                        const newProject = await projectService.create({
+                            title: `طلب استفسار: ${request.serviceTitle}`,
+                            client: request.clientName,
+                            clientId: targetClientId,
+                            clientEmail: request.clientEmail,
+                            status: 'planning',
+                            category: request.category || 'inquiry',
+                            date: date,
+                            fullDescription: `طلب تلقائي لعميل جديد: ${request.serviceTitle}\n\nالرسالة الأصلية:\n${request.message || ''}`
+                        } as any);
+                        targetProjectId = newProject.id;
+                    }
                 }
             } catch (error) {
-                console.error('Failed to auto-provision project:', error);
-                // Continue anyway, project_id will be null or fallback
+                console.error('Failed to auto-onboard client/project:', error);
             }
         }
 
@@ -123,7 +136,8 @@ export const requestService = {
                 timeline_events: newRequest.timelineEvents,
                 estimated_completion: newRequest.estimatedCompletion,
                 project_id: targetProjectId,
-                data: newRequest
+                client_id: targetClientId,
+                data: { ...newRequest, clientId: targetClientId }
             }]);
             if (error) throw error;
 

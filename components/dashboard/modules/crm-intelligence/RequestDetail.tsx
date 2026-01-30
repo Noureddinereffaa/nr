@@ -247,6 +247,32 @@ const RequestDetail: React.FC<RequestDetailProps> = ({ request, onClose }) => {
                             </div>
                         </div>
 
+                        {/* CRM Linking Status */}
+                        {(currentRequest.clientId || currentRequest.projectId) && (
+                            <div className="p-6 bg-indigo-500/5 border border-indigo-500/10 rounded-[2rem] flex flex-wrap gap-4 items-center">
+                                <div className="flex items-center gap-2">
+                                    <div className="w-8 h-8 rounded-lg bg-indigo-500/20 flex items-center justify-center text-indigo-400">
+                                        <Briefcase size={16} />
+                                    </div>
+                                    <div>
+                                        <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest">ارتباطات النظام</p>
+                                        <div className="flex gap-2 text-xs font-mono">
+                                            {currentRequest.clientId && <span className="text-indigo-300">CLIENT: {currentRequest.clientId}</span>}
+                                            {currentRequest.projectId && <span className="text-purple-300">PROJECT: {currentRequest.projectId}</span>}
+                                        </div>
+                                    </div>
+                                </div>
+                                {currentRequest.projectId && (
+                                    <button
+                                        onClick={() => addToast('سيتم نقلك لمتابعة المشروع في التحديث القادم', 'info')}
+                                        className="mr-auto px-4 py-2 bg-indigo-500/10 text-indigo-400 rounded-xl text-[10px] font-black uppercase hover:bg-indigo-500/20 transition-all"
+                                    >
+                                        عرض المشروع المتصل
+                                    </button>
+                                )}
+                            </div>
+                        )}
+
                         {/* Details */}
                         <div className="space-y-4">
                             <h5 className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] flex items-center gap-2">
@@ -393,10 +419,10 @@ const RequestDetail: React.FC<RequestDetailProps> = ({ request, onClose }) => {
                                         ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 cursor-not-allowed'
                                         : 'bg-white text-slate-950 hover:shadow-[0_0_50px_rgba(255,255,255,0.2)]'}`}
                             >
-                                {currentRequest.status === 'accepted' ? (
+                                {currentRequest.clientId || currentRequest.status === 'accepted' ? (
                                     <>
                                         <CheckCircle size={20} />
-                                        تم التحويل للـ CRM
+                                        عميل مسجل في النظام
                                     </>
                                 ) : (
                                     <>

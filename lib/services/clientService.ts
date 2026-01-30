@@ -21,6 +21,33 @@ export const clientService = {
         }));
     },
 
+    /**
+     * Finds a client by their email address.
+     */
+    async getByEmail(email: string): Promise<Client | null> {
+        if (!isSupabaseConfigured() || !supabase) return null;
+
+        const { data, error } = await supabase
+            .from('clients')
+            .select('*')
+            .eq('email', email.toLowerCase())
+            .single();
+
+        if (error && error.code !== 'PGRST116') throw error;
+        if (!data) return null;
+
+        return {
+            ...data.data,
+            id: data.id,
+            name: data.name || data.data?.name,
+            email: data.email || data.data?.email,
+            phone: data.phone || data.data?.phone,
+            company: data.company || data.data?.company,
+            status: data.status || data.data?.status || 'lead',
+            value: Number(data.value || data.data?.value || 0)
+        };
+    },
+
     async create(client: Partial<Client>): Promise<Client> {
         const id = client.id || 'c-' + Date.now();
         const newClient = { ...client, id } as Client;
