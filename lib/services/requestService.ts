@@ -2,6 +2,7 @@ import { supabase, isSupabaseConfigured } from '../supabase';
 import { ServiceRequest, RequestAttachment, RequestTimelineEvent } from '../../types';
 import { projectService } from './projectService';
 import { clientService } from './clientService';
+import { notificationService } from './notificationService';
 import { sendWelcomeEmail } from '../email-notifications';
 
 /**
@@ -70,10 +71,11 @@ export const requestService = {
                 if (!client) {
                     client = await clientService.create({
                         name: request.clientName,
-                        email: request.clientEmail,
+                        email: request.clientEmail.toLowerCase(),
                         phone: request.clientPhone || '',
                         status: 'lead'
                     });
+                    console.log(`[Onboarding] New client created: ${client.id}`);
                 }
                 targetClientId = client.id;
 
@@ -86,37 +88,31 @@ export const requestService = {
                         const newProject = await projectService.create({
                             title: `طلب استفسار: ${request.serviceTitle}`,
                             client: request.clientName,
-                            clientId: targetClientId,
-                            clientEmail: request.clientEmail,
+                            client_id: targetClientId, // SQL Standard
+                            clientId: targetClientId,  // Type Standard
+                            clientEmail: request.clientEmail.toLowerCase(),
                             status: 'planning',
                             category: request.category || 'inquiry',
                             date: date,
                             fullDescription: `طلب تلقائي لعميل جديد: ${request.serviceTitle}\n\nالرسالة الأصلية:\n${request.message || ''}`
                         } as any);
                         targetProjectId = newProject.id;
+                        console.log(`[Onboarding] New project created: ${targetProjectId}`);
                     }
                 }
             } catch (error) {
-                console.error('Failed to auto-onboard client/project:', error);
+                console.error('[Onboarding] Error during auto-linking:', error);
+                // We proceed to create the request even if linking fails to avoid data loss
             }
         }
 
-        // Create initial timeline event
-        const initialTimeline: RequestTimelineEvent = {
-            id: 'evt-' + Date.now(),
-            timestamp: date,
-            type: 'created',
-            description: `تم إنشاء طلب جديد: ${request.serviceTitle}`,
-            actor: 'client'
-        };
-
-        const newRequest = {
+        const newRequest: ServiceRequest = {
             ...request,
             id,
             date,
             projectId: targetProjectId,
+            clientId: targetClientId, // Now allowed by updated interface
             status: request.status || 'new',
-            timelineEvents: [initialTimeline],
             attachments: request.attachments || []
         } as ServiceRequest;
 
@@ -141,7 +137,7 @@ export const requestService = {
             }]);
             if (error) throw error;
 
-            // Trigger Welcome Email / Access Code notification
+            // 1. Trigger Welcome Email / Access Code notification to Client
             if (newRequest.clientEmail && targetProjectId) {
                 sendWelcomeEmail(
                     newRequest.clientEmail,
@@ -150,6 +146,13 @@ export const requestService = {
                     targetProjectId
                 ).catch(err => console.error('Failed to send welcome email:', err));
             }
+
+            // 2. Trigger Admin System Notification
+            notificationService.create({
+                title: 'طلب خدمة جديد 🆕',
+                message: `وصل طلب جديد من ${newRequest.clientName} بخصوص "${newRequest.serviceTitle}"`,
+                type: 'success'
+            }).catch(err => console.error('Failed to create admin notification:', err));
         }
 
         return newRequest;

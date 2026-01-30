@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useBusiness } from '../../../../context/BusinessContext';
 import { useUI } from '../../../../context/UIContext';
 import { Client } from '../../../../types';
-import { X, Save, Trash2, Phone, Mail, Globe, MapPin, Tag, Calendar, User, DollarSign, FileText } from 'lucide-react';
+import { X, Save, Trash2, Phone, Mail, Globe, MapPin, Tag, Calendar, User, DollarSign, FileText, Briefcase } from 'lucide-react';
 
 interface ClientDetailProps {
     client: Client;
@@ -10,9 +10,10 @@ interface ClientDetailProps {
 }
 
 const ClientDetail: React.FC<ClientDetailProps> = ({ client, onClose }) => {
-    const { updateClient, deleteClient, invoices } = useBusiness();
+    const { updateClient, deleteClient, invoices, projects } = useBusiness();
     const { isShieldMode } = useUI();
     const clientInvoices = invoices.filter(i => i.clientId === client.id);
+    const clientProjects = projects.filter(p => p.client_id === client.id || p.clientId === client.id || p.clientEmail === client.email);
     const [formData, setFormData] = useState<Client>(client);
     const [tagInput, setTagInput] = useState('');
 
@@ -187,9 +188,34 @@ const ClientDetail: React.FC<ClientDetailProps> = ({ client, onClose }) => {
                         <textarea
                             value={formData.notes || ''}
                             onChange={(e) => handleChange('notes', e.target.value)}
-                            className="w-full bg-slate-950 border border-white/10 rounded-lg p-3 text-white h-32 outline-none resize-none"
+                            className="w-full bg-slate-950 border border-white/10 rounded-lg p-3 text-white h-24 outline-none resize-none"
                             placeholder="اكتب أي ملاحظات هنا..."
                         />
+                    </div>
+
+                    {/* Linked Projects Section */}
+                    <div className="space-y-4 pt-4 border-t border-white/5">
+                        <h3 className="text-sm font-black text-white uppercase tracking-widest flex items-center gap-2">
+                            <Briefcase size={16} className="text-indigo-400" />
+                            المشاريع المرتبطة ({clientProjects.length})
+                        </h3>
+                        {clientProjects.length > 0 ? (
+                            <div className="grid grid-cols-1 gap-3">
+                                {clientProjects.map(proj => (
+                                    <div key={proj.id} className="p-4 bg-slate-950/50 border border-white/5 rounded-xl flex justify-between items-center group hover:border-indigo-500/30 transition-all">
+                                        <div>
+                                            <p className="text-sm font-bold text-white mb-1">{proj.title}</p>
+                                            <p className="text-[10px] text-slate-500 font-mono">{proj.status} • {proj.category}</p>
+                                        </div>
+                                        <div className="text-[10px] font-black text-indigo-400 opacity-0 group-hover:opacity-100 transition-opacity">
+                                            عرض في الاستوديو
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        ) : (
+                            <p className="text-xs text-slate-600 italic">لا توجد مشاريع مسجلة لهذا العميل بعد.</p>
+                        )}
                     </div>
                 </div>
 

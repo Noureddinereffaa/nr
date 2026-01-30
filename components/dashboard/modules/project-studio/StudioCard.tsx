@@ -45,7 +45,12 @@ const StudioCard: React.FC<StudioCardProps> = ({ project, onEdit, onDelete }) =>
                 <div className="flex justify-between items-start mb-2">
                     <div>
                         <h3 className="text-xl font-bold text-white mb-1 group-hover:text-indigo-400 transition-colors">{project.title}</h3>
-                        <p className="text-xs text-slate-400 font-mono">{project.category} • {project.date}</p>
+                        <p className="text-xs text-slate-400 font-mono flex items-center gap-2">
+                            <Layers size={14} className="text-indigo-500" />
+                            {project.client || "عميل غير محدد"}
+                            <span className="opacity-30">•</span>
+                            {project.category}
+                        </p>
                     </div>
                 </div>
 

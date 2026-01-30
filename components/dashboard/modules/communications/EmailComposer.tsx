@@ -1,9 +1,13 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Send, Mail, User, Type, FileText, CheckCircle2, AlertTriangle, Loader2 } from 'lucide-react';
+import { Send, Mail, User, Type, FileText, CheckCircle2, AlertTriangle, Loader2, Users } from 'lucide-react';
 import { sendEmailNotification } from '../../../../lib/email-notifications';
+import { useBusiness } from '../../../../context/BusinessContext';
+import { useUI } from '../../../../context/UIContext';
 
 const EmailComposer: React.FC = () => {
+    const { clients } = useBusiness();
+    const { addNotification } = useUI();
     const [isLoading, setIsLoading] = useState(false);
     const [status, setStatus] = useState<'idle' | 'success' | 'error'>('idle');
     const [formData, setFormData] = useState({
@@ -12,6 +16,17 @@ const EmailComposer: React.FC = () => {
         subject: '',
         message: ''
     });
+
+    const handleClientSelect = (e: React.ChangeEvent<HTMLSelectElement>) => {
+        const client = clients.find(c => c.id === e.target.value);
+        if (client) {
+            setFormData(prev => ({
+                ...prev,
+                to: client.email,
+                clientName: client.name
+            }));
+        }
+    };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -30,6 +45,11 @@ const EmailComposer: React.FC = () => {
 
             if (success) {
                 setStatus('success');
+                addNotification({
+                    title: 'تم إرسال البريد',
+                    message: `تم إرسال رسالة يدوية بنجاح إلى ${formData.to}`,
+                    type: 'success'
+                });
                 setFormData({ to: '', clientName: '', subject: '', message: '' });
                 setTimeout(() => setStatus('idle'), 3000);
             } else {
@@ -56,6 +76,22 @@ const EmailComposer: React.FC = () => {
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-6">
+                <div className="space-y-2">
+                    <label className="text-xs font-bold text-slate-500 uppercase tracking-widest flex items-center gap-2">
+                        <Users size={14} /> اختر عميل من القاعدة (اختياري)
+                    </label>
+                    <select
+                        onChange={handleClientSelect}
+                        className="w-full bg-slate-950 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-indigo-500 transition-colors cursor-pointer"
+                        dir="rtl"
+                    >
+                        <option value="">-- اختر من القائمة لملء البيانات تلقائياً --</option>
+                        {clients.map(c => (
+                            <option key={c.id} value={c.id}>{c.name} ({c.email})</option>
+                        ))}
+                    </select>
+                </div>
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-2">
                         <label className="text-xs font-bold text-slate-500 uppercase tracking-widest flex items-center gap-2">

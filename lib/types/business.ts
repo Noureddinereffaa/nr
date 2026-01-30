@@ -124,6 +124,7 @@ export interface Project {
     client: string;
     clientId?: string;      // NR-OS Standard
     client_id?: string;     // DB Standard
+    clientEmail?: string;   // For consistent linking
     date: string;
     technologies: string[];
     tasks?: ProjectTask[];

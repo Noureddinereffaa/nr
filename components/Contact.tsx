@@ -27,7 +27,7 @@ const Contact: React.FC = () => {
     setStatus('idle');
 
     try {
-      await requestService.create({
+      const result = await requestService.create({
         clientName: formData.name,
         clientEmail: formData.email,
         clientPhone: '', // Not collected in this simplified form
@@ -38,8 +38,13 @@ const Contact: React.FC = () => {
         source: 'web',
         status: 'new'
       });
-      setStatus('success');
-      setFormData({ name: '', email: '', category: 'تطوير أعمال وإدارة أتمتة', message: '' });
+
+      if (result) {
+        setStatus('success');
+        setFormData({ name: '', email: '', category: 'تطوير أعمال وإدارة أتمتة', message: '' });
+      } else {
+        throw new Error('No data returned from service');
+      }
     } catch (error) {
       console.error('Contact submission failed:', error);
       setStatus('error');

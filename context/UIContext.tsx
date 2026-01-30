@@ -1,6 +1,8 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useSystem } from './SystemContext';
 import { useModals } from '../lib/hooks/useModals';
+import { notificationService } from '../lib/services/notificationService';
+import { supabase, isSupabaseConfigured } from '../lib/supabase';
 
 export interface Toast {
     id: string;
@@ -101,33 +103,75 @@ export const UIProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     };
 
     // Notification State
-    const [notifications, setNotifications] = useState<SystemNotification[]>(() => {
-        const saved = localStorage.getItem('nr_notifications');
-        return saved ? JSON.parse(saved) : [
-            { id: '1', title: 'ترحيب بالنظام', message: 'مرحباً بك في NR-OS السيادي. نظام الإشعارات جاهز للعمل.', time: new Date().toISOString(), type: 'info', read: false }
-        ];
-    });
+    const [notifications, setNotifications] = useState<SystemNotification[]>([]);
 
     useEffect(() => {
-        localStorage.setItem('nr_notifications', JSON.stringify(notifications));
-    }, [notifications]);
-
-    const addNotification = (notif: Omit<SystemNotification, 'id' | 'time' | 'read'>) => {
-        const newNotif: SystemNotification = {
-            ...notif,
-            id: Math.random().toString(36).substr(2, 9),
-            time: new Date().toISOString(),
-            read: false
+        const fetchInitialNotifications = async () => {
+            try {
+                const data = await notificationService.getAll();
+                setNotifications(data);
+            } catch (err) {
+                console.error('Failed to fetch notifications:', err);
+            }
         };
-        setNotifications(prev => [newNotif, ...prev].slice(0, 50));
+
+        if (isSupabaseConfigured()) {
+            fetchInitialNotifications();
+
+            // Setup Real-time listener for new notifications
+            const channel = supabase
+                ?.channel('system-notifications-realtime')
+                .on(
+                    'postgres_changes',
+                    { event: '*', schema: 'public', table: 'notifications' },
+                    async (payload: any) => {
+                        console.log('Notification channel update:', payload);
+                        const freshData = await notificationService.getAll();
+                        setNotifications(freshData);
+                    }
+                )
+                .subscribe();
+
+            return () => {
+                if (channel) supabase?.removeChannel(channel);
+            };
+        }
+    }, []);
+
+    const addNotification = async (notif: Omit<SystemNotification, 'id' | 'time' | 'read'>) => {
+        try {
+            await notificationService.create(notif);
+            // State will update via real-time listener or manual refetch if channel is slow
+        } catch (err) {
+            console.error('Failed to create notification:', err);
+            // Fallback to local state if DB fails
+            const newNotif: SystemNotification = {
+                ...notif,
+                id: Math.random().toString(36).substr(2, 9),
+                time: new Date().toISOString(),
+                read: false
+            };
+            setNotifications(prev => [newNotif, ...prev].slice(0, 50));
+        }
     };
 
-    const markNotificationAsRead = (id: string) => {
-        setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n));
+    const markNotificationAsRead = async (id: string) => {
+        try {
+            await notificationService.markAsRead(id);
+            setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n));
+        } catch (err) {
+            console.error('Failed to mark notification as read:', err);
+        }
     };
 
-    const clearNotifications = () => {
-        setNotifications([]);
+    const clearNotifications = async () => {
+        if (!window.confirm('هل أنت متأكد من مسح جميع الإشعارات؟')) return;
+        try {
+            await notificationService.clearAll();
+            setNotifications([]);
+        } catch (err) {
+            console.error('Failed to clear notifications:', err);
+        }
     };
 
     // Helper for RGB conversion (for transparency support)
